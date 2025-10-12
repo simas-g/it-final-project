@@ -13,7 +13,7 @@ app.use(
   })
 );
 app.get("/", (_req, res) => {
-  res.send("Hello, yo, niger, wassup");
+  res.send("Hello, world");
 });
 
 export default app;
