@@ -1,28 +1,17 @@
-import { useState } from "react";
-import viteLogo from "/vite.svg";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-import { Button } from "./components/ui/button";
-function App() {
-  const [count, setCount] = useState(0);
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 
+function App() {
   return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <Button
-          variant="outline"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          count is {count}
-        </Button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+    </Routes>
   );
 }
 

@@ -1,15 +1,70 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CREATOR
+  USER
+}
+
+enum InventoryAccessType {
+  READ
+  WRITE
+}
+
+model InventoryAccess {
+  id          String              @id @default(uuid())
+  inventoryId String
+  inventory   Inventory           @relation(fields: [inventoryId], references: [id])
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  accessType  InventoryAccessType @default(READ)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  name            String?
+  password        String?           // Null for OAuth users
+  provider        String?           // "google", "github", null for email/password
+  providerId      String?           // OAuth provider's user ID
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  role            UserRole          @default(USER)
+  inventories     Inventory[]
+  items           InventoryItem[]
+  inventoryAccess InventoryAccess[]
+}
+
+model Inventory {
+  id              String            @id @default(uuid())
+  name            String
+  fields          Json              @default("{}")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  items           InventoryItem[]
+  inventoryAccess InventoryAccess[]
+}
+
+model InventoryItem {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  fields      Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
 }

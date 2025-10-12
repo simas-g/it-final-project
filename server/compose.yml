@@ -12,6 +12,8 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/mydb?schema=public
+      JWT_SECRET: your-jwt-secret-change-in-production
+      FRONTEND_URL: http://localhost:5173
       PORT: 8080
     depends_on: [postgres]
     command: npm run dev
