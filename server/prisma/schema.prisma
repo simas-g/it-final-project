@@ -204,7 +204,6 @@ model InventoryItem {
   updatedAt   DateTime  @updatedAt
   userId      String
   user        User      @relation(fields: [userId], references: [id])
-
   // Relations
   likes ItemLike[]
 
