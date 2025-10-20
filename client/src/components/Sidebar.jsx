@@ -1,0 +1,96 @@
+import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import { useI18n } from '@/contexts/I18nContext'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import {
+  Home,
+  LayoutDashboard,
+  Search,
+  Users,
+  Plus,
+  Package
+} from 'lucide-react'
+
+export default function Sidebar({ open, onClose }) {
+  const { user, isAdmin } = useAuth()
+  const { t } = useI18n()
+  const location = useLocation()
+
+  const navigation = [
+    {
+      name: t('home'),
+      href: '/',
+      icon: Home,
+      current: location.pathname === '/'
+    },
+    {
+      name: t('dashboard'),
+      href: '/dashboard',
+      icon: LayoutDashboard,
+      current: location.pathname === '/dashboard'
+    },
+    {
+      name: t('search'),
+      href: '/search',
+      icon: Search,
+      current: location.pathname === '/search'
+    }
+  ]
+
+  if (isAdmin()) {
+    navigation.push({
+      name: t('admin'),
+      href: '/admin',
+      icon: Users,
+      current: location.pathname === '/admin'
+    })
+  }
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {open && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/80 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={cn(
+        "fixed inset-y-0 left-0 w-64 h-screen pt-20 z-50 transform bg-background border-r-2 transition-transform duration-200 ease-in-out lg:translate-x-0",
+        open ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="flex h-full flex-col overflow-hidden">
+          {/* Navigation - Minimal */}
+          <nav className="flex-1 space-y-1 px-4 py-6 overflow-y-auto">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-150",
+                    item.current
+                      ? "bg-secondary text-secondary-foreground border-2 border-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                  {item.current && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-foreground"></div>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+        </div>
+      </div>
+    </>
+  )
+}

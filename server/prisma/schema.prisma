@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CREATOR
+  USER
+}
+
+enum InventoryAccessType {
+  READ
+  WRITE
+}
+
+enum FieldType {
+  SINGLE_LINE_TEXT
+  MULTI_LINE_TEXT
+  NUMERIC
+  DOCUMENT_IMAGE
+  BOOLEAN
+}
+
+enum CustomIdElementType {
+  FIXED_TEXT
+  RANDOM_20BIT
+  RANDOM_32BIT
+  RANDOM_6DIGIT
+  RANDOM_9DIGIT
+  GUID
+  DATE_TIME
+  SEQUENCE
+}
+
+// User preferences for language and theme
+model UserPreferences {
+  id       String @id @default(uuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id])
+  language String @default("en")
+  theme    String @default("light")
+}
+
+// Categories for inventories
+model Category {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  inventories Inventory[]
+}
+
+// Tags for inventories
+model Tag {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  inventories InventoryTag[]
+}
+
+model InventoryTag {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  tagId       String
+  tag         Tag       @relation(fields: [tagId], references: [id])
+
+  @@unique([inventoryId, tagId])
+}
+
+// Custom fields for inventories
+model InventoryField {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  title       String
+  description String?
+  fieldType   FieldType
+  isRequired  Boolean   @default(false)
+  showInTable Boolean   @default(true)
+  order       Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Custom ID configuration for inventories
+model CustomIdConfig {
+  id           String            @id @default(uuid())
+  inventoryId  String            @unique
+  inventory    Inventory         @relation(fields: [inventoryId], references: [id])
+  elements     Json // Array of CustomIdElement
+  elementsList CustomIdElement[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+// Custom ID elements configuration
+model CustomIdElement {
+  id          String              @id @default(uuid())
+  configId    String
+  config      CustomIdConfig      @relation(fields: [configId], references: [id])
+  elementType CustomIdElementType
+  format      String // Format string (e.g., "D3", "yyyy", "X5")
+  value       String? // For fixed text
+  order       Int
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+// Inventory access control
+model InventoryAccess {
+  id          String              @id @default(uuid())
+  inventoryId String
+  inventory   Inventory           @relation(fields: [inventoryId], references: [id])
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  accessType  InventoryAccessType @default(READ)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([inventoryId, userId])
+}
+
+// Discussion posts for inventories
+model DiscussionPost {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  content     String // Markdown content
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Likes for items
+model ItemLike {
+  id     String        @id @default(uuid())
+  itemId String
+  item   InventoryItem @relation(fields: [itemId], references: [id])
+  userId String
+  user   User          @relation(fields: [userId], references: [id])
+
+  @@unique([itemId, userId])
+}
+
+// User model with all relations
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String?
+  password   String? // Null for OAuth users
+  provider   String? // "google", "github", null for email/password
+  providerId String? // OAuth provider's user ID
+  isBlocked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  role       UserRole @default(USER)
+
+  // Relations
+  preferences     UserPreferences?
+  inventories     Inventory[]
+  items           InventoryItem[]
+  inventoryAccess InventoryAccess[]
+  discussionPosts DiscussionPost[]
+  itemLikes       ItemLike[]
+}
+
+// Enhanced Inventory model
+model Inventory {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  imageUrl    String?
+  isPublic    Boolean   @default(false)
+  version     Int       @default(1) // For optimistic locking
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  // Relations
+  items           InventoryItem[]
+  inventoryAccess InventoryAccess[]
+  inventoryTags   InventoryTag[]
+  fields          InventoryField[]
+  customIdConfig  CustomIdConfig?
+  discussionPosts DiscussionPost[]
+}
+
+// Enhanced InventoryItem model
+model InventoryItem {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  customId    String? // Custom ID within inventory scope
+  fields      Json      @default("{}") // Custom field values
+  version     Int       @default(1) // For optimistic locking
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  // Relations
+  likes ItemLike[]
+
+  @@unique([inventoryId, customId])
+}
