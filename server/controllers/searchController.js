@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Global search across inventories and items
 export async function globalSearch(req, res) {
   try {
     const { q: query, type = "all", page = 1, limit = 20 } = req.query;
@@ -19,7 +18,6 @@ export async function globalSearch(req, res) {
       total: 0
     };
 
-    // Search inventories
     if (type === "all" || type === "inventories") {
       const [inventories, inventoryCount] = await Promise.all([
         prisma.inventory.findMany({
@@ -61,7 +59,6 @@ export async function globalSearch(req, res) {
       }
     }
 
-    // Search items
     if (type === "all" || type === "items") {
       const [items, itemCount] = await Promise.all([
         prisma.inventoryItem.findMany({
@@ -125,7 +122,6 @@ export async function globalSearch(req, res) {
   }
 }
 
-// Search inventories by tag
 export async function searchByTag(req, res) {
   try {
     const { tag } = req.params;
@@ -188,7 +184,6 @@ export async function searchByTag(req, res) {
   }
 }
 
-// Get search suggestions
 export async function getSearchSuggestions(req, res) {
   try {
     const { q: query } = req.query;

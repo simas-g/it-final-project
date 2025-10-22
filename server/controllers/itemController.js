@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Generate custom ID based on configuration
 async function generateCustomId(inventoryId) {
   const config = await prisma.customIdConfig.findUnique({
     where: { inventoryId },
@@ -52,7 +51,6 @@ async function generateCustomId(inventoryId) {
         break;
         
       case 'SEQUENCE':
-        // Get all items to find the highest sequence number
         const items = await prisma.inventoryItem.findMany({
           where: { inventoryId },
           select: { customId: true }
@@ -61,7 +59,6 @@ async function generateCustomId(inventoryId) {
         let maxSeq = 0;
         for (const item of items) {
           if (item.customId) {
-            // Extract all numbers from the custom ID and take the last one
             const numbers = item.customId.match(/\d+/g);
             if (numbers && numbers.length > 0) {
               const lastNum = parseInt(numbers[numbers.length - 1]);
@@ -120,7 +117,6 @@ function generateGUID() {
   });
 }
 
-// Get items for an inventory
 export async function getInventoryItems(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -174,7 +170,6 @@ export async function getInventoryItems(req, res) {
   }
 }
 
-// Get single item
 export async function getItem(req, res) {
   try {
     const { id } = req.params;
@@ -195,7 +190,7 @@ export async function getItem(req, res) {
         likes: {
           include: {
             user: {
-              select: { id: true, name: true }
+              select: { id: true, name: true, email: true }
             }
           }
         }
@@ -213,14 +208,12 @@ export async function getItem(req, res) {
   }
 }
 
-// Create new item
 export async function createItem(req, res) {
   try {
     const { inventoryId } = req.params;
     const { fields = {}, customId } = req.body;
     const userId = req.user.id;
 
-    // Check if user has write access to inventory
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       include: {
@@ -236,20 +229,17 @@ export async function createItem(req, res) {
 
     const hasWriteAccess = inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
-                          inventory.isPublic ||
                           inventory.inventoryAccess.some(access => access.accessType === 'WRITE');
 
     if (!hasWriteAccess) {
       return res.status(403).json({ error: "You don't have write access to this inventory" });
     }
 
-    // Generate custom ID if not provided
     let finalCustomId = customId;
     if (!finalCustomId) {
       finalCustomId = await generateCustomId(inventoryId);
     }
 
-    // Check if custom ID already exists in this inventory
     if (finalCustomId) {
       const existingItem = await prisma.inventoryItem.findFirst({
         where: {
@@ -280,7 +270,7 @@ export async function createItem(req, res) {
         likes: {
           include: {
             user: {
-              select: { id: true, name: true }
+              select: { id: true, name: true, email: true }
             }
           }
         }
@@ -294,14 +284,12 @@ export async function createItem(req, res) {
   }
 }
 
-// Update item with optimistic locking
 export async function updateItem(req, res) {
   try {
     const { id } = req.params;
     const { fields, customId, version } = req.body;
     const userId = req.user.id;
 
-    // Check if user has write access
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
       include: {
@@ -321,14 +309,12 @@ export async function updateItem(req, res) {
 
     const hasWriteAccess = existingItem.inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
-                          existingItem.inventory.isPublic ||
                           existingItem.inventory.inventoryAccess.some(access => access.accessType === 'WRITE');
 
     if (!hasWriteAccess) {
       return res.status(403).json({ error: "You don't have write access to this item" });
     }
 
-    // Optimistic locking check
     if (version && existingItem.version !== version) {
       return res.status(409).json({ 
         error: "Item was modified by another user. Please refresh and try again.",
@@ -336,7 +322,6 @@ export async function updateItem(req, res) {
       });
     }
 
-    // Check if custom ID already exists (if changed)
     if (customId && customId !== existingItem.customId) {
       const duplicateItem = await prisma.inventoryItem.findFirst({
         where: {
@@ -367,7 +352,7 @@ export async function updateItem(req, res) {
         likes: {
           include: {
             user: {
-              select: { id: true, name: true }
+              select: { id: true, name: true, email: true }
             }
           }
         }
@@ -381,13 +366,11 @@ export async function updateItem(req, res) {
   }
 }
 
-// Delete item
 export async function deleteItem(req, res) {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Check if user has write access
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
       include: {
@@ -407,7 +390,6 @@ export async function deleteItem(req, res) {
 
     const hasWriteAccess = existingItem.inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
-                          existingItem.inventory.isPublic ||
                           existingItem.inventory.inventoryAccess.some(access => access.accessType === 'WRITE');
 
     if (!hasWriteAccess) {
@@ -425,7 +407,6 @@ export async function deleteItem(req, res) {
   }
 }
 
-// Toggle like on item
 export async function toggleItemLike(req, res) {
   try {
     const { id } = req.params;
@@ -441,13 +422,11 @@ export async function toggleItemLike(req, res) {
     });
 
     if (existingLike) {
-      // Remove like
       await prisma.itemLike.delete({
         where: { id: existingLike.id }
       });
       res.json({ liked: false });
     } else {
-      // Add like
       await prisma.itemLike.create({
         data: {
           itemId: id,

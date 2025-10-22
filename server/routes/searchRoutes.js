@@ -7,7 +7,6 @@ import {
 
 const router = express.Router();
 
-// Public routes
 router.get("/search", globalSearch);
 router.get("/search/tag/:tag", searchByTag);
 router.get("/search/suggestions", getSearchSuggestions);

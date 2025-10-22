@@ -62,9 +62,8 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-16">
+    <div className="max-w-6xl mx-auto space-y-12 pb-16 mt-10 px-10">
 
-      {/* Latest Inventories */}
       <section>
         <div className="flex items-center justify-between mb-6 pb-4 border-b">
           <div>
@@ -144,7 +143,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Popular Inventories */}
       <section>
         <div className="mb-6 pb-4 border-b">
           <h2 className="text-2xl font-bold">
@@ -199,7 +197,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tag Cloud */}
       {tags.length > 0 && (
         <section>
           <div className="mb-6 pb-4 border-b">
@@ -231,8 +228,6 @@ export default function Home() {
         </section>
       )}
 
-      
-      {/* CTA Section */}
       {!isAuthenticated() && (
         <section className="text-center space-y-6 py-16 border-t">
           <div className="space-y-3">

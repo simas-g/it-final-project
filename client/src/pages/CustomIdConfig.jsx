@@ -210,7 +210,6 @@ export default function CustomIdConfig() {
       return;
     }
 
-    // Validate elements
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element.elementType === 'FIXED_TEXT' && !element.value) {
@@ -277,7 +276,6 @@ export default function CustomIdConfig() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column: Current configuration */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-2">
             <CardHeader>
@@ -381,7 +379,6 @@ export default function CustomIdConfig() {
             </CardContent>
           </Card>
 
-          {/* Preview */}
           <Card className="border-2 border-primary">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -403,7 +400,6 @@ export default function CustomIdConfig() {
           </Card>
         </div>
 
-        {/* Right column: Available elements */}
         <div className="space-y-4">
           <Card className="border-2">
             <CardHeader>

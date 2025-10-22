@@ -9,7 +9,8 @@ import {
   Search,
   Users,
   Plus,
-  Package
+  Package,
+  User  
 } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
@@ -18,6 +19,12 @@ export default function Sidebar({ open, onClose }) {
   const location = useLocation()
 
   const navigation = [
+    {
+      name: t('profile'),
+      href: `/profile/${user.id}`,
+      icon: User,
+      current: location.pathname === `/profile/${user.id}`
+    },
     {
       name: t('home'),
       href: '/',
@@ -49,7 +56,6 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <>
-      {/* Mobile backdrop */}
       {open && (
         <div 
           className="fixed inset-0 z-40 bg-black/80 lg:hidden"
@@ -57,13 +63,11 @@ export default function Sidebar({ open, onClose }) {
         />
       )}
 
-      {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 w-64 h-screen pt-20 z-50 transform bg-background border-r-2 transition-transform duration-200 ease-in-out lg:translate-x-0",
         open ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-full flex-col overflow-hidden">
-          {/* Navigation - Minimal */}
           <nav className="flex-1 space-y-1 px-4 py-6 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -75,15 +79,12 @@ export default function Sidebar({ open, onClose }) {
                   className={cn(
                     "group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-150",
                     item.current
-                      ? "bg-secondary text-secondary-foreground border-2 border-foreground"
+                      ? "bg-secondary text-secondary-foreground border-2"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {item.name}
-                  {item.current && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-foreground"></div>
-                  )}
                 </Link>
               )
             })}

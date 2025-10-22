@@ -183,7 +183,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
 
   return (
     <div className="space-y-6">
-      {/* Public Access Toggle */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -226,7 +225,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
         </CardContent>
       </Card>
 
-      {/* User Access Management */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -248,7 +246,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Add User Form */}
           {showAddUser && (
             <div className="border-2 border-dashed rounded-lg p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -259,7 +256,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
               </div>
 
               <div className="space-y-3">
-                {/* User Search */}
                 <div>
                   <Label>{t('searchUser')}</Label>
                   <div className="relative mt-1">
@@ -272,7 +268,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                     />
                   </div>
                   
-                  {/* Search Results */}
                   {searchResults.length > 0 && (
                     <div className="mt-2 border rounded-md max-h-48 overflow-y-auto">
                       {searchResults.map((user) => (
@@ -300,7 +295,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                   )}
                 </div>
 
-                {/* Selected User */}
                 {selectedUser && (
                   <div className="border rounded-md p-3 bg-muted/50">
                     <div className="flex items-center justify-between">
@@ -317,7 +311,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                       </Button>
                     </div>
 
-                    {/* Add Button */}
                     <Button
                       onClick={handleAddAccess}
                       disabled={submitting}
@@ -332,7 +325,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
             </div>
           )}
 
-          {/* Access List */}
           {accessList.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -368,7 +360,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    {/* Remove Button */}
                     <Button
                       variant="ghost"
                       size="sm"

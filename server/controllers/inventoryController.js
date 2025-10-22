@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get all inventories with pagination and search
 export async function getInventories(req, res) {
   try {
     const { page = 1, limit = 10, search = "", category = "", tag = "" } = req.query;
@@ -63,7 +62,6 @@ export async function getInventories(req, res) {
   }
 }
 
-// Get single inventory with all details
 export async function getInventory(req, res) {
   try {
     const { id } = req.params;
@@ -128,7 +126,6 @@ export async function getInventory(req, res) {
   }
 }
 
-// Create new inventory
 export async function createInventory(req, res) {
   try {
     const { name, description, categoryId, imageUrl, tags = [], isPublic = false } = req.body;
@@ -171,14 +168,12 @@ export async function createInventory(req, res) {
   }
 }
 
-// Update inventory with optimistic locking
 export async function updateInventory(req, res) {
   try {
     const { id } = req.params;
     const { name, description, categoryId, imageUrl, tags = [], isPublic, version } = req.body;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const existingInventory = await prisma.inventory.findUnique({
       where: { id },
       select: { userId: true, version: true }
@@ -192,7 +187,6 @@ export async function updateInventory(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can edit this inventory" });
     }
 
-    // Optimistic locking check
     if (version && existingInventory.version !== version) {
       return res.status(409).json({ 
         error: "Inventory was modified by another user. Please refresh and try again.",
@@ -239,13 +233,11 @@ export async function updateInventory(req, res) {
   }
 }
 
-// Delete inventory
 export async function deleteInventory(req, res) {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const existingInventory = await prisma.inventory.findUnique({
       where: { id },
       select: { userId: true }
@@ -270,7 +262,6 @@ export async function deleteInventory(req, res) {
   }
 }
 
-// Get user's inventories (owned and with access)
 export async function getUserInventories(req, res) {
   try {
     const userId = req.user.id;
@@ -326,7 +317,6 @@ export async function getUserInventories(req, res) {
   }
 }
 
-// Get popular inventories
 export async function getPopularInventories(req, res) {
   try {
     const inventories = await prisma.inventory.findMany({
@@ -357,7 +347,6 @@ export async function getPopularInventories(req, res) {
   }
 }
 
-// Get categories
 export async function getCategories(req, res) {
   try {
     const categories = await prisma.category.findMany({
@@ -370,7 +359,6 @@ export async function getCategories(req, res) {
   }
 }
 
-// Get tags
 export async function getTags(req, res) {
   try {
     const { search = "" } = req.query;
@@ -391,5 +379,137 @@ export async function getTags(req, res) {
   } catch (error) {
     console.error("Get tags error:", error);
     res.status(500).json({ error: "Failed to fetch tags" });
+  }
+}
+
+export async function getInventoryStatistics(req, res) {
+  try {
+    const { id } = req.params;
+
+    const inventory = await prisma.inventory.findUnique({
+      where: { id },
+      select: { id: true, createdAt: true }
+    });
+
+    if (!inventory) {
+      return res.status(404).json({ error: "Inventory not found" });
+    }
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalItems,
+      itemsLast7Days,
+      itemsLast30Days,
+      topContributors,
+      recentItems,
+      totalLikes,
+      totalDiscussions
+    ] = await Promise.all([
+      prisma.inventoryItem.count({
+        where: { inventoryId: id }
+      }),
+      prisma.inventoryItem.count({
+        where: {
+          inventoryId: id,
+          createdAt: { gte: sevenDaysAgo }
+        }
+      }),
+      prisma.inventoryItem.count({
+        where: {
+          inventoryId: id,
+          createdAt: { gte: thirtyDaysAgo }
+        }
+      }),
+      prisma.inventoryItem.groupBy({
+        by: ['userId'],
+        where: { inventoryId: id },
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 5
+      }),
+      prisma.inventoryItem.findMany({
+        where: { inventoryId: id },
+        select: {
+          id: true,
+          customId: true,
+          createdAt: true,
+          user: {
+            select: { id: true, name: true, email: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      }),
+      prisma.itemLike.count({
+        where: {
+          item: { inventoryId: id }
+        }
+      }),
+      prisma.discussionPost.count({
+        where: { inventoryId: id }
+      })
+    ]);
+
+    const contributorUsers = await prisma.user.findMany({
+      where: {
+        id: { in: topContributors.map(c => c.userId) }
+      },
+      select: { id: true, name: true, email: true }
+    });
+
+    const contributorsWithDetails = topContributors.map(contributor => ({
+      user: contributorUsers.find(u => u.id === contributor.userId),
+      itemCount: contributor._count.id
+    }));
+
+    const itemsByDay = await prisma.inventoryItem.findMany({
+      where: {
+        inventoryId: id,
+        createdAt: { gte: thirtyDaysAgo }
+      },
+      select: { createdAt: true }
+    });
+
+    const dailyStats = {};
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      dailyStats[dateStr] = 0;
+    }
+
+    itemsByDay.forEach(item => {
+      const dateStr = item.createdAt.toISOString().split('T')[0];
+      if (dailyStats[dateStr] !== undefined) {
+        dailyStats[dateStr]++;
+      }
+    });
+
+    const itemsOverTime = Object.entries(dailyStats).map(([date, count]) => ({
+      date,
+      count
+    }));
+
+    const statistics = {
+      overview: {
+        totalItems,
+        itemsLast7Days,
+        itemsLast30Days,
+        totalLikes,
+        totalDiscussions,
+        averageItemsPerDay: itemsLast30Days > 0 ? (itemsLast30Days / 30).toFixed(2) : 0
+      },
+      topContributors: contributorsWithDetails,
+      recentItems,
+      itemsOverTime
+    };
+
+    res.json(statistics);
+  } catch (error) {
+    console.error("Get inventory statistics error:", error);
+    res.status(500).json({ error: "Failed to fetch inventory statistics" });
   }
 }

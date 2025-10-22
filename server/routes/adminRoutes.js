@@ -11,7 +11,6 @@ import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Admin only routes
 router.get("/admin/users", authenticateToken, authorizeRoles('ADMIN'), getUsers);
 router.get("/admin/users/:id", authenticateToken, authorizeRoles('ADMIN'), getUser);
 router.put("/admin/users/:id/role", authenticateToken, authorizeRoles('ADMIN'), updateUserRole);

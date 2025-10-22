@@ -49,7 +49,6 @@ export default function CreateItem() {
       setInventory(response.data);
       setCustomFields(response.data.fields || []);
       
-      // Initialize field values
       const initialValues = {};
       (response.data.fields || []).forEach(field => {
         initialValues[field.id] = '';
@@ -99,7 +98,6 @@ export default function CreateItem() {
   };
 
   const validateForm = () => {
-    // Check required fields
     for (const field of customFields) {
       if (field.isRequired && !fieldValues[field.id]) {
         setError(`${field.title} is required`);
@@ -120,7 +118,6 @@ export default function CreateItem() {
     setError("");
 
     try {
-      // Prepare field values with proper types using field IDs as keys
       const preparedFields = {};
       customFields.forEach(field => {
         const value = fieldValues[field.id];
@@ -140,14 +137,13 @@ export default function CreateItem() {
 
       const payload = {
         fields: preparedFields,
-        customId: customId || undefined // Let backend generate if not provided
+        customId: customId || undefined
       };
 
       console.log('Creating item with payload:', payload);
       const response = await api.post(`/inventories/${inventoryId}/items`, payload);
       console.log('Item created:', response.data);
 
-      // Navigate to the inventory to see the new item
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating item:', error);
@@ -219,7 +215,6 @@ export default function CreateItem() {
           </Alert>
         )}
 
-        {/* Custom ID Section */}
         {inventory.customIdConfig && (
           <Card className="border-2 border-primary">
             <CardHeader>
@@ -268,7 +263,6 @@ export default function CreateItem() {
           </Card>
         )}
 
-        {/* Custom Fields */}
         {customFields.length > 0 ? (
           <Card className="border-2">
             <CardHeader>
@@ -374,7 +368,6 @@ export default function CreateItem() {
           </Card>
         )}
 
-        {/* Submit Button */}
         <div className="flex items-center justify-between pt-6 border-t-2">
           <Button
             type="button"

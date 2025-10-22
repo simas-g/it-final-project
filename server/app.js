@@ -24,7 +24,6 @@ app.use(
   })
 );
 
-// Routes
 app.use("/api", authRoutes);
 app.use("/api", inventoryRoutes);
 app.use("/api", itemRoutes);
@@ -36,7 +35,6 @@ app.use("/api", fieldRoutes);
 app.use("/api", accessRoutes);
 app.use("/api", userRoutes);
 
-// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });

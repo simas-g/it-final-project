@@ -9,11 +9,9 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Public routes
 router.post("/auth/register", registerEmail);
 router.post("/auth/login", loginEmail);
-router.post("/auth/provider", authProvider); // OAuth providers
+router.post("/auth/provider", authProvider);
 
-// Protected routes
 router.get("/auth/me", authenticateToken, getCurrentUser);
 export default router;

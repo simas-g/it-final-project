@@ -18,7 +18,6 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Global error handler for debugging
     const errorHandler = (event) => {
       console.error('Global error caught:', event.error);
       event.preventDefault();
@@ -31,7 +30,6 @@ function Login() {
     e.preventDefault();
     e.stopPropagation();
     
-    // Don't proceed if already loading
     if (loading) return;
     
     try {
@@ -41,13 +39,10 @@ function Login() {
       const result = await auth.login(email, password);
       
       if (result && result.success) {
-        // Only navigate on success
         navigate("/dashboard");
       }
-      // Error is already set in auth context, will be displayed
     } catch (error) {
       console.error('Login error:', error);
-      // Error handling is done in auth context
     } finally {
       setLoading(false);
     }
@@ -56,13 +51,11 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
-        {/* Minimal Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold tracking-tight mb-2">{t('welcomeBack')}</h1>
           <p className="text-muted-foreground">{t('loginDescription')}</p>
         </div>
 
-        {/* Login Card - Minimal Border Design */}
         <Card className="border-2 shadow-lg">
           <CardContent className="pt-8 pb-8 px-8">
             <form onSubmit={handleSubmit} className="space-y-6">

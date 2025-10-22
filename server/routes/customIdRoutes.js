@@ -8,7 +8,6 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Protected routes
 router.get("/inventories/:inventoryId/custom-id", authenticateToken, getCustomIdConfig);
 router.put("/inventories/:inventoryId/custom-id", authenticateToken, updateCustomIdConfig);
 router.post("/custom-id/preview", authenticateToken, generateCustomIdPreview);

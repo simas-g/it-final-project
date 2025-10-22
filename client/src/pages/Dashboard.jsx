@@ -89,7 +89,6 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between pb-6 border-b">
         <div>
           <h1 className="text-3xl font-bold mb-1">{t('dashboard')}</h1>
@@ -105,7 +104,6 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
@@ -144,7 +142,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Inventories List */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold">{t('yourInventories')}</h2>

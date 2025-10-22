@@ -92,10 +92,8 @@ export default function FieldsConfig() {
     const field = fields[index];
     
     if (field.isNew) {
-      // Just remove from UI if it's a new unsaved field
       setFields(fields.filter((_, i) => i !== index));
     } else {
-      // Delete from backend
       try {
         await api.delete(`/fields/${field.id}`);
         setFields(fields.filter((_, i) => i !== index));
@@ -136,7 +134,6 @@ export default function FieldsConfig() {
   };
 
   const handleSave = async () => {
-    // Validation
     for (let i = 0; i < fields.length; i++) {
       if (!fields[i].title.trim()) {
         setError(`Field ${i + 1}: Title is required`);
@@ -148,7 +145,6 @@ export default function FieldsConfig() {
       setSaving(true);
       setError("");
       
-      // Create new fields
       const newFields = fields.filter(f => f.isNew);
       for (const field of newFields) {
         await api.post(`/inventories/${id}/fields`, {
@@ -160,7 +156,6 @@ export default function FieldsConfig() {
         });
       }
 
-      // Update existing fields
       const existingFields = fields.filter(f => !f.isNew);
       for (const field of existingFields) {
         await api.put(`/fields/${field.id}`, {
@@ -171,7 +166,6 @@ export default function FieldsConfig() {
         });
       }
 
-      // Reorder all fields
       const fieldOrders = fields.map((field, index) => ({
         fieldId: field.id || field.tempId,
         order: index
@@ -212,7 +206,7 @@ export default function FieldsConfig() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <Button onClick={() => navigate(`/inventory/${id}`)} variant="ghost">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Inventory

@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get fields for an inventory
 export async function getInventoryFields(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -18,14 +17,12 @@ export async function getInventoryFields(req, res) {
   }
 }
 
-// Create new field
 export async function createField(req, res) {
   try {
     const { inventoryId } = req.params;
     const { title, description, fieldType, isRequired, showInTable } = req.body;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true }
@@ -39,7 +36,6 @@ export async function createField(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can manage fields" });
     }
 
-    // Check field type limits
     const existingFields = await prisma.inventoryField.findMany({
       where: { inventoryId, fieldType }
     });
@@ -58,7 +54,6 @@ export async function createField(req, res) {
       });
     }
 
-    // Get next order
     const maxOrder = await prisma.inventoryField.aggregate({
       where: { inventoryId },
       _max: { order: true }
@@ -83,14 +78,12 @@ export async function createField(req, res) {
   }
 }
 
-// Update field
 export async function updateField(req, res) {
   try {
     const { fieldId } = req.params;
     const { title, description, isRequired, showInTable } = req.body;
     const userId = req.user.id;
 
-    // Check if field exists and user has permission
     const existingField = await prisma.inventoryField.findUnique({
       where: { id: fieldId },
       include: {
@@ -125,13 +118,11 @@ export async function updateField(req, res) {
   }
 }
 
-// Delete field
 export async function deleteField(req, res) {
   try {
     const { fieldId } = req.params;
     const userId = req.user.id;
 
-    // Check if field exists and user has permission
     const existingField = await prisma.inventoryField.findUnique({
       where: { id: fieldId },
       include: {
@@ -160,14 +151,12 @@ export async function deleteField(req, res) {
   }
 }
 
-// Reorder fields
 export async function reorderFields(req, res) {
   try {
     const { inventoryId } = req.params;
     const { fieldOrders } = req.body; // Array of { fieldId, order }
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true }
@@ -181,7 +170,6 @@ export async function reorderFields(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can reorder fields" });
     }
 
-    // Update field orders
     const updatePromises = fieldOrders.map(({ fieldId, order }) =>
       prisma.inventoryField.update({
         where: { id: fieldId },
@@ -191,7 +179,6 @@ export async function reorderFields(req, res) {
 
     await Promise.all(updatePromises);
 
-    // Get updated fields
     const fields = await prisma.inventoryField.findMany({
       where: { inventoryId },
       orderBy: { order: 'asc' }

@@ -160,7 +160,6 @@ export default function Discussion({ inventoryId }) {
 
   return (
     <div className="space-y-6">
-      {/* New Post Form */}
       {isAuthenticated() ? (
         <Card>
           <CardContent className="pt-6">
@@ -203,7 +202,6 @@ export default function Discussion({ inventoryId }) {
         </Card>
       )}
 
-      {/* Posts List */}
       <div className="space-y-4">
         {posts.length === 0 ? (
           <Card>

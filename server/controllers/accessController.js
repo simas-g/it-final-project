@@ -1,13 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get access list for an inventory
 export async function getInventoryAccess(req, res) {
   try {
     const { inventoryId } = req.params;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true, isPublic: true }
@@ -41,7 +39,6 @@ export async function getInventoryAccess(req, res) {
   }
 }
 
-// Add user to inventory access
 export async function addInventoryAccess(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -50,7 +47,6 @@ export async function addInventoryAccess(req, res) {
 
     console.log('Adding access:', { inventoryId, targetUserId, accessType, requestUserId: userId });
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true, isPublic: true }
@@ -64,7 +60,6 @@ export async function addInventoryAccess(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can manage access" });
     }
 
-    // Check if target user exists
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
       select: { id: true, name: true, email: true }
@@ -74,7 +69,6 @@ export async function addInventoryAccess(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if access already exists
     const existingAccess = await prisma.inventoryAccess.findFirst({
       where: {
         inventoryId: inventoryId,
@@ -108,14 +102,12 @@ export async function addInventoryAccess(req, res) {
   }
 }
 
-// Update inventory access
 export async function updateInventoryAccess(req, res) {
   try {
     const { accessId } = req.params;
     const { accessType } = req.body;
     const userId = req.user.id;
 
-    // Check if access exists and user has permission
     const existingAccess = await prisma.inventoryAccess.findUnique({
       where: { id: accessId },
       include: {
@@ -150,13 +142,11 @@ export async function updateInventoryAccess(req, res) {
   }
 }
 
-// Remove inventory access
 export async function removeInventoryAccess(req, res) {
   try {
     const { accessId } = req.params;
     const userId = req.user.id;
 
-    // Check if access exists and user has permission
     const existingAccess = await prisma.inventoryAccess.findUnique({
       where: { id: accessId },
       include: {
@@ -185,14 +175,12 @@ export async function removeInventoryAccess(req, res) {
   }
 }
 
-// Toggle public access
 export async function togglePublicAccess(req, res) {
   try {
     const { inventoryId } = req.params;
     const { isPublic } = req.body;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true }
@@ -219,7 +207,6 @@ export async function togglePublicAccess(req, res) {
   }
 }
 
-// Search users for access management
 export async function searchUsersForAccess(req, res) {
   try {
     const { q: query } = req.query;

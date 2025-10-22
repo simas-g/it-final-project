@@ -3,7 +3,6 @@ import app from "./app.js";
 
 const PORT = process.env.PORT || 8080;
 
-// Validate required environment variables
 if (!process.env.JWT_SECRET) {
   console.error("ERROR: JWT_SECRET is not set in .env file");
   process.exit(1);

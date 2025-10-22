@@ -60,7 +60,6 @@ export default function UserProfile() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* Profile Header */}
       <div className="flex items-start gap-6 pb-6 border-b">
         <div className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center shrink-0">
           <User className="h-8 w-8 text-background" />
@@ -98,7 +97,6 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="inventories" className="flex items-center">

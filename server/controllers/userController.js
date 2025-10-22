@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get public user profile (no auth required)
 export async function getUserProfile(req, res) {
   try {
     const { id } = req.params;
@@ -15,11 +14,7 @@ export async function getUserProfile(req, res) {
         role: true,
         provider: true,
         createdAt: true,
-        // Get only public inventories
         inventories: {
-          where: {
-            isPublic: true
-          },
           include: {
             category: true,
             inventoryTags: {
@@ -36,13 +31,7 @@ export async function getUserProfile(req, res) {
           },
           orderBy: { createdAt: 'desc' }
         },
-        // Get items from public inventories only
         items: {
-          where: {
-            inventory: {
-              isPublic: true
-            }
-          },
           include: {
             inventory: {
               select: { id: true, name: true, isPublic: true }
@@ -54,13 +43,7 @@ export async function getUserProfile(req, res) {
           orderBy: { createdAt: 'desc' },
           take: 20
         },
-        // Get discussion posts from public inventories only
         discussionPosts: {
-          where: {
-            inventory: {
-              isPublic: true
-            }
-          },
           include: {
             inventory: {
               select: { id: true, name: true, isPublic: true }
@@ -69,15 +52,7 @@ export async function getUserProfile(req, res) {
           orderBy: { createdAt: 'desc' },
           take: 20
         },
-        // Get public item likes
         itemLikes: {
-          where: {
-            item: {
-              inventory: {
-                isPublic: true
-              }
-            }
-          },
           include: {
             item: {
               include: {
@@ -105,7 +80,6 @@ export async function getUserProfile(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // If user is blocked, only show basic info
     if (user.isBlocked) {
       return res.json({
         id: user.id,
@@ -134,7 +108,6 @@ export async function getUserProfile(req, res) {
   }
 }
 
-// Get all public users (for user directory/search)
 export async function getPublicUsers(req, res) {
   try {
     const { search, role, page = 1, limit = 20 } = req.query;

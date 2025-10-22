@@ -119,12 +119,10 @@ export default function CreateInventory() {
     isPublic: false
   });
 
-  // Custom ID state
   const [customIdElements, setCustomIdElements] = useState([]);
   const [preview, setPreview] = useState("");
   const [draggedIndex, setDraggedIndex] = useState(null);
 
-  // Custom Fields state
   const [customFields, setCustomFields] = useState([]);
   const [draggedFieldIndex, setDraggedFieldIndex] = useState(null);
 
@@ -167,7 +165,6 @@ export default function CreateInventory() {
     }));
   };
 
-  // Custom ID functions
   const handleAddElement = (elementType) => {
     const newElement = {
       elementType,
@@ -219,7 +216,6 @@ export default function CreateInventory() {
     return ELEMENT_TYPES.find(et => et.value === type);
   };
 
-  // Custom Fields functions
   const getFieldTypeCount = (fieldType) => {
     return customFields.filter(f => f.fieldType === fieldType).length;
   };
@@ -359,12 +355,10 @@ export default function CreateInventory() {
       const inventoryId = inventoryResponse.data.id;
       console.log('Inventory created:', inventoryResponse.data);
 
-      // Create custom ID configuration
       console.log('Creating custom ID config:', customIdElements);
       await api.put(`/inventories/${inventoryId}/custom-id`, { elements: customIdElements });
       console.log('Custom ID config created');
 
-      // Create custom fields if any
       if (customFields.length > 0) {
         console.log('Creating custom fields:', customFields);
         for (const field of customFields) {
@@ -379,7 +373,6 @@ export default function CreateInventory() {
         console.log('Custom fields created');
       }
 
-      // Navigate to the newly created inventory
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating inventory:', error);
@@ -417,7 +410,6 @@ export default function CreateInventory() {
         </div>
       </div>
 
-      {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center space-x-4">
           <div className={`flex items-center ${currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -444,7 +436,6 @@ export default function CreateInventory() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Step 1: Basic Information */}
         {currentStep === 1 && (
           <>
             <Card className="border-2">
@@ -605,7 +596,6 @@ export default function CreateInventory() {
           </>
         )}
 
-        {/* Step 2: Custom ID Configuration */}
         {currentStep === 2 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -683,7 +673,6 @@ export default function CreateInventory() {
                 </CardContent>
               </Card>
 
-              {/* Preview */}
               <Card className="border-2 border-primary">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -702,7 +691,6 @@ export default function CreateInventory() {
               </Card>
             </div>
 
-            {/* Available Elements */}
             <div className="space-y-4">
               <Card className="border-2">
                 <CardHeader>
@@ -749,7 +737,6 @@ export default function CreateInventory() {
           </div>
         )}
 
-        {/* Navigation buttons for step 2 */}
         {currentStep === 2 && (
           <div className="flex items-center justify-between pt-6 border-t-2">
             <Button
@@ -772,7 +759,6 @@ export default function CreateInventory() {
           </div>
         )}
 
-        {/* Step 3: Custom Fields Configuration */}
         {currentStep === 3 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -937,7 +923,6 @@ export default function CreateInventory() {
           </div>
         )}
 
-        {/* Navigation buttons for step 3 */}
         {currentStep === 3 && (
           <div className="flex items-center justify-between pt-6 border-t-2">
             <Button

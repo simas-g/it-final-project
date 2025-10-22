@@ -1,6 +1,5 @@
 import * as React from "react"
 
-// Simple toast context
 const ToastContext = React.createContext(null)
 
 let toastCount = 0

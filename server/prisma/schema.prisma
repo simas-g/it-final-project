@@ -37,7 +37,6 @@ enum CustomIdElementType {
   SEQUENCE
 }
 
-// User preferences for language and theme
 model UserPreferences {
   id       String @id @default(uuid())
   userId   String @unique
@@ -46,14 +45,12 @@ model UserPreferences {
   theme    String @default("light")
 }
 
-// Categories for inventories
 model Category {
   id          String      @id @default(uuid())
   name        String      @unique
   inventories Inventory[]
 }
 
-// Tags for inventories
 model Tag {
   id          String         @id @default(uuid())
   name        String         @unique
@@ -70,7 +67,6 @@ model InventoryTag {
   @@unique([inventoryId, tagId])
 }
 
-// Custom fields for inventories
 model InventoryField {
   id          String    @id @default(uuid())
   inventoryId String
@@ -85,31 +81,28 @@ model InventoryField {
   updatedAt   DateTime  @updatedAt
 }
 
-// Custom ID configuration for inventories
 model CustomIdConfig {
   id           String            @id @default(uuid())
   inventoryId  String            @unique
   inventory    Inventory         @relation(fields: [inventoryId], references: [id])
-  elements     Json // Array of CustomIdElement
+  elements     Json
   elementsList CustomIdElement[]
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 }
 
-// Custom ID elements configuration
 model CustomIdElement {
   id          String              @id @default(uuid())
   configId    String
   config      CustomIdConfig      @relation(fields: [configId], references: [id])
   elementType CustomIdElementType
-  format      String // Format string (e.g., "D3", "yyyy", "X5")
-  value       String? // For fixed text
+  format      String
+  value       String?
   order       Int
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
 
-// Inventory access control
 model InventoryAccess {
   id          String              @id @default(uuid())
   inventoryId String
@@ -123,19 +116,17 @@ model InventoryAccess {
   @@unique([inventoryId, userId])
 }
 
-// Discussion posts for inventories
 model DiscussionPost {
   id          String    @id @default(uuid())
   inventoryId String
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
   userId      String
   user        User      @relation(fields: [userId], references: [id])
-  content     String // Markdown content
+  content     String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 
-// Likes for items
 model ItemLike {
   id     String        @id @default(uuid())
   itemId String
@@ -146,20 +137,18 @@ model ItemLike {
   @@unique([itemId, userId])
 }
 
-// User model with all relations
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
   name       String?
-  password   String? // Null for OAuth users
-  provider   String? // "google", "github", null for email/password
-  providerId String? // OAuth provider's user ID
+  password   String?
+  provider   String?
+  providerId String?
   isBlocked  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   role       UserRole @default(USER)
 
-  // Relations
   preferences     UserPreferences?
   inventories     Inventory[]
   items           InventoryItem[]
@@ -168,7 +157,6 @@ model User {
   itemLikes       ItemLike[]
 }
 
-// Enhanced Inventory model
 model Inventory {
   id          String    @id @default(uuid())
   name        String
@@ -177,13 +165,12 @@ model Inventory {
   category    Category? @relation(fields: [categoryId], references: [id])
   imageUrl    String?
   isPublic    Boolean   @default(false)
-  version     Int       @default(1) // For optimistic locking
+  version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
   user        User      @relation(fields: [userId], references: [id])
 
-  // Relations
   items           InventoryItem[]
   inventoryAccess InventoryAccess[]
   inventoryTags   InventoryTag[]
@@ -192,20 +179,18 @@ model Inventory {
   discussionPosts DiscussionPost[]
 }
 
-// Enhanced InventoryItem model
 model InventoryItem {
   id          String    @id @default(uuid())
   inventoryId String
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
-  customId    String? // Custom ID within inventory scope
-  fields      Json      @default("{}") // Custom field values
-  version     Int       @default(1) // For optimistic locking
+  customId    String?
+  fields      Json      @default("{}")
+  version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
   user        User      @relation(fields: [userId], references: [id])
-  // Relations
-  likes ItemLike[]
+  likes       ItemLike[]
 
   @@unique([inventoryId, customId])
 }

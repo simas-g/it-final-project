@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get custom ID configuration for inventory
 export async function getCustomIdConfig(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -22,14 +21,12 @@ export async function getCustomIdConfig(req, res) {
   }
 }
 
-// Update custom ID configuration
 export async function updateCustomIdConfig(req, res) {
   try {
     const { inventoryId } = req.params;
     const { elements } = req.body;
     const userId = req.user.id;
 
-    // Check if user is owner or admin
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true }
@@ -43,7 +40,6 @@ export async function updateCustomIdConfig(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can configure custom IDs" });
     }
 
-    // Validate elements
     if (!Array.isArray(elements) || elements.length === 0) {
       return res.status(400).json({ error: "At least one element is required" });
     }
@@ -52,7 +48,6 @@ export async function updateCustomIdConfig(req, res) {
       return res.status(400).json({ error: "Maximum 10 elements allowed" });
     }
 
-    // Validate each element
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (!element.elementType) {
@@ -68,7 +63,6 @@ export async function updateCustomIdConfig(req, res) {
       }
     }
 
-    // Update or create configuration
     const config = await prisma.customIdConfig.upsert({
       where: { inventoryId },
       update: {
@@ -80,7 +74,6 @@ export async function updateCustomIdConfig(req, res) {
       }
     });
 
-    // Update elements in database
     await prisma.customIdElement.deleteMany({
       where: { configId: config.id }
     });
@@ -95,7 +88,6 @@ export async function updateCustomIdConfig(req, res) {
       }))
     });
 
-    // Get updated configuration
     const updatedConfig = await prisma.customIdConfig.findUnique({
       where: { inventoryId },
       include: {
@@ -112,7 +104,6 @@ export async function updateCustomIdConfig(req, res) {
   }
 }
 
-// Generate preview of custom ID
 export async function generateCustomIdPreview(req, res) {
   try {
     const { elements } = req.body;
@@ -159,7 +150,6 @@ export async function generateCustomIdPreview(req, res) {
           break;
           
         case 'SEQUENCE':
-          // For preview, use a sample sequence number
           preview += formatNumber(123, element.format);
           break;
       }

@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get all users with pagination and search
 export async function getUsers(req, res) {
   try {
     const { page = 1, limit = 20, search = "", role = "" } = req.query;
@@ -59,7 +58,6 @@ export async function getUsers(req, res) {
   }
 }
 
-// Get single user details
 export async function getUser(req, res) {
   try {
     const { id } = req.params;
@@ -124,7 +122,6 @@ export async function getUser(req, res) {
   }
 }
 
-// Update user role
 export async function updateUserRole(req, res) {
   try {
     const { id } = req.params;
@@ -135,7 +132,6 @@ export async function updateUserRole(req, res) {
       return res.status(400).json({ error: "Invalid role" });
     }
 
-    // Check if admin is trying to remove their own admin access
     if (id === adminId && role !== 'ADMIN') {
       return res.status(400).json({ error: "You cannot remove admin access from yourself" });
     }
@@ -159,14 +155,12 @@ export async function updateUserRole(req, res) {
   }
 }
 
-// Block/unblock user
 export async function toggleUserBlock(req, res) {
   try {
     const { id } = req.params;
     const { isBlocked } = req.body;
     const adminId = req.user.id;
 
-    // Check if admin is trying to block themselves
     if (id === adminId && isBlocked) {
       return res.status(400).json({ error: "You cannot block yourself" });
     }
@@ -190,18 +184,15 @@ export async function toggleUserBlock(req, res) {
   }
 }
 
-// Delete user
 export async function deleteUser(req, res) {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
 
-    // Check if admin is trying to delete themselves
     if (id === adminId) {
       return res.status(400).json({ error: "You cannot delete yourself" });
     }
 
-    // Check if user exists
     const user = await prisma.user.findUnique({
       where: { id },
       select: { id: true, email: true, role: true }
@@ -211,7 +202,6 @@ export async function deleteUser(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Delete user (cascade will handle related records)
     await prisma.user.delete({
       where: { id }
     });
@@ -223,7 +213,6 @@ export async function deleteUser(req, res) {
   }
 }
 
-// Get system statistics
 export async function getSystemStats(req, res) {
   try {
     const [

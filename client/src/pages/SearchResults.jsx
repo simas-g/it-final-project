@@ -97,7 +97,7 @@ export default function SearchResults() {
   // Show search prompt if no search has been performed
   if (!hasSearched) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6 mt-8 px-10">
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative flex-1 max-w-2xl">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -127,9 +127,8 @@ export default function SearchResults() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Search Header */}
+    return (
+      <div className="space-y-6 mt-8 px-10">
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">{getTranslation('searchResults', language)}</h1>
         
@@ -166,7 +165,6 @@ export default function SearchResults() {
         </form>
       </div>
 
-      {/* Results for Tag Search */}
       {currentTag ? (
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">
@@ -199,7 +197,7 @@ export default function SearchResults() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex flex-wrap gap-4 items-center justify-between text-sm text-muted-foreground">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center">
                           <User className="h-4 w-4 mr-1" />
@@ -232,7 +230,6 @@ export default function SearchResults() {
           )}
         </div>
       ) : (
-        // Regular search with tabs
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="all">{getTranslation('all', language)}</TabsTrigger>
@@ -241,7 +238,6 @@ export default function SearchResults() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-6">
-          {/* Inventories */}
           {results.inventories?.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold mb-4">
@@ -296,7 +292,6 @@ export default function SearchResults() {
             </div>
           )}
 
-          {/* Items */}
           {results.items?.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold mb-4">
@@ -349,7 +344,6 @@ export default function SearchResults() {
             </div>
           )}
 
-          {/* No Results */}
           {(!results.inventories?.length && !results.items?.length) && (
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

@@ -8,20 +8,20 @@ import {
   getUserInventories,
   getPopularInventories,
   getCategories,
-  getTags
+  getTags,
+  getInventoryStatistics
 } from "../controllers/inventoryController.js";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Public routes
 router.get("/inventories", getInventories);
 router.get("/inventories/popular", getPopularInventories);
+router.get("/inventories/:id/statistics", getInventoryStatistics);
 router.get("/inventories/:id", getInventory);
 router.get("/categories", getCategories);
 router.get("/tags", getTags);
 
-// Protected routes
 router.get("/user/inventories", authenticateToken, getUserInventories);
 router.post("/inventories", authenticateToken, createInventory);
 router.put("/inventories/:id", authenticateToken, updateInventory);

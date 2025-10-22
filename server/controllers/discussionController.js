@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get discussion posts for an inventory
 export async function getDiscussionPosts(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -40,7 +39,6 @@ export async function getDiscussionPosts(req, res) {
   }
 }
 
-// Create new discussion post
 export async function createDiscussionPost(req, res) {
   try {
     const { inventoryId } = req.params;
@@ -51,7 +49,6 @@ export async function createDiscussionPost(req, res) {
       return res.status(400).json({ error: "Content is required" });
     }
 
-    // Check if inventory exists
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId }
     });
@@ -80,7 +77,6 @@ export async function createDiscussionPost(req, res) {
   }
 }
 
-// Update discussion post
 export async function updateDiscussionPost(req, res) {
   try {
     const { postId } = req.params;
@@ -91,7 +87,6 @@ export async function updateDiscussionPost(req, res) {
       return res.status(400).json({ error: "Content is required" });
     }
 
-    // Check if post exists and user is the author
     const existingPost = await prisma.discussionPost.findUnique({
       where: { id: postId },
       include: {
@@ -105,7 +100,6 @@ export async function updateDiscussionPost(req, res) {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    // Check if user is the author, inventory owner, or admin
     const canEdit = existingPost.userId === userId || 
                     existingPost.inventory.userId === userId || 
                     req.user.role === 'ADMIN';
@@ -133,13 +127,11 @@ export async function updateDiscussionPost(req, res) {
   }
 }
 
-// Delete discussion post
 export async function deleteDiscussionPost(req, res) {
   try {
     const { postId } = req.params;
     const userId = req.user.id;
 
-    // Check if post exists and user can delete it
     const existingPost = await prisma.discussionPost.findUnique({
       where: { id: postId },
       include: {
@@ -153,7 +145,6 @@ export async function deleteDiscussionPost(req, res) {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    // Check if user is the author, inventory owner, or admin
     const canDelete = existingPost.userId === userId || 
                       existingPost.inventory.userId === userId || 
                       req.user.role === 'ADMIN';

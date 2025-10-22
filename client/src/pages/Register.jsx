@@ -27,7 +27,6 @@ function Register() {
       return;
     }
 
-    // Don't proceed if already loading
     if (loading) return;
 
     try {
@@ -37,13 +36,10 @@ function Register() {
       const result = await register(email, password, name);
       
       if (result.success) {
-        // Only navigate on success
         navigate("/dashboard");
       }
-      // Error is already set in auth context, will be displayed
     } catch (error) {
       console.error('Registration error:', error);
-      // Error handling is done in auth context
     } finally {
       setLoading(false);
     }
@@ -60,7 +56,6 @@ function Register() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md mx-auto gap-12 items-center">
 
-        {/* Register Form - Minimal */}
         <div>
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold tracking-tight mb-2">{t('createAccount')}</h2>
