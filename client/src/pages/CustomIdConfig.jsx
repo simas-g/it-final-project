@@ -16,86 +16,89 @@ import {
   X,
   HelpCircle,
   Sparkles,
-  Hash,
-  Calendar,
-  Type,
-  RefreshCw
+  Hash
 } from "lucide-react";
+import { DndContext, closestCorners } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from "@/hooks/useDndSensors";
+import { ELEMENT_TYPES } from "@/lib/inventoryConstants";
 
-const ELEMENT_TYPES = [
-  { 
-    value: 'FIXED_TEXT', 
-    label: 'Fixed Text', 
-    icon: Type,
-    description: 'Static text that appears in every ID',
-    helpText: 'Enter any text (supports Unicode characters)',
-    requiresValue: true,
-    requiresFormat: false
-  },
-  { 
-    value: 'RANDOM_6DIGIT', 
-    label: '6-Digit Random', 
-    icon: Hash,
-    description: 'Random 6-digit number (0-999,999)',
-    helpText: 'Format: D6 for zero-padded (e.g., 000123), or leave empty',
-    requiresValue: false,
-    requiresFormat: true
-  },
-  { 
-    value: 'RANDOM_9DIGIT', 
-    label: '9-Digit Random', 
-    icon: Hash,
-    description: 'Random 9-digit number (0-999,999,999)',
-    helpText: 'Format: D9 for zero-padded, X9 for hexadecimal',
-    requiresValue: false,
-    requiresFormat: true
-  },
-  { 
-    value: 'RANDOM_20BIT', 
-    label: '20-bit Random', 
-    icon: Hash,
-    description: '20-bit random number (0-1,048,575)',
-    helpText: 'Format: D7 for zero-padded decimal, X5 for hexadecimal',
-    requiresValue: false,
-    requiresFormat: true
-  },
-  { 
-    value: 'RANDOM_32BIT', 
-    label: '32-bit Random', 
-    icon: Hash,
-    description: '32-bit random number (0-4,294,967,295)',
-    helpText: 'Format: D10 for zero-padded decimal, X8 for hexadecimal',
-    requiresValue: false,
-    requiresFormat: true
-  },
-  { 
-    value: 'GUID', 
-    label: 'GUID', 
-    icon: Sparkles,
-    description: 'Globally Unique Identifier (UUID)',
-    helpText: 'Generates a standard UUID (e.g., 550e8400-e29b-41d4-a716-446655440000)',
-    requiresValue: false,
-    requiresFormat: false
-  },
-  { 
-    value: 'DATE_TIME', 
-    label: 'Date/Time', 
-    icon: Calendar,
-    description: 'Current date/time when item is created',
-    helpText: 'Format examples: yyyy (year), MM (month), dd (day), HH (hour), mm (minute), ss (second). Example: yyyyMMdd gives 20251015',
-    requiresValue: false,
-    requiresFormat: true
-  },
-  { 
-    value: 'SEQUENCE', 
-    label: 'Sequence Number', 
-    icon: RefreshCw,
-    description: 'Auto-incrementing number (resets per inventory)',
-    helpText: 'Format: D4 for zero-padded (e.g., 0001, 0002)',
-    requiresValue: false,
-    requiresFormat: true
-  }
-];
+const SortableElementItem = ({ element, index, onUpdate, onRemove, showHelp, onToggleHelp }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: element.id || `element-${index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const Icon = ELEMENT_TYPES.find(et => et.value === element.elementType)?.icon || Hash;
+  const info = ELEMENT_TYPES.find(et => et.value === element.elementType);
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all ${
+        isDragging ? 'scale-95 z-50' : 'hover:border-primary'
+      }`}
+    >
+      <div {...attributes} {...listeners} className="cursor-move">
+        <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+      </div>
+      <Icon className="h-5 w-5 flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center space-x-2 mb-2">
+          <Badge variant="outline">{info?.label}</Badge>
+          {showHelp[index] && (
+            <p className="text-xs text-muted-foreground">{info?.helpText}</p>
+          )}
+        </div>
+        
+        {info?.requiresValue && (
+          <Input
+            placeholder="Enter text..."
+            value={element.value || ''}
+            onChange={(e) => onUpdate(index, 'value', e.target.value)}
+            className="mt-2"
+          />
+        )}
+        
+        {info?.requiresFormat && (
+          <Input
+            placeholder="Format (e.g., D6, yyyy-MM-dd)"
+            value={element.format || ''}
+            onChange={(e) => onUpdate(index, 'format', e.target.value)}
+            className="mt-2"
+          />
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onToggleHelp(index)}
+      >
+        <HelpCircle className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemove(index)}
+        className="hover:bg-destructive hover:text-destructive-foreground"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
 
 export default function CustomIdConfig() {
   const { id } = useParams();
@@ -108,8 +111,8 @@ export default function CustomIdConfig() {
   const [inventory, setInventory] = useState(null);
   const [elements, setElements] = useState([]);
   const [preview, setPreview] = useState("");
-  const [draggedIndex, setDraggedIndex] = useState(null);
   const [showHelp, setShowHelp] = useState({});
+  const sensors = useDndSensors();
 
   useEffect(() => {
     fetchInventory();
@@ -159,6 +162,7 @@ export default function CustomIdConfig() {
 
   const handleAddElement = (elementType) => {
     const newElement = {
+      id: `element-${Date.now()}-${Math.random()}`,
       elementType,
       format: elementType === 'DATE_TIME' ? 'yyyyMMdd' : 
               elementType.includes('RANDOM') || elementType === 'SEQUENCE' ? 'D6' : '',
@@ -178,25 +182,17 @@ export default function CustomIdConfig() {
     setElements(updated);
   };
 
-  const handleDragStart = (index) => {
-    setDraggedIndex(index);
-  };
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
 
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    const updated = [...elements];
-    const draggedElement = updated[draggedIndex];
-    updated.splice(draggedIndex, 1);
-    updated.splice(index, 0, draggedElement);
-    
-    setElements(updated.map((el, i) => ({ ...el, order: i })));
-    setDraggedIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
+    if (active.id !== over.id) {
+      setElements((items) => {
+        const oldIndex = items.findIndex((item) => (item.id || `element-${items.indexOf(item)}`) === active.id);
+        const newIndex = items.findIndex((item) => (item.id || `element-${items.indexOf(item)}`) === over.id);
+        
+        return arrayMove(items, oldIndex, newIndex).map((el, i) => ({ ...el, order: i }));
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -230,15 +226,6 @@ export default function CustomIdConfig() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const getElementIcon = (type) => {
-    const elementType = ELEMENT_TYPES.find(et => et.value === type);
-    return elementType ? elementType.icon : Hash;
-  };
-
-  const getElementInfo = (type) => {
-    return ELEMENT_TYPES.find(et => et.value === type);
   };
 
   if (loading) {
@@ -292,69 +279,30 @@ export default function CustomIdConfig() {
                   <p className="text-sm text-muted-foreground">Add elements from the right panel to start building your custom ID</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {elements.map((element, index) => {
-                    const Icon = getElementIcon(element.elementType);
-                    const info = getElementInfo(element.elementType);
-                    
-                    return (
-                      <div
-                        key={index}
-                        draggable
-                        onDragStart={() => handleDragStart(index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDragEnd={handleDragEnd}
-                        className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all cursor-move ${
-                          draggedIndex === index ? 'opacity-50 scale-95' : 'hover:border-primary'
-                        }`}
-                      >
-                        <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge variant="outline">{info?.label}</Badge>
-                            {showHelp[index] && (
-                              <p className="text-xs text-muted-foreground">{info?.helpText}</p>
-                            )}
-                          </div>
-                          
-                          {info?.requiresValue && (
-                            <Input
-                              placeholder="Enter text..."
-                              value={element.value || ''}
-                              onChange={(e) => handleUpdateElement(index, 'value', e.target.value)}
-                              className="mt-2"
-                            />
-                          )}
-                          
-                          {info?.requiresFormat && (
-                            <Input
-                              placeholder="Format (e.g., D6, yyyy-MM-dd)"
-                              value={element.format || ''}
-                              onChange={(e) => handleUpdateElement(index, 'format', e.target.value)}
-                              className="mt-2"
-                            />
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowHelp({ ...showHelp, [index]: !showHelp[index] })}
-                        >
-                          <HelpCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveElement(index)}
-                          className="hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCorners}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={elements.map(el => el.id || `element-${elements.indexOf(el)}`)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {elements.map((element, index) => (
+                        <SortableElementItem
+                          key={element.id || `element-${index}`}
+                          element={element}
+                          index={index}
+                          onUpdate={handleUpdateElement}
+                          onRemove={handleRemoveElement}
+                          showHelp={showHelp}
+                          onToggleHelp={(idx) => setShowHelp({ ...showHelp, [idx]: !showHelp[idx] })}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
 
               <div className="pt-4 border-t">

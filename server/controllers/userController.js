@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 export async function getUserProfile(req, res) {
   try {
     const { id } = req.params;
-    
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -12,7 +11,6 @@ export async function getUserProfile(req, res) {
         email: true,
         name: true,
         role: true,
-        provider: true,
         createdAt: true,
         inventories: {
           include: {
@@ -41,7 +39,6 @@ export async function getUserProfile(req, res) {
             }
           },
           orderBy: { createdAt: 'desc' },
-          take: 20
         },
         discussionPosts: {
           include: {
@@ -50,7 +47,6 @@ export async function getUserProfile(req, res) {
             }
           },
           orderBy: { createdAt: 'desc' },
-          take: 20
         },
         itemLikes: {
           include: {
@@ -63,7 +59,6 @@ export async function getUserProfile(req, res) {
             }
           },
           orderBy: { id: 'desc' },
-          take: 20
         },
         _count: {
           select: {

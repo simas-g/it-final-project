@@ -16,20 +16,96 @@ import {
   Plus,
   Type,
   Hash,
-  Image as ImageIcon,
-  ToggleLeft,
-  FileText,
   AlertCircle,
   Info
 } from "lucide-react";
+import { DndContext, closestCorners } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from "@/hooks/useDndSensors";
+import { FIELD_TYPES } from "@/lib/inventoryConstants";
 
-const FIELD_TYPES = [
-  { value: 'SINGLE_LINE_TEXT', label: 'Single Line Text', icon: Type, max: 3 },
-  { value: 'MULTI_LINE_TEXT', label: 'Multi Line Text', icon: FileText, max: 3 },
-  { value: 'NUMERIC', label: 'Number', icon: Hash, max: 3 },
-  { value: 'DOCUMENT_IMAGE', label: 'Document/Image URL', icon: ImageIcon, max: 3 },
-  { value: 'BOOLEAN', label: 'Yes/No (Boolean)', icon: ToggleLeft, max: 3 }
-];
+const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id || field.tempId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const Icon = FIELD_TYPES.find(ft => ft.value === field.fieldType)?.icon || Type;
+  const typeInfo = FIELD_TYPES.find(t => t.value === field.fieldType);
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-start space-x-3 p-4 border-2 rounded-lg transition-all ${
+        isDragging ? 'scale-95 z-50' : 'hover:border-primary'
+      }`}
+    >
+      <div {...attributes} {...listeners} className="cursor-move mt-2">
+        <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+      </div>
+      <Icon className="h-5 w-5 flex-shrink-0 mt-2" />
+      <div className="flex-1 space-y-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <Badge variant="outline">{typeInfo?.label}</Badge>
+          {field.isNew && <Badge>New</Badge>}
+        </div>
+        <div className="space-y-2">
+          <Input
+            placeholder="Field Title *"
+            value={field.title}
+            onChange={(e) => onUpdate(index, 'title', e.target.value)}
+          />
+          <Input
+            placeholder="Description (shown as hint)"
+            value={field.description || ''}
+            onChange={(e) => onUpdate(index, 'description', e.target.value)}
+          />
+        </div>
+        <div className="flex items-center space-x-4 text-sm">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={field.isRequired}
+              onChange={(e) => onUpdate(index, 'isRequired', e.target.checked)}
+              className="w-4 h-4 rounded border-2"
+            />
+            <span>Required</span>
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={field.showInTable}
+              onChange={(e) => onUpdate(index, 'showInTable', e.target.checked)}
+              className="w-4 h-4 rounded border-2"
+            />
+            <span>Show in table</span>
+          </label>
+        </div>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemove(index)}
+        className="hover:bg-destructive hover:text-destructive-foreground"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
 
 export default function FieldsConfig() {
   const { id } = useParams();
@@ -40,7 +116,7 @@ export default function FieldsConfig() {
   const [success, setSuccess] = useState("");
   const [inventory, setInventory] = useState(null);
   const [fields, setFields] = useState([]);
-  const [draggedIndex, setDraggedIndex] = useState(null);
+  const sensors = useDndSensors();
 
   useEffect(() => {
     fetchInventoryAndFields();
@@ -112,25 +188,17 @@ export default function FieldsConfig() {
     setFields(updated);
   };
 
-  const handleDragStart = (index) => {
-    setDraggedIndex(index);
-  };
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
 
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    const updated = [...fields];
-    const draggedField = updated[draggedIndex];
-    updated.splice(draggedIndex, 1);
-    updated.splice(index, 0, draggedField);
-    
-    setFields(updated.map((field, i) => ({ ...field, order: i })));
-    setDraggedIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
+    if (active.id !== over.id) {
+      setFields((items) => {
+        const oldIndex = items.findIndex((item) => (item.id || item.tempId) === active.id);
+        const newIndex = items.findIndex((item) => (item.id || item.tempId) === over.id);
+        
+        return arrayMove(items, oldIndex, newIndex).map((field, i) => ({ ...field, order: i }));
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -186,11 +254,6 @@ export default function FieldsConfig() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const getFieldIcon = (type) => {
-    const fieldType = FIELD_TYPES.find(ft => ft.value === type);
-    return fieldType ? fieldType.icon : Type;
   };
 
   if (loading) {
@@ -254,75 +317,28 @@ export default function FieldsConfig() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {fields.map((field, index) => {
-                    const Icon = getFieldIcon(field.fieldType);
-                    const typeInfo = FIELD_TYPES.find(t => t.value === field.fieldType);
-                    
-                    return (
-                      <div
-                        key={field.id || field.tempId}
-                        draggable
-                        onDragStart={() => handleDragStart(index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDragEnd={handleDragEnd}
-                        className={`flex items-start space-x-3 p-4 border-2 rounded-lg transition-all cursor-move ${
-                          draggedIndex === index ? 'opacity-50 scale-95' : 'hover:border-primary'
-                        }`}
-                      >
-                        <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-2" />
-                        <Icon className="h-5 w-5 flex-shrink-0 mt-2" />
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge variant="outline">{typeInfo?.label}</Badge>
-                            {field.isNew && <Badge>New</Badge>}
-                          </div>
-                          <div className="space-y-2">
-                            <Input
-                              placeholder="Field Title *"
-                              value={field.title}
-                              onChange={(e) => handleUpdateField(index, 'title', e.target.value)}
-                            />
-                            <Input
-                              placeholder="Description (shown as hint)"
-                              value={field.description || ''}
-                              onChange={(e) => handleUpdateField(index, 'description', e.target.value)}
-                            />
-                          </div>
-                          <div className="flex items-center space-x-4 text-sm">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={field.isRequired}
-                                onChange={(e) => handleUpdateField(index, 'isRequired', e.target.checked)}
-                                className="w-4 h-4 rounded border-2"
-                              />
-                              <span>Required</span>
-                            </label>
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={field.showInTable}
-                                onChange={(e) => handleUpdateField(index, 'showInTable', e.target.checked)}
-                                className="w-4 h-4 rounded border-2"
-                              />
-                              <span>Show in table</span>
-                            </label>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveField(index)}
-                          className="hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCorners}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={fields.map(f => f.id || f.tempId)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {fields.map((field, index) => (
+                        <SortableFieldItem
+                          key={field.id || field.tempId}
+                          field={field}
+                          index={index}
+                          onUpdate={handleUpdateField}
+                          onRemove={handleRemoveField}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
 
               <div className="pt-4 border-t">

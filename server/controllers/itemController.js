@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { PrismaClient } from "@prisma/client"
+import { fieldsToColumns, columnsToFields } from "../lib/fieldMapping.js"
+const prisma = new PrismaClient()
 
 async function generateCustomId(inventoryId) {
   const config = await prisma.customIdConfig.findUnique({
@@ -119,19 +120,32 @@ function generateGUID() {
 
 export async function getInventoryItems(req, res) {
   try {
-    const { inventoryId } = req.params;
-    const { page = 1, limit = 20, search = "" } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const { inventoryId } = req.params
+    const { page = 1, limit = 20, search = "" } = req.query
+    const skip = (parseInt(page) - 1) * parseInt(limit)
 
-    const where = {
-      inventoryId,
-      ...(search && {
-        OR: [
-          { customId: { contains: search, mode: 'insensitive' } },
-          { fields: { path: [], string_contains: search } }
-        ]
+    const inventoryFields = await prisma.inventoryField.findMany({
+      where: { inventoryId },
+      orderBy: { order: 'asc' }
+    })
+
+    let where = { inventoryId }
+    
+    if (search) {
+      const searchConditions = [
+        { customId: { contains: search, mode: 'insensitive' } }
+      ]
+      
+      inventoryFields.forEach(field => {
+        if (field.fieldType === 'SINGLE_LINE_TEXT' || field.fieldType === 'MULTI_LINE_TEXT') {
+          searchConditions.push({
+            [field.columnName]: { contains: search, mode: 'insensitive' }
+          })
+        }
       })
-    };
+      
+      where.OR = searchConditions
+    }
 
     const [items, total] = await Promise.all([
       prisma.inventoryItem.findMany({
@@ -153,26 +167,31 @@ export async function getInventoryItems(req, res) {
         orderBy: { createdAt: 'desc' }
       }),
       prisma.inventoryItem.count({ where })
-    ]);
+    ])
+
+    const itemsWithFields = items.map(item => ({
+      ...item,
+      fields: columnsToFields(item, inventoryFields)
+    }))
 
     res.json({
-      items,
+      items: itemsWithFields,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
         pages: Math.ceil(total / parseInt(limit))
       }
-    });
+    })
   } catch (error) {
-    console.error("Get inventory items error:", error);
-    res.status(500).json({ error: "Failed to fetch items" });
+    console.error("Get inventory items error:", error)
+    res.status(500).json({ error: "Failed to fetch items" })
   }
 }
 
 export async function getItem(req, res) {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     
     const item = await prisma.inventoryItem.findUnique({
       where: { id },
@@ -195,49 +214,57 @@ export async function getItem(req, res) {
           }
         }
       }
-    });
+    })
 
     if (!item) {
-      return res.status(404).json({ error: "Item not found" });
+      return res.status(404).json({ error: "Item not found" })
     }
 
-    res.json(item);
+    const itemWithFields = {
+      ...item,
+      fields: columnsToFields(item, item.inventory.fields)
+    }
+
+    res.json(itemWithFields)
   } catch (error) {
-    console.error("Get item error:", error);
-    res.status(500).json({ error: "Failed to fetch item" });
+    console.error("Get item error:", error)
+    res.status(500).json({ error: "Failed to fetch item" })
   }
 }
 
 export async function createItem(req, res) {
   try {
-    const { inventoryId } = req.params;
-    const { fields = {}, customId } = req.body;
-    const userId = req.user.id;
+    const { inventoryId } = req.params
+    const { fields = {}, customId } = req.body
+    const userId = req.user.id
 
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       include: {
         inventoryAccess: {
           where: { userId }
+        },
+        fields: {
+          orderBy: { order: 'asc' }
         }
       }
-    });
+    })
 
     if (!inventory) {
-      return res.status(404).json({ error: "Inventory not found" });
+      return res.status(404).json({ error: "Inventory not found" })
     }
 
     const hasWriteAccess = inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
-                          inventory.inventoryAccess.some(access => access.accessType === 'WRITE');
+                          inventory.inventoryAccess.some(access => access.accessType === 'WRITE')
 
     if (!hasWriteAccess) {
-      return res.status(403).json({ error: "You don't have write access to this inventory" });
+      return res.status(403).json({ error: "You don't have write access to this inventory" })
     }
 
-    let finalCustomId = customId;
+    let finalCustomId = customId
     if (!finalCustomId) {
-      finalCustomId = await generateCustomId(inventoryId);
+      finalCustomId = await generateCustomId(inventoryId)
     }
 
     if (finalCustomId) {
@@ -246,21 +273,23 @@ export async function createItem(req, res) {
           inventoryId,
           customId: finalCustomId
         }
-      });
+      })
 
       if (existingItem) {
         return res.status(409).json({ 
           error: "Custom ID already exists in this inventory",
           suggestedId: await generateCustomId(inventoryId)
-        });
+        })
       }
     }
+
+    const columns = fieldsToColumns(fields, inventory.fields)
 
     const item = await prisma.inventoryItem.create({
       data: {
         inventoryId,
         customId: finalCustomId,
-        fields,
+        ...columns,
         userId
       },
       include: {
@@ -275,20 +304,25 @@ export async function createItem(req, res) {
           }
         }
       }
-    });
+    })
 
-    res.status(201).json(item);
+    const itemWithFields = {
+      ...item,
+      fields: columnsToFields(item, inventory.fields)
+    }
+
+    res.status(201).json(itemWithFields)
   } catch (error) {
-    console.error("Create item error:", error);
-    res.status(500).json({ error: "Failed to create item" });
+    console.error("Create item error:", error)
+    res.status(500).json({ error: "Failed to create item" })
   }
 }
 
 export async function updateItem(req, res) {
   try {
-    const { id } = req.params;
-    const { fields, customId, version } = req.body;
-    const userId = req.user.id;
+    const { id } = req.params
+    const { fields, customId, version } = req.body
+    const userId = req.user.id
 
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
@@ -297,29 +331,32 @@ export async function updateItem(req, res) {
           include: {
             inventoryAccess: {
               where: { userId }
+            },
+            fields: {
+              orderBy: { order: 'asc' }
             }
           }
         }
       }
-    });
+    })
 
     if (!existingItem) {
-      return res.status(404).json({ error: "Item not found" });
+      return res.status(404).json({ error: "Item not found" })
     }
 
     const hasWriteAccess = existingItem.inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
-                          existingItem.inventory.inventoryAccess.some(access => access.accessType === 'WRITE');
+                          existingItem.inventory.inventoryAccess.some(access => access.accessType === 'WRITE')
 
     if (!hasWriteAccess) {
-      return res.status(403).json({ error: "You don't have write access to this item" });
+      return res.status(403).json({ error: "You don't have write access to this item" })
     }
 
     if (version && existingItem.version !== version) {
       return res.status(409).json({ 
         error: "Item was modified by another user. Please refresh and try again.",
         currentVersion: existingItem.version
-      });
+      })
     }
 
     if (customId && customId !== existingItem.customId) {
@@ -329,19 +366,21 @@ export async function updateItem(req, res) {
           customId,
           id: { not: id }
         }
-      });
+      })
 
       if (duplicateItem) {
         return res.status(409).json({ 
           error: "Custom ID already exists in this inventory"
-        });
+        })
       }
     }
+
+    const columns = fields ? fieldsToColumns(fields, existingItem.inventory.fields) : {}
 
     const item = await prisma.inventoryItem.update({
       where: { id },
       data: {
-        fields,
+        ...columns,
         customId,
         version: { increment: 1 }
       },
@@ -357,12 +396,17 @@ export async function updateItem(req, res) {
           }
         }
       }
-    });
+    })
 
-    res.json(item);
+    const itemWithFields = {
+      ...item,
+      fields: columnsToFields(item, existingItem.inventory.fields)
+    }
+
+    res.json(itemWithFields)
   } catch (error) {
-    console.error("Update item error:", error);
-    res.status(500).json({ error: "Failed to update item" });
+    console.error("Update item error:", error)
+    res.status(500).json({ error: "Failed to update item" })
   }
 }
 

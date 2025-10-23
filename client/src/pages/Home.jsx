@@ -62,7 +62,7 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-16 mt-10 px-10">
+    <div className={`max-w-6xl mx-auto space-y-12 ${isAuthenticated() ? '' : 'p-10'}`}>
 
       <section>
         <div className="flex items-center justify-between mb-6 pb-4 border-b">

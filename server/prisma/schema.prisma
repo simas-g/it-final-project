@@ -74,6 +74,7 @@ model InventoryField {
   title       String
   description String?
   fieldType   FieldType
+  columnName  String
   isRequired  Boolean   @default(false)
   showInTable Boolean   @default(true)
   order       Int
@@ -184,7 +185,27 @@ model InventoryItem {
   inventoryId String
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
   customId    String?
-  fields      Json      @default("{}")
+  
+  text1       String?
+  text2       String?
+  text3       String?
+  
+  multiText1  String?
+  multiText2  String?
+  multiText3  String?
+  
+  numeric1    Decimal?
+  numeric2    Decimal?
+  numeric3    Decimal?
+  
+  image1      String?
+  image2      String?
+  image3      String?
+  
+  boolean1    Boolean?
+  boolean2    Boolean?
+  boolean3    Boolean?
+  
   version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

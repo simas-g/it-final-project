@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { PrismaClient } from "@prisma/client"
+import { getColumnNameForField } from "../lib/fieldMapping.js"
+const prisma = new PrismaClient()
 
 export async function getInventoryFields(req, res) {
   try {
@@ -38,7 +39,7 @@ export async function createField(req, res) {
 
     const existingFields = await prisma.inventoryField.findMany({
       where: { inventoryId, fieldType }
-    });
+    })
 
     const fieldLimits = {
       'SINGLE_LINE_TEXT': 3,
@@ -46,18 +47,26 @@ export async function createField(req, res) {
       'NUMERIC': 3,
       'DOCUMENT_IMAGE': 3,
       'BOOLEAN': 3
-    };
+    }
 
     if (existingFields.length >= fieldLimits[fieldType]) {
       return res.status(400).json({ 
         error: `Maximum ${fieldLimits[fieldType]} ${fieldType.toLowerCase().replace(/_/g, ' ')} fields allowed` 
-      });
+      })
+    }
+
+    const columnName = getColumnNameForField(fieldType, existingFields.length)
+    
+    if (!columnName) {
+      return res.status(400).json({ 
+        error: "Unable to assign column for this field type" 
+      })
     }
 
     const maxOrder = await prisma.inventoryField.aggregate({
       where: { inventoryId },
       _max: { order: true }
-    });
+    })
 
     const field = await prisma.inventoryField.create({
       data: {
@@ -65,11 +74,12 @@ export async function createField(req, res) {
         title,
         description,
         fieldType,
+        columnName,
         isRequired: isRequired || false,
         showInTable: showInTable !== false,
         order: (maxOrder._max.order || 0) + 1
       }
-    });
+    })
 
     res.status(201).json(field);
   } catch (error) {

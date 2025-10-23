@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { PrismaClient } from "@prisma/client"
+import { columnsToFields } from "../lib/fieldMapping.js"
+const prisma = new PrismaClient()
 
 export async function globalSearch(req, res) {
   try {
@@ -60,17 +61,29 @@ export async function globalSearch(req, res) {
     }
 
     if (type === "all" || type === "items") {
+      const searchWhere = {
+        OR: [
+          { customId: { contains: searchTerm, mode: 'insensitive' } },
+          { text1: { contains: searchTerm, mode: 'insensitive' } },
+          { text2: { contains: searchTerm, mode: 'insensitive' } },
+          { text3: { contains: searchTerm, mode: 'insensitive' } },
+          { multiText1: { contains: searchTerm, mode: 'insensitive' } },
+          { multiText2: { contains: searchTerm, mode: 'insensitive' } },
+          { multiText3: { contains: searchTerm, mode: 'insensitive' } }
+        ]
+      }
+
       const [items, itemCount] = await Promise.all([
         prisma.inventoryItem.findMany({
-          where: {
-            OR: [
-              { customId: { contains: searchTerm, mode: 'insensitive' } },
-              { fields: { path: [], string_contains: searchTerm } }
-            ]
-          },
+          where: searchWhere,
           include: {
             inventory: {
-              select: { id: true, name: true, description: true }
+              select: { id: true, name: true, description: true },
+              include: {
+                fields: {
+                  orderBy: { order: 'asc' }
+                }
+              }
             },
             user: {
               select: { id: true, name: true, email: true }
@@ -87,19 +100,17 @@ export async function globalSearch(req, res) {
           take: type === "items" ? parseInt(limit) : 10,
           orderBy: { createdAt: 'desc' }
         }),
-        prisma.inventoryItem.count({
-          where: {
-            OR: [
-              { customId: { contains: searchTerm, mode: 'insensitive' } },
-              { fields: { path: [], string_contains: searchTerm } }
-            ]
-          }
-        })
-      ]);
+        prisma.inventoryItem.count({ where: searchWhere })
+      ])
 
-      results.items = items;
+      const itemsWithFields = items.map(item => ({
+        ...item,
+        fields: columnsToFields(item, item.inventory.fields)
+      }))
+
+      results.items = itemsWithFields
       if (type === "items") {
-        results.total = itemCount;
+        results.total = itemCount
       }
     }
 
