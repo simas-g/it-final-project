@@ -42,7 +42,16 @@ export default function ItemDetail() {
   }, [fetchItem])
 
   const startEditing = () => {
-    setEditValues(item.fields || {})
+    const initialValues = {}
+    item.inventory.fields.forEach(field => {
+      const existingValue = item.fields?.[field.id]
+      if (field.fieldType === 'BOOLEAN') {
+        initialValues[field.id] = existingValue === true || existingValue === 'true'
+      } else {
+        initialValues[field.id] = existingValue || ''
+      }
+    })
+    setEditValues(initialValues)
     setIsEditing(true)
   }
 
@@ -65,7 +74,7 @@ export default function ItemDetail() {
       
       item.inventory.fields.forEach(field => {
         const value = editValues[field.id]
-        if (value !== '' && value !== null && value !== undefined) {
+        if (field.fieldType === 'BOOLEAN' || (value !== '' && value !== null && value !== undefined)) {
           switch (field.fieldType) {
             case 'NUMERIC':
               preparedFields[field.id] = parseFloat(value) || 0
@@ -221,7 +230,7 @@ export default function ItemDetail() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    className="text-destructive hover:bg-destructive hover:text-foreground"
                     onClick={handleDelete}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -282,7 +291,7 @@ export default function ItemDetail() {
                             />
                           )}
 
-                          {field.fieldType === 'DOCUMENT_IMAGE' && (
+                          {field.fieldType === 'IMAGE_URL' && (
                             <Input
                               type="url"
                               placeholder="https://example.com/image.jpg"
@@ -308,12 +317,32 @@ export default function ItemDetail() {
                           )}
                         </>
                       ) : (
-                        <p className="text-sm mt-1">
-                          {field.fieldType === 'BOOLEAN' 
-                            ? (item.fields[field.id] ? getTranslation('yes', language) : getTranslation('no', language))
-                            : (item.fields[field.id] || getTranslation('notSet', language))
-                          }
-                        </p>
+                        <div className="mt-1">
+                          {field.fieldType === 'BOOLEAN' ? (
+                            <p className="text-sm">
+                              {item.fields[field.id] ? getTranslation('yes', language) : getTranslation('no', language)}
+                            </p>
+                          ) : field.fieldType === 'IMAGE_URL' && item.fields[field.id] ? (
+                            <div className="space-y-2">
+                              <img 
+                                src={item.fields[field.id]} 
+                                alt={field.title}
+                                className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'block';
+                                }}
+                              />
+                              <p className="text-xs text-muted-foreground break-all" style={{display: 'none'}}>
+                                {item.fields[field.id]}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm">
+                              {item.fields[field.id] || getTranslation('notSet', language)}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   ))}

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import { fieldsToColumns, columnsToFields } from "../lib/fieldMapping.js"
+import { getFieldValues, createFieldValueData, formatFieldValueForDisplay } from "../lib/fieldMapping.js"
 const prisma = new PrismaClient()
 
 async function generateCustomId(inventoryId) {
@@ -136,13 +136,21 @@ export async function getInventoryItems(req, res) {
         { customId: { contains: search, mode: 'insensitive' } }
       ]
       
-      inventoryFields.forEach(field => {
-        if (field.fieldType === 'SINGLE_LINE_TEXT' || field.fieldType === 'MULTI_LINE_TEXT') {
-          searchConditions.push({
-            [field.columnName]: { contains: search, mode: 'insensitive' }
-          })
-        }
-      })
+      // Add search conditions for text fields through fieldValues
+      const textFields = inventoryFields.filter(field => 
+        field.fieldType === 'SINGLE_LINE_TEXT' || field.fieldType === 'MULTI_LINE_TEXT'
+      )
+      
+      if (textFields.length > 0) {
+        searchConditions.push({
+          fieldValues: {
+            some: {
+              fieldId: { in: textFields.map(f => f.id) },
+              value: { contains: search, mode: 'insensitive' }
+            }
+          }
+        })
+      }
       
       where.OR = searchConditions
     }
@@ -160,6 +168,11 @@ export async function getInventoryItems(req, res) {
                 select: { id: true, name: true }
               }
             }
+          },
+          fieldValues: {
+            include: {
+              field: true
+            }
           }
         },
         skip,
@@ -171,7 +184,7 @@ export async function getInventoryItems(req, res) {
 
     const itemsWithFields = items.map(item => ({
       ...item,
-      fields: columnsToFields(item, inventoryFields)
+      fields: getFieldValues(item, inventoryFields)
     }))
 
     res.json({
@@ -212,6 +225,11 @@ export async function getItem(req, res) {
               select: { id: true, name: true, email: true }
             }
           }
+        },
+        fieldValues: {
+          include: {
+            field: true
+          }
         }
       }
     })
@@ -222,7 +240,7 @@ export async function getItem(req, res) {
 
     const itemWithFields = {
       ...item,
-      fields: columnsToFields(item, item.inventory.fields)
+      fields: getFieldValues(item, item.inventory.fields)
     }
 
     res.json(itemWithFields)
@@ -283,14 +301,19 @@ export async function createItem(req, res) {
       }
     }
 
-    const columns = fieldsToColumns(fields, inventory.fields)
+    const fieldValueData = createFieldValueData(fields, inventory.fields)
 
     const item = await prisma.inventoryItem.create({
       data: {
         inventoryId,
         customId: finalCustomId,
-        ...columns,
-        userId
+        userId,
+        fieldValues: {
+          create: fieldValueData.map(fv => ({
+            fieldId: fv.fieldId,
+            value: fv.value
+          }))
+        }
       },
       include: {
         user: {
@@ -302,13 +325,18 @@ export async function createItem(req, res) {
               select: { id: true, name: true, email: true }
             }
           }
+        },
+        fieldValues: {
+          include: {
+            field: true
+          }
         }
       }
     })
 
     const itemWithFields = {
       ...item,
-      fields: columnsToFields(item, inventory.fields)
+      fields: getFieldValues(item, inventory.fields)
     }
 
     res.status(201).json(itemWithFields)
@@ -335,6 +363,11 @@ export async function updateItem(req, res) {
             fields: {
               orderBy: { order: 'asc' }
             }
+          }
+        },
+        fieldValues: {
+          include: {
+            field: true
           }
         }
       }
@@ -375,12 +408,28 @@ export async function updateItem(req, res) {
       }
     }
 
-    const columns = fields ? fieldsToColumns(fields, existingItem.inventory.fields) : {}
+    const fieldValueData = fields ? createFieldValueData(fields, existingItem.inventory.fields) : []
+
+    // Update field values
+    if (fieldValueData.length > 0) {
+      // Delete existing field values
+      await prisma.itemFieldValue.deleteMany({
+        where: { itemId: id }
+      })
+
+      // Create new field values
+      await prisma.itemFieldValue.createMany({
+        data: fieldValueData.map(fv => ({
+          itemId: id,
+          fieldId: fv.fieldId,
+          value: fv.value
+        }))
+      })
+    }
 
     const item = await prisma.inventoryItem.update({
       where: { id },
       data: {
-        ...columns,
         customId,
         version: { increment: 1 }
       },
@@ -394,13 +443,18 @@ export async function updateItem(req, res) {
               select: { id: true, name: true, email: true }
             }
           }
+        },
+        fieldValues: {
+          include: {
+            field: true
+          }
         }
       }
     })
 
     const itemWithFields = {
       ...item,
-      fields: columnsToFields(item, existingItem.inventory.fields)
+      fields: getFieldValues(item, existingItem.inventory.fields)
     }
 
     res.json(itemWithFields)

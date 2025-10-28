@@ -22,7 +22,7 @@ enum FieldType {
   SINGLE_LINE_TEXT
   MULTI_LINE_TEXT
   NUMERIC
-  DOCUMENT_IMAGE
+  IMAGE_URL
   BOOLEAN
 }
 
@@ -74,12 +74,12 @@ model InventoryField {
   title       String
   description String?
   fieldType   FieldType
-  columnName  String
   isRequired  Boolean   @default(false)
   showInTable Boolean   @default(true)
   order       Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  fieldValues ItemFieldValue[]
 }
 
 model CustomIdConfig {
@@ -185,33 +185,26 @@ model InventoryItem {
   inventoryId String
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
   customId    String?
-  
-  text1       String?
-  text2       String?
-  text3       String?
-  
-  multiText1  String?
-  multiText2  String?
-  multiText3  String?
-  
-  numeric1    Decimal?
-  numeric2    Decimal?
-  numeric3    Decimal?
-  
-  image1      String?
-  image2      String?
-  image3      String?
-  
-  boolean1    Boolean?
-  boolean2    Boolean?
-  boolean3    Boolean?
-  
   version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
   user        User      @relation(fields: [userId], references: [id])
   likes       ItemLike[]
+  fieldValues ItemFieldValue[]
 
   @@unique([inventoryId, customId])
+}
+
+model ItemFieldValue {
+  id       String         @id @default(uuid())
+  itemId   String
+  item     InventoryItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  fieldId  String
+  field    InventoryField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  value    String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([itemId, fieldId])
 }

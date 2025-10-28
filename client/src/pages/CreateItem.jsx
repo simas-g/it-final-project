@@ -20,7 +20,6 @@ import {
 
 export default function CreateItem() {
   const { id: inventoryId } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetchingInventory, setFetchingInventory] = useState(true);
@@ -51,7 +50,7 @@ export default function CreateItem() {
       
       const initialValues = {};
       (response.data.fields || []).forEach(field => {
-        initialValues[field.id] = '';
+        initialValues[field.id] = field.fieldType === 'BOOLEAN' ? false : '';
       });
       setFieldValues(initialValues);
     } catch (error) {
@@ -99,7 +98,7 @@ export default function CreateItem() {
 
   const validateForm = () => {
     for (const field of customFields) {
-      if (field.isRequired && !fieldValues[field.id]) {
+      if (field.isRequired && !fieldValues[field.id] && field.fieldType !== 'BOOLEAN') {
         setError(`${field.title} is required`);
         return false;
       }
@@ -121,7 +120,7 @@ export default function CreateItem() {
       const preparedFields = {};
       customFields.forEach(field => {
         const value = fieldValues[field.id];
-        if (value !== '' && value !== null && value !== undefined) {
+        if (field.fieldType === 'BOOLEAN' || (value !== '' && value !== null && value !== undefined)) {
           switch (field.fieldType) {
             case 'NUMERIC':
               preparedFields[field.id] = parseFloat(value) || 0;
@@ -316,7 +315,7 @@ export default function CreateItem() {
                     />
                   )}
 
-                  {field.fieldType === 'DOCUMENT_IMAGE' && (
+                  {field.fieldType === 'IMAGE_URL' && (
                     <Input
                       id={field.id}
                       type="url"

@@ -203,6 +203,21 @@ export default function InventoryDetail() {
                                   </Badge>
                                 ) : field.fieldType === 'MULTI_LINE_TEXT' ? (
                                   <span className="text-sm line-clamp-2">{item.fields?.[field.id] || '-'}</span>
+                                ) : field.fieldType === 'IMAGE_URL' && item.fields?.[field.id] ? (
+                                  <div className="flex items-center space-x-2">
+                                    <img 
+                                      src={item.fields[field.id]} 
+                                      alt={field.title}
+                                      className="w-8 h-8 rounded object-cover"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'inline';
+                                      }}
+                                    />
+                                    <span className="text-xs text-muted-foreground hidden truncate max-w-20">
+                                      {item.fields[field.id]}
+                                    </span>
+                                  </div>
                                 ) : (
                                   <span className="text-sm">{item.fields?.[field.id] || '-'}</span>
                                 )}

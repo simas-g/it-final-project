@@ -1,47 +1,88 @@
-export const getColumnNameForField = (fieldType, index) => {
-  const columnMap = {
-    'SINGLE_LINE_TEXT': ['text1', 'text2', 'text3'],
-    'MULTI_LINE_TEXT': ['multiText1', 'multiText2', 'multiText3'],
-    'NUMERIC': ['numeric1', 'numeric2', 'numeric3'],
-    'DOCUMENT_IMAGE': ['image1', 'image2', 'image3'],
-    'BOOLEAN': ['boolean1', 'boolean2', 'boolean3']
+export const getFieldValue = (item, fieldId) => {
+  if (!item.fieldValues || !Array.isArray(item.fieldValues)) {
+    return null
+  }
+  const fieldValue = item.fieldValues.find(fv => fv.fieldId === fieldId)
+  return fieldValue ? fieldValue.value : null
+}
+
+export const getFieldValues = (item, inventoryFields) => {
+  const fieldValues = {}
+  
+  if (!item.fieldValues || !Array.isArray(item.fieldValues)) {
+    return fieldValues
   }
   
-  return columnMap[fieldType]?.[index] || null
-}
-
-export const getFieldTypeFromColumn = (columnName) => {
-  if (columnName.startsWith('text')) return 'SINGLE_LINE_TEXT'
-  if (columnName.startsWith('multiText')) return 'MULTI_LINE_TEXT'
-  if (columnName.startsWith('numeric')) return 'NUMERIC'
-  if (columnName.startsWith('image')) return 'DOCUMENT_IMAGE'
-  if (columnName.startsWith('boolean')) return 'BOOLEAN'
-  return null
-}
-
-export const fieldsToColumns = (fields, inventoryFields) => {
-  const columns = {}
-  
   inventoryFields.forEach(field => {
-    const value = fields[field.id]
-    if (value !== undefined && value !== null) {
-      columns[field.columnName] = value
+    const fieldValue = item.fieldValues.find(fv => fv.fieldId === field.id)
+    if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
+      fieldValues[field.id] = {
+        value: fieldValue.value,
+        fieldType: field.fieldType,
+        title: field.title,
+        isRequired: field.isRequired
+      }
     }
   })
   
-  return columns
+  return fieldValues
 }
 
-export const columnsToFields = (item, inventoryFields) => {
-  const fields = {}
+export const createFieldValueData = (fieldValues, inventoryFields) => {
+  const fieldValueData = []
   
-  inventoryFields.forEach(field => {
-    const value = item[field.columnName]
-    if (value !== undefined && value !== null) {
-      fields[field.id] = value
+  Object.entries(fieldValues).forEach(([fieldId, value]) => {
+    const field = inventoryFields.find(f => f.id === fieldId)
+    if (field) {
+      const { isValid, value: validatedValue } = validateFieldValue(value, field.fieldType)
+      if (isValid) {
+        fieldValueData.push({
+          fieldId,
+          value: String(validatedValue)
+        })
+      }
     }
   })
   
-  return fields
+  return fieldValueData
+}
+
+export const validateFieldValue = (value, fieldType) => {
+  if (fieldType === 'BOOLEAN') {
+    if (value === null || value === undefined || value === '') {
+      return { isValid: true, value: false }
+    }
+    return { isValid: true, value: Boolean(value) }
+  }
+  if (value === null || value === undefined || value === '') {
+    return { isValid: true, value: null }
+  }
+  
+  switch (fieldType) {
+    case 'NUMERIC':
+      const numValue = parseFloat(value)
+      return { isValid: !isNaN(numValue), value: isNaN(numValue) ? null : numValue }
+    case 'SINGLE_LINE_TEXT':
+    case 'MULTI_LINE_TEXT':
+    case 'IMAGE_URL':
+      return { isValid: true, value: String(value) }
+    default:
+      return { isValid: true, value }
+  }
+}
+
+export const formatFieldValueForDisplay = (value, fieldType) => {
+  if (value === null || value === undefined || value === '') {
+    return ''
+  }
+  
+  switch (fieldType) {
+    case 'BOOLEAN':
+      return Boolean(value) ? 'Yes' : 'No'
+    case 'NUMERIC':
+      return parseFloat(value).toLocaleString()
+    default:
+      return String(value)
+  }
 }
 

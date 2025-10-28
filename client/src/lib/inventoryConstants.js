@@ -4,7 +4,7 @@ export const FIELD_TYPES = [
   { value: 'SINGLE_LINE_TEXT', label: 'Single Line Text', icon: Type, max: 3 },
   { value: 'MULTI_LINE_TEXT', label: 'Multi Line Text', icon: FileText, max: 3 },
   { value: 'NUMERIC', label: 'Number', icon: Hash, max: 3 },
-  { value: 'DOCUMENT_IMAGE', label: 'Document/Image URL', icon: Image, max: 3 },
+  { value: 'IMAGE_URL', label: 'Image URL', icon: Image, max: 3 },
   { value: 'BOOLEAN', label: 'Yes/No (Boolean)', icon: ToggleLeft, max: 3 }
 ];
 

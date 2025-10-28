@@ -1,13 +1,15 @@
 import { createContext, useContext, useMemo } from 'react'
 import { useTheme } from './ThemeContext'
 import enTranslations from '../locales/en.json'
+import esTranslations from '../locales/es.json'
+import plTranslations from '../locales/pl.json'
 
 const I18nContext = createContext()
 
 const translations = {
   en: enTranslations,
-  es: enTranslations,
-  pl: enTranslations
+  es: esTranslations,
+  pl: plTranslations
 }
 
 export const I18nProvider = ({ children }) => {

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client"
-import { getColumnNameForField } from "../lib/fieldMapping.js"
 const prisma = new PrismaClient()
 
 export async function getInventoryFields(req, res) {
@@ -37,31 +36,8 @@ export async function createField(req, res) {
       return res.status(403).json({ error: "Only the owner or admin can manage fields" });
     }
 
-    const existingFields = await prisma.inventoryField.findMany({
-      where: { inventoryId, fieldType }
-    })
-
-    const fieldLimits = {
-      'SINGLE_LINE_TEXT': 3,
-      'MULTI_LINE_TEXT': 3,
-      'NUMERIC': 3,
-      'DOCUMENT_IMAGE': 3,
-      'BOOLEAN': 3
-    }
-
-    if (existingFields.length >= fieldLimits[fieldType]) {
-      return res.status(400).json({ 
-        error: `Maximum ${fieldLimits[fieldType]} ${fieldType.toLowerCase().replace(/_/g, ' ')} fields allowed` 
-      })
-    }
-
-    const columnName = getColumnNameForField(fieldType, existingFields.length)
-    
-    if (!columnName) {
-      return res.status(400).json({ 
-        error: "Unable to assign column for this field type" 
-      })
-    }
+    // No field limits in the new system since we use ItemFieldValue table
+    // Each field can have unlimited values through the relationship
 
     const maxOrder = await prisma.inventoryField.aggregate({
       where: { inventoryId },
@@ -74,7 +50,6 @@ export async function createField(req, res) {
         title,
         description,
         fieldType,
-        columnName,
         isRequired: isRequired || false,
         showInTable: showInTable !== false,
         order: (maxOrder._max.order || 0) + 1

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/contexts/I18nContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -16,6 +17,7 @@ import {
 export default function Sidebar({ open, onClose }) {
   const { user, isAdmin } = useAuth()
   const { t } = useI18n()
+  const { theme } = useTheme()
   const location = useLocation()
 
   const navigation = [
@@ -58,7 +60,10 @@ export default function Sidebar({ open, onClose }) {
     <>
       {open && (
         <div 
-          className="fixed inset-0 z-40 bg-black/80 lg:hidden"
+          className={cn(
+            "fixed inset-0 z-40 lg:hidden",
+            theme === 'light' ? "bg-white/80" : "bg-black/80"
+          )}
           onClick={onClose}
         />
       )}

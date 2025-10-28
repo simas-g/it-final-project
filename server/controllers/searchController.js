@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import { columnsToFields } from "../lib/fieldMapping.js"
+import { getFieldValues } from "../lib/fieldMapping.js"
 const prisma = new PrismaClient()
 
 export async function globalSearch(req, res) {
@@ -64,12 +64,13 @@ export async function globalSearch(req, res) {
       const searchWhere = {
         OR: [
           { customId: { contains: searchTerm, mode: 'insensitive' } },
-          { text1: { contains: searchTerm, mode: 'insensitive' } },
-          { text2: { contains: searchTerm, mode: 'insensitive' } },
-          { text3: { contains: searchTerm, mode: 'insensitive' } },
-          { multiText1: { contains: searchTerm, mode: 'insensitive' } },
-          { multiText2: { contains: searchTerm, mode: 'insensitive' } },
-          { multiText3: { contains: searchTerm, mode: 'insensitive' } }
+          {
+            fieldValues: {
+              some: {
+                value: { contains: searchTerm, mode: 'insensitive' }
+              }
+            }
+          }
         ]
       }
 
@@ -94,6 +95,11 @@ export async function globalSearch(req, res) {
                   select: { id: true, name: true }
                 }
               }
+            },
+            fieldValues: {
+              include: {
+                field: true
+              }
             }
           },
           skip: type === "items" ? skip : 0,
@@ -105,7 +111,7 @@ export async function globalSearch(req, res) {
 
       const itemsWithFields = items.map(item => ({
         ...item,
-        fields: columnsToFields(item, item.inventory.fields)
+        fields: getFieldValues(item, item.inventory.fields)
       }))
 
       results.items = itemsWithFields
