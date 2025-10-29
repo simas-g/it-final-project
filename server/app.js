@@ -22,6 +22,8 @@ import accessRoutes from "./routes/accessRoutes.js";
 
 import userRoutes from "./routes/userRoutes.js";
 
+import uploadRoutes from "./routes/uploadRoutes.js";
+
 const app = express();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
@@ -46,6 +48,8 @@ app.use("/api", searchRoutes);
 app.use("/api", fieldRoutes);
 app.use("/api", accessRoutes);
 app.use("/api", userRoutes);
+app.use("/api", uploadRoutes);
+
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });

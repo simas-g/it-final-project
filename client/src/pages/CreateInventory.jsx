@@ -36,7 +36,7 @@ export default function CreateInventory() {
     name: "",
     description: "",
     categoryId: "",
-    imageUrl: "",
+    imageFile: null,
     tags: "",
     isPublic: false
   });
@@ -71,10 +71,17 @@ export default function CreateInventory() {
     }
   };
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : type === 'file' ? files?.[0] || null : value
+    }));
+  };
+  
+  const handleImageFileChange = (file) => {
+    setFormData(prev => ({
+      ...prev,
+      imageFile: file
     }));
   };
   const handleAddElement = (elementType) => {
@@ -189,11 +196,21 @@ export default function CreateInventory() {
     }
     try {
       setLoading(true);
+      
+      let imageUrl = undefined;
+      if (formData.imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', formData.imageFile);
+        
+        const imageResponse = await api.post('/upload/image', imageFormData);
+        imageUrl = imageResponse.data.url;
+      }
+      
       const inventoryPayload = {
         name: formData.name,
         description: formData.description || undefined,
         categoryId: formData.categoryId || undefined,
-        imageUrl: formData.imageUrl || undefined,
+        imageUrl: imageUrl,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
         isPublic: formData.isPublic
       };
@@ -275,6 +292,7 @@ export default function CreateInventory() {
             formData={formData}
             categories={categories}
             onInputChange={handleInputChange}
+            onImageFileChange={handleImageFileChange}
             onNext={handleNext}
           />
         )}

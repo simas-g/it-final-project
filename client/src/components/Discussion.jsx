@@ -1,45 +1,27 @@
 import { useState, useEffect } from 'react'
-
 import { useAuth } from '@/contexts/AuthContext'
-
 import { useI18n } from '@/contexts/I18nContext'
-
 import { Button } from '@/components/ui/button'
-
 import { Card, CardContent } from '@/components/ui/card'
-
 import { useToast } from '@/hooks/use-toast'
-
 import api from '@/lib/api'
-
+import { formatDate } from '@/lib/formatting'
 import { MessageSquare, Send, Edit2, Trash2, X, LogIn } from 'lucide-react'
-
 import { Link } from 'react-router-dom'
 
 export default function Discussion({ inventoryId }) {
-
   const { user, isAuthenticated } = useAuth()
-
   const { t, language } = useI18n()
-
   const { toast } = useToast()
-
   const [posts, setPosts] = useState([])
-
   const [loading, setLoading] = useState(true)
-
   const [newPostContent, setNewPostContent] = useState('')
-
   const [editingPostId, setEditingPostId] = useState(null)
-
   const [editContent, setEditContent] = useState('')
-
   const [submitting, setSubmitting] = useState(false)
-
   useEffect(() => {
     fetchPosts()
   }, [inventoryId])
-
   const fetchPosts = async () => {
     try {
       setLoading(true)
@@ -56,7 +38,6 @@ export default function Discussion({ inventoryId }) {
       setLoading(false)
     }
   }
-
   const handleCreatePost = async (e) => {
     e.preventDefault()
     if (!newPostContent.trim()) return
@@ -140,39 +121,6 @@ export default function Discussion({ inventoryId }) {
     setEditContent('')
   }
 
-  const formatDate = (dateString) => {
-
-    const date = new Date(dateString)
-
-    const now = new Date()
-
-    const diffMs = now - date
-
-    const diffMins = Math.floor(diffMs / 60000)
-
-    const diffHours = Math.floor(diffMs / 3600000)
-
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return t('justNow')
-    if (diffMins === 1) return t('minutesAgo', { count: 1 })
-    if (diffMins < 60) return t('minutesAgo', { count: diffMins })
-    if (diffHours === 1) return t('hoursAgo', { count: 1 })
-    if (diffHours < 24) return t('hoursAgo', { count: diffHours })
-    if (diffDays === 1) return t('daysAgo', { count: 1 })
-    if (diffDays < 7) return t('daysAgo', { count: diffDays })
-    
-
-    const locale = language === 'es' ? 'es-ES' : language === 'pl' ? 'pl-PL' : 'en-US'
-    return date.toLocaleDateString(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -241,9 +189,9 @@ export default function Discussion({ inventoryId }) {
             </CardContent>
           </Card>
         ) : (
-          posts.map((post) => (
+          posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((post) => (
             <Card key={post.id}>
-              <CardContent className="pt-6">
+              <CardContent className="">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <Link to={`/profile/${post.user.id}`}>
@@ -258,7 +206,7 @@ export default function Discussion({ inventoryId }) {
                         {post.user.name || post.user.email.split('@')[0]}
                       </Link>
                       <p className="text-xs text-muted-foreground">
-                        {formatDate(post.createdAt)}
+                        {formatDate(post.createdAt, t, language)}
                         {post.updatedAt !== post.createdAt && (
                           <span className="ml-1">({t('edited')})</span>
                         )}

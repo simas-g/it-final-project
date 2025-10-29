@@ -6,9 +6,16 @@ import { Label } from "@/components/ui/label";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Image as ImageIcon, Tag as TagIcon, Lock, Globe } from "lucide-react";
+import ImageUpload from "@/components/ui/image-upload";
 
-const Step1BasicInfo = ({ formData, categories, onInputChange, onNext }) => (
+import { Tag as TagIcon, Lock, Globe } from "lucide-react";
+
+import { useToast } from "@/hooks/use-toast";
+
+const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange, onNext }) => {
+  const { toast } = useToast();
+  
+  return (
   <>
     <Card className="border-2">
       <CardHeader>
@@ -93,21 +100,13 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onNext }) => (
         <CardDescription>Customize how your inventory appears</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="imageUrl" className="text-sm font-medium flex items-center">
-            <ImageIcon className="h-4 w-4 mr-2" />
-            Image URL
-          </Label>
-          <Input
-            id="imageUrl"
-            name="imageUrl"
-            type="url"
-            placeholder="https://example.com/image.jpg"
-            value={formData.imageUrl}
-            onChange={onInputChange}
-            className="h-11 border-2"
-          />
-        </div>
+        <ImageUpload
+          value={formData.imageFile}
+          onChange={onImageFileChange}
+          onError={(error) => {
+            toast({ title: error, variant: 'destructive' });
+          }}
+        />
 
         <div className="space-y-4">
           <Label className="text-sm font-medium">Visibility</Label>
@@ -152,7 +151,8 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onNext }) => (
       </Button>
     </div>
   </>
-);
+  );
+};
 
 export default Step1BasicInfo;
 

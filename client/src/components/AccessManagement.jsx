@@ -1,66 +1,29 @@
 import { useState, useEffect } from 'react'
-
-import { useAuth } from '@/contexts/AuthContext'
-
 import { useI18n } from '@/contexts/I18nContext'
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-
 import { Button } from '@/components/ui/button'
-
 import { Input } from '@/components/ui/input'
-
 import { Label } from '@/components/ui/label'
-
 import { Badge } from '@/components/ui/badge'
-
 import { useToast } from '@/hooks/use-toast'
-
 import api from '@/lib/api'
-import { 
-  Users, 
-  Search, 
-  Plus, 
-  Trash2, 
-  Globe, 
-  Lock,
-  UserPlus,
-  X
-} from 'lucide-react'
-
+import { Users, Search, Plus, Trash2, Globe, Lock, UserPlus, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
 export default function AccessManagement({ inventoryId, isOwner }) {
-
-  const { user } = useAuth()
-
   const { t } = useI18n()
-
   const { toast } = useToast()
-  
-
   const [accessList, setAccessList] = useState([])
-
   const [isPublic, setIsPublic] = useState(false)
-
   const [loading, setLoading] = useState(true)
-
   const [showAddUser, setShowAddUser] = useState(false)
-
   const [searchQuery, setSearchQuery] = useState('')
-
   const [searchResults, setSearchResults] = useState([])
-
   const [searching, setSearching] = useState(false)
-
   const [selectedUser, setSelectedUser] = useState(null)
-
   const [submitting, setSubmitting] = useState(false)
-
   useEffect(() => {
     fetchAccessList()
   }, [inventoryId])
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchQuery.trim().length >= 2) {
@@ -71,7 +34,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
     }, 300)
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
-
   const fetchAccessList = async () => {
     try {
       setLoading(true)
@@ -89,7 +51,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       setLoading(false)
     }
   }
-
   const searchUsers = async () => {
     try {
       setSearching(true)
@@ -101,21 +62,17 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       setSearching(false)
     }
   }
-
   const handleAddAccess = async () => {
     if (!selectedUser) {
       console.log('No user selected')
       return
     }
-    console.log('Adding access for:', { 
-      inventoryId, 
-      userId: selectedUser.id
-    })
+    console.log('Adding access for:', { inventoryId, userId: selectedUser.id })
     try {
       setSubmitting(true)
       const response = await api.post(`/inventories/${inventoryId}/access`, {
         userId: selectedUser.id,
-        accessType: 'WRITE'  // Always grant WRITE access
+        accessType: 'WRITE'
       })
       console.log('Access granted successfully:', response.data)
       setAccessList([...accessList, response.data])
@@ -139,11 +96,8 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       setSubmitting(false)
     }
   }
-
-
   const handleRemoveAccess = async (accessId) => {
     if (!confirm(t('confirmRemoveAccess'))) return
-
     try {
       await api.delete(`/access/${accessId}`)
       setAccessList(accessList.filter(a => a.id !== accessId))
@@ -160,7 +114,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       })
     }
   }
-
   const handleTogglePublic = async () => {
     try {
       const response = await api.put(`/inventories/${inventoryId}/public`, {
@@ -180,18 +133,15 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       })
     }
   }
-
   const cancelAddUser = () => {
     setShowAddUser(false)
     setSearchQuery('')
     setSelectedUser(null)
     setSearchResults([])
   }
-
   if (!isOwner) {
     return null
   }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -199,7 +149,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       </div>
     )
   }
-
   return (
     <div className="space-y-6">
       <Card>
@@ -225,7 +174,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
               </div>
             </div>
             <Button
-
               variant={isPublic ? 'outline' : 'default'}
               onClick={handleTogglePublic}
             >
@@ -244,11 +192,10 @@ export default function AccessManagement({ inventoryId, isOwner }) {
           </div>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center gap-4 justify-between">
+            <div className='gap-2 flex flex-col'>
               <CardTitle className="flex items-center">
                 <Users className="h-5 w-5 mr-2" />
                 {t('userAccess')}
@@ -274,7 +221,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-
               <div className="space-y-3">
                 <div>
                   <Label>{t('searchUser')}</Label>
@@ -287,7 +233,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                       className="pl-9"
                     />
                   </div>
-                  
                   {searchResults.length > 0 && (
                     <div className="mt-2 border rounded-md max-h-48 overflow-y-auto">
                       {searchResults.map((user) => (
@@ -309,12 +254,10 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                       ))}
                     </div>
                   )}
-
                   {searching && (
                     <p className="text-sm text-muted-foreground mt-2">{t('searching')}...</p>
                   )}
                 </div>
-
                 {selectedUser && (
                   <div className="border rounded-md p-3 bg-muted/50">
                     <div className="flex items-center justify-between">
@@ -323,7 +266,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                         <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                       </div>
                       <Button
-
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedUser(null)}
@@ -331,7 +273,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-
                     <Button
                       onClick={handleAddAccess}
                       disabled={submitting}
@@ -345,7 +286,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
               </div>
             </div>
           )}
-
           {accessList.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -379,10 +319,8 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                       <p className="text-sm text-muted-foreground">{access.user.email}</p>
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-2">
                     <Button
-
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveAccess(access.id)}
@@ -399,4 +337,3 @@ export default function AccessManagement({ inventoryId, isOwner }) {
     </div>
   )
 }
-
