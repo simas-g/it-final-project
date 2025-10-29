@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react'
+
 import { useSearchParams, Link, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { Input } from '@/components/ui/input'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
 import api from '@/lib/api'
+
 import { Search, Package, FileText, User, Calendar, Heart } from 'lucide-react'
 
 export default function SearchResults() {
@@ -22,11 +32,9 @@ export default function SearchResults() {
   const [searchType, setSearchType] = useState(null) // 'query' or 'tag'
   const [currentTag, setCurrentTag] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
-
   useEffect(() => {
     const query = searchParams.get('q')
     const tag = searchParams.get('tag')
-    
     if (tag) {
       setCurrentTag(tag)
       setSearchType('tag')
@@ -47,10 +55,8 @@ export default function SearchResults() {
       setResults({ inventories: [], items: [] })
     }
   }, [searchParams, activeTab])
-
   const performSearch = async (query) => {
     if (!query.trim()) return
-
     setLoading(true)
     try {
       const response = await api.get(`/search?q=${encodeURIComponent(query)}&type=${activeTab}`)
@@ -61,10 +67,8 @@ export default function SearchResults() {
       setLoading(false)
     }
   }
-
   const performTagSearch = async (tag) => {
     if (!tag.trim()) return
-
     setLoading(true)
     try {
       const response = await api.get(`/search/tag/${encodeURIComponent(tag)}`)
@@ -75,14 +79,12 @@ export default function SearchResults() {
       setLoading(false)
     }
   }
-
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -93,7 +95,6 @@ export default function SearchResults() {
       </div>
     )
   }
-
   // Show search prompt if no search has been performed
   if (!hasSearched) {
     return (
@@ -113,7 +114,6 @@ export default function SearchResults() {
             {getTranslation('search', language)}
           </Button>
         </form>
-
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center max-w-md">
             <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -126,12 +126,10 @@ export default function SearchResults() {
       </div>
     )
   }
-
     return (
       <div className="space-y-6 mt-8 px-10">
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">{getTranslation('searchResults', language)}</h1>
-        
         {currentTag && (
           <div className="flex items-center space-x-2 p-4 bg-muted rounded-lg border-2">
             <span className="text-sm text-muted-foreground">{getTranslation('searchingByTag', language)}</span>
@@ -148,7 +146,6 @@ export default function SearchResults() {
             </Button>
           </div>
         )}
-        
         <form onSubmit={handleSearch} className="flex items-center space-x-2">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -164,7 +161,6 @@ export default function SearchResults() {
           </Button>
         </form>
       </div>
-
       {currentTag ? (
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">
@@ -236,7 +232,6 @@ export default function SearchResults() {
             <TabsTrigger value="inventories">{getTranslation('inventories', language)}</TabsTrigger>
             <TabsTrigger value="items">{getTranslation('items', language)}</TabsTrigger>
           </TabsList>
-
           <TabsContent value="all" className="space-y-6">
           {results.inventories?.length > 0 && (
             <div>
@@ -291,7 +286,6 @@ export default function SearchResults() {
               </div>
             </div>
           )}
-
           {results.items?.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold mb-4">
@@ -343,7 +337,6 @@ export default function SearchResults() {
               </div>
             </div>
           )}
-
           {(!results.inventories?.length && !results.items?.length) && (
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -356,7 +349,6 @@ export default function SearchResults() {
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="inventories" className="space-y-4">
           {results.inventories?.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -417,7 +409,6 @@ export default function SearchResults() {
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="items" className="space-y-4">
           {results.items?.length > 0 ? (
             <div className="space-y-2">

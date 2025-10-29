@@ -24,13 +24,13 @@ function themeReducer(state, action) {
 }
 
 export function ThemeProvider({ children }) {
+
   const [state, dispatch] = useReducer(themeReducer, initialState)
 
   useEffect(() => {
     // Apply theme to document
     document.documentElement.classList.remove('light', 'dark')
     document.documentElement.classList.add(state.theme)
-    
     // Save to localStorage
     localStorage.setItem('theme', state.theme)
   }, [state.theme])
@@ -67,6 +67,7 @@ export function ThemeProvider({ children }) {
 }
 
 export function useTheme() {
+
   const context = useContext(ThemeContext)
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider')

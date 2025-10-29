@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { Input } from '@/components/ui/input'
+
 import api from '@/lib/api'
+
 import { Users, UserCheck, UserX, Shield, Trash2, Search } from 'lucide-react'
 
 export default function AdminPanel() {
@@ -20,10 +28,8 @@ export default function AdminPanel() {
     totalItems: 0,
     totalPosts: 0
   })
-
   useEffect(() => {
     if (!isAdmin()) return
-
     const fetchData = async () => {
       try {
         const [usersRes, statsRes] = await Promise.all([
@@ -38,10 +44,8 @@ export default function AdminPanel() {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [isAdmin])
-
   const handleToggleBlock = async (userId, isBlocked) => {
     try {
       await api.put(`/admin/users/${userId}/block`, { isBlocked: !isBlocked })
@@ -52,7 +56,6 @@ export default function AdminPanel() {
       console.error('Error toggling user block:', error)
     }
   }
-
   const handleChangeRole = async (userId, newRole) => {
     try {
       await api.put(`/admin/users/${userId}/role`, { role: newRole })
@@ -63,10 +66,8 @@ export default function AdminPanel() {
       console.error('Error changing user role:', error)
     }
   }
-
   const handleDeleteUser = async (userId) => {
     if (!confirm(getTranslation('confirmDeleteUser', language))) return
-    
     try {
       await api.delete(`/admin/users/${userId}`)
       setUsers(users.filter(user => user.id !== userId))
@@ -74,7 +75,6 @@ export default function AdminPanel() {
       console.error('Error deleting user:', error)
     }
   }
-
   if (!isAdmin()) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -87,7 +87,6 @@ export default function AdminPanel() {
       </div>
     )
   }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -98,12 +97,10 @@ export default function AdminPanel() {
       </div>
     )
   }
-
   const filteredUsers = users.filter(user => 
     user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -114,7 +111,6 @@ export default function AdminPanel() {
           </p>
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -161,7 +157,6 @@ export default function AdminPanel() {
           </CardContent>
         </Card>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

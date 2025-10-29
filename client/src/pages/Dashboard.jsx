@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
+
 import { Link } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { useI18n } from "@/contexts/I18nContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
+
 import { api } from "@/lib/api";
 import { 
   Plus, 
@@ -27,21 +34,17 @@ export default function Dashboard() {
     totalItems: 0,
     recentActivity: 0
   });
-
   useEffect(() => {
     if (authLoading) return;
     if (!user) return;
-
     const fetchData = async () => {
       try {
         const [ownedRes, accessRes] = await Promise.all([
           api.get('/user/inventories?type=owned'),
           api.get('/user/inventories?type=access')
         ]);
-
         const allInventories = [...ownedRes.data, ...accessRes.data];
         setInventories(allInventories);
-
         const totalItems = allInventories.reduce((sum, inv) => sum + (inv._count?.items || 0), 0);
         setStats({
           totalInventories: allInventories.length,
@@ -57,10 +60,8 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [user, authLoading]);
-
   if (!isAuthenticated()) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -75,7 +76,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -86,7 +86,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center justify-between pb-6 border-b">
@@ -103,7 +102,6 @@ export default function Dashboard() {
           </Link>
         </Button>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
@@ -116,7 +114,6 @@ export default function Dashboard() {
             <div className="text-3xl font-bold">{stats.totalInventories}</div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -128,7 +125,6 @@ export default function Dashboard() {
             <div className="text-3xl font-bold">{stats.totalItems}</div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -141,7 +137,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold">{t('yourInventories')}</h2>
@@ -149,7 +144,6 @@ export default function Dashboard() {
             {inventories.length} {inventories.length === 1 ? t('inventory') : t('inventories')}
           </p>
         </div>
-
         {inventories.length === 0 ? (
           <Card>
             <CardContent className="py-12">
@@ -198,13 +192,11 @@ export default function Dashboard() {
                           </Badge>
                         )}
                       </div>
-
                       {inventory.description && (
                         <p className="text-sm text-muted-foreground truncate">
                           {inventory.description}
                         </p>
                       )}
-
                       <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                         <span className="flex items-center">
                           <FileText className="h-3 w-3 mr-1" />
@@ -216,7 +208,6 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </div>
-
                     <Button variant="outline" size="sm" asChild>
                       <Link to={`/inventory/${inventory.id}`}>
                         {t('view')}

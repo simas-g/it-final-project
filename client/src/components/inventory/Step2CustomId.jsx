@@ -1,10 +1,17 @@
 import { DndContext, closestCorners } from '@dnd-kit/core';
+
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { ArrowLeft, Hash, Sparkles, Plus } from "lucide-react";
+
 import { ELEMENT_TYPES } from "@/lib/inventoryConstants";
+
 import SortableElementItem from "./SortableElementItem";
 
 const Step2CustomId = ({ 

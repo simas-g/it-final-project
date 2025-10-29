@@ -4,6 +4,7 @@ import {
   updateCustomIdConfig,
   generateCustomIdPreview
 } from "../controllers/customIdController.js";
+
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();

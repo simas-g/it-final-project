@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
+
 import { Link } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useTheme } from '@/contexts/ThemeContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { api } from '@/lib/api'
 import { 
   Package, 
@@ -27,7 +35,6 @@ export default function Home() {
   const [popularInventories, setPopularInventories] = useState([])
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,7 +43,6 @@ export default function Home() {
           api.get('/inventories/popular'),
           api.get('/tags')
         ])
-
         setLatestInventories(inventoriesRes.data.inventories)
         setPopularInventories(popularRes.data.slice(0, 3))
         setTags(tagsRes.data.slice(0, 30))
@@ -46,10 +52,8 @@ export default function Home() {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [])
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -60,10 +64,8 @@ export default function Home() {
       </div>
     )
   }
-
   return (
     <div className={`max-w-6xl mx-auto space-y-12 ${isAuthenticated() ? '' : 'p-10'}`}>
-
       <section>
         <div className="flex items-center justify-between mb-6 pb-4 border-b">
           <div>
@@ -81,7 +83,6 @@ export default function Home() {
             </Link>
           </Button>
         </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {latestInventories.map((inventory) => (
             <Card key={inventory.id} className="hover:shadow-md transition-shadow">
@@ -142,7 +143,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
       <section>
         <div className="mb-6 pb-4 border-b">
           <h2 className="text-2xl font-bold">
@@ -152,7 +152,6 @@ export default function Home() {
             {t('mostPopular')}
           </p>
         </div>
-        
         <div className="space-y-3">
           {popularInventories.slice(0, 5).map((inventory, idx) => (
             <Card key={inventory.id} className="hover:shadow-md transition-shadow">
@@ -184,7 +183,6 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                  
                   <Button variant="outline" size="sm" asChild>
                     <Link to={`/inventory/${inventory.id}`}>
                       {t('view')}
@@ -196,7 +194,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
       {tags.length > 0 && (
         <section>
           <div className="mb-6 pb-4 border-b">
@@ -207,7 +204,6 @@ export default function Home() {
               {t('exploreCategories')}
             </p>
           </div>
-          
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <Badge
@@ -227,7 +223,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
       {!isAuthenticated() && (
         <section className="text-center space-y-6 py-16 border-t">
           <div className="space-y-3">

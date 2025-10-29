@@ -1,9 +1,15 @@
 import { Outlet } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useTheme } from '@/contexts/ThemeContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import Header from './Header'
+
 import Sidebar from './Sidebar'
+
 import { useState } from 'react'
 
 export default function Layout() {
@@ -11,7 +17,6 @@ export default function Layout() {
   const { theme, language } = useTheme()
   const { getTranslation } = useI18n()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   if (!isAuthenticated()) {
     return (
       <div className="min-h-screen bg-background">
@@ -25,7 +30,6 @@ export default function Layout() {
       </div>
     )
   }
-
   return (
     <div className="min-h-screen bg-background">
       <Header 

@@ -5,6 +5,7 @@ import {
   authProvider,
   getCurrentUser,
 } from "../controllers/authController.js";
+
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -14,4 +15,5 @@ router.post("/auth/login", loginEmail);
 router.post("/auth/provider", authProvider);
 
 router.get("/auth/me", authenticateToken, getCurrentUser);
+
 export default router;

@@ -1,8 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { useTheme } from '@/contexts/ThemeContext'
+
 import { Button } from '@/components/ui/button'
+
 import { cn } from '@/lib/utils'
 import {
   Home,
@@ -15,9 +20,13 @@ import {
 } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
+
   const { user, isAdmin } = useAuth()
+
   const { t } = useI18n()
+
   const { theme } = useTheme()
+
   const location = useLocation()
 
   const navigation = [

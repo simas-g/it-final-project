@@ -1,10 +1,17 @@
 import { DndContext, closestCorners } from '@dnd-kit/core';
+
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
+
 import { ArrowLeft, Save, Type, Hash, Calendar, Plus } from "lucide-react";
+
 import { FIELD_TYPES } from "@/lib/inventoryConstants";
+
 import SortableFieldItem from "./SortableFieldItem";
 
 const Step3CustomFields = ({ 
@@ -77,7 +84,6 @@ const Step3CustomFields = ({
             const Icon = type.icon;
             const count = getFieldTypeCount(type.value);
             const canAdd = canAddFieldType(type.value);
-            
             return (
               <button
                 key={type.value}

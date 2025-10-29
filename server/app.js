@@ -1,17 +1,29 @@
 import express from "express";
+
 import cors from "cors";
+
 import authRoutes from "./routes/authRoutes.js";
+
 import inventoryRoutes from "./routes/inventoryRoutes.js";
+
 import itemRoutes from "./routes/itemRoutes.js";
+
 import customIdRoutes from "./routes/customIdRoutes.js";
+
 import discussionRoutes from "./routes/discussionRoutes.js";
+
 import adminRoutes from "./routes/adminRoutes.js";
+
 import searchRoutes from "./routes/searchRoutes.js";
+
 import fieldRoutes from "./routes/fieldRoutes.js";
+
 import accessRoutes from "./routes/accessRoutes.js";
+
 import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
+
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(express.json());

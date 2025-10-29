@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
+
 import jwt from "jsonwebtoken";
+
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 const generateToken = (userId, email, role) => {
@@ -112,9 +115,7 @@ export async function authProvider(req, res) {
       });
     }
     const token = generateToken(user.id, user.email, user.role);
-
     const { password: _, ...userWithoutPassword } = user;
-
     res.status(200).json({
       user: userWithoutPassword,
       token,

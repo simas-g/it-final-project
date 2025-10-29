@@ -1,7 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useTheme } from '@/contexts/ThemeContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Button } from '@/components/ui/button'
 import { 
   DropdownMenu,
@@ -22,9 +26,13 @@ import {
 } from 'lucide-react'
 
 export default function Header({ sidebarOpen, setSidebarOpen }) {
+
   const { user, logout, isAuthenticated } = useAuth()
+
   const { theme, toggleTheme, setLanguage, language } = useTheme()
+
   const { t } = useI18n()
+
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -44,7 +52,6 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
               InventoryManager
             </span>
           </Link>
-
           <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -65,7 +72,6 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
             <Button
               variant="ghost"
               size="sm"
@@ -77,11 +83,9 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
                 <Sun className="h-4 w-4" />
               )}
             </Button>
-
             <Button variant="outline" size="sm" asChild>
               <Link to="/login">{t('login')}</Link>
             </Button>
-
             <Button size="sm" asChild>
               <Link to="/register">{t('register')}</Link>
             </Button>
@@ -96,6 +100,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
+
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -136,6 +141,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
           </DropdownMenu>
 
           <Button
+
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
@@ -150,6 +156,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
           <DropdownMenu className="">
             <DropdownMenuTrigger asChild className="border rounded-md p-2">
               <Button 
+
                 variant="ghost" 
                 size="sm" 
                 className="flex items-center space-x-2"

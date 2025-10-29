@@ -7,6 +7,7 @@ import {
   togglePublicAccess,
   searchUsersForAccess
 } from "../controllers/accessController.js";
+
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();

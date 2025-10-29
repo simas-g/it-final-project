@@ -1,14 +1,25 @@
 import { useState, useEffect } from 'react'
+
 import { useParams, Link } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
 import Discussion from '@/components/Discussion'
+
 import AccessManagement from '@/components/AccessManagement'
+
 import api from '@/lib/api'
+
 import { Package, Users, Settings, MessageSquare, BarChart3, Plus, Hash, Lock } from 'lucide-react'
 
 export default function InventoryDetail() {
@@ -20,7 +31,6 @@ export default function InventoryDetail() {
   const [activeTab, setActiveTab] = useState('items')
   const [statistics, setStatistics] = useState(null)
   const [statsLoading, setStatsLoading] = useState(false)
-
   useEffect(() => {
     const fetchInventory = async () => {
       try {
@@ -32,10 +42,8 @@ export default function InventoryDetail() {
         setLoading(false)
       }
     }
-
     fetchInventory()
   }, [id])
-
   useEffect(() => {
     const fetchStatistics = async () => {
       if (activeTab === 'stats') {
@@ -53,10 +61,8 @@ export default function InventoryDetail() {
         }
       }
     }
-
     fetchStatistics()
   }, [id, activeTab])
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -67,7 +73,6 @@ export default function InventoryDetail() {
       </div>
     )
   }
-
   if (!inventory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -80,7 +85,6 @@ export default function InventoryDetail() {
       </div>
     )
   }
-
   return (
     <div className="w-full space-y-6">
       <div className="pb-6 border-b">
@@ -119,7 +123,6 @@ export default function InventoryDetail() {
           )}
         </div>
       </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="items" className="flex items-center">
@@ -147,7 +150,6 @@ export default function InventoryDetail() {
             {getTranslation('statistics', language)}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="items" className="space-y-4">
           <Card>
             <CardHeader>
@@ -246,7 +248,6 @@ export default function InventoryDetail() {
                       </tbody>
                     </table>
                   </div>
-
                   <div className="md:hidden space-y-3">
                     {inventory.items?.map((item) => (
                       <Card key={item.id} className="hover:shadow-md transition-shadow">
@@ -294,18 +295,15 @@ export default function InventoryDetail() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="discussion" className="space-y-4">
           <Discussion inventoryId={id} />
         </TabsContent>
-
         <TabsContent value="access" className="space-y-4">
           <AccessManagement 
             inventoryId={id} 
             isOwner={user && user.id === inventory.userId}
           />
         </TabsContent>
-
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
@@ -330,7 +328,6 @@ export default function InventoryDetail() {
                   </Link>
                 </Button>
               </div>
-
               <div className="flex items-start justify-between p-4 border-2 rounded-lg">
                 <div className="flex items-start space-x-4">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -357,7 +354,6 @@ export default function InventoryDetail() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="stats" className="space-y-4">
           {statsLoading ? (
             <Card>
@@ -402,7 +398,6 @@ export default function InventoryDetail() {
                   </div>
                 </CardContent>
               </Card>
-
               <div className="grid md:grid-cols-2 gap-4">
                 <Card>
                   <CardHeader>
@@ -434,7 +429,6 @@ export default function InventoryDetail() {
                     )}
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardHeader>
                     <CardTitle>{getTranslation('recentItems', language)}</CardTitle>
@@ -469,7 +463,6 @@ export default function InventoryDetail() {
                   </CardContent>
                 </Card>
               </div>
-
               <Card>
                 <CardHeader>
                   <CardTitle>{getTranslation('activityOverTime', language)}</CardTitle>

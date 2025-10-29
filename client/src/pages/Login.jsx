@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { useI18n } from "@/contexts/I18nContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { ArrowRight, Mail, Lock } from "lucide-react";
 
 function Login() {
@@ -16,7 +25,6 @@ function Login() {
   const auth = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
-
   useEffect(() => {
     const errorHandler = (event) => {
       console.error('Global error caught:', event.error);
@@ -25,19 +33,14 @@ function Login() {
     window.addEventListener('error', errorHandler);
     return () => window.removeEventListener('error', errorHandler);
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
     if (loading) return;
-    
     try {
       setLoading(true);
       auth.clearError();
-
       const result = await auth.login(email, password);
-      
       if (result && result.success) {
         navigate("/dashboard");
       }
@@ -47,7 +50,6 @@ function Login() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
@@ -55,7 +57,6 @@ function Login() {
           <h1 className="text-4xl font-bold tracking-tight mb-2">{t('welcomeBack')}</h1>
           <p className="text-muted-foreground">{t('loginDescription')}</p>
         </div>
-
         <Card className="border-2 shadow-lg">
           <CardContent className="pt-8 pb-8 px-8">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -64,7 +65,6 @@ function Login() {
                   <AlertDescription>{auth.error}</AlertDescription>
                 </Alert>
               )}
-
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   {t('email')}
@@ -82,7 +82,6 @@ function Login() {
                   />
                 </div>
               </div>
-              
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
                   {t('password')}
@@ -100,7 +99,6 @@ function Login() {
                   />
                 </div>
               </div>
-
               <Button 
                 type="submit" 
                 className="w-full h-11 font-medium group" 
@@ -119,7 +117,6 @@ function Login() {
                 )}
               </Button>
             </form>
-
             <div className="mt-6 pt-6 border-t text-center">
               <p className="text-sm text-muted-foreground">
                 {t('noAccount')}{" "}

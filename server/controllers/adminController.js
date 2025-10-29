@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 export async function getUsers(req, res) {
   try {
     const { page = 1, limit = 20, search = "", role = "" } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
     const where = {
       ...(search && {
         OR: [
@@ -15,7 +15,6 @@ export async function getUsers(req, res) {
       }),
       ...(role && { role })
     };
-
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
@@ -42,7 +41,6 @@ export async function getUsers(req, res) {
       }),
       prisma.user.count({ where })
     ]);
-
     res.json({
       users,
       pagination: {
@@ -61,7 +59,6 @@ export async function getUsers(req, res) {
 export async function getUser(req, res) {
   try {
     const { id } = req.params;
-    
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -110,11 +107,9 @@ export async function getUser(req, res) {
         }
       }
     });
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     res.json(user);
   } catch (error) {
     console.error("Get user error:", error);
@@ -127,15 +122,12 @@ export async function updateUserRole(req, res) {
     const { id } = req.params;
     const { role } = req.body;
     const adminId = req.user.id;
-
     if (!['ADMIN', 'CREATOR', 'USER'].includes(role)) {
       return res.status(400).json({ error: "Invalid role" });
     }
-
     if (id === adminId && role !== 'ADMIN') {
       return res.status(400).json({ error: "You cannot remove admin access from yourself" });
     }
-
     const user = await prisma.user.update({
       where: { id },
       data: { role },
@@ -147,7 +139,6 @@ export async function updateUserRole(req, res) {
         isBlocked: true
       }
     });
-
     res.json(user);
   } catch (error) {
     console.error("Update user role error:", error);
@@ -160,11 +151,9 @@ export async function toggleUserBlock(req, res) {
     const { id } = req.params;
     const { isBlocked } = req.body;
     const adminId = req.user.id;
-
     if (id === adminId && isBlocked) {
       return res.status(400).json({ error: "You cannot block yourself" });
     }
-
     const user = await prisma.user.update({
       where: { id },
       data: { isBlocked },
@@ -176,7 +165,6 @@ export async function toggleUserBlock(req, res) {
         isBlocked: true
       }
     });
-
     res.json(user);
   } catch (error) {
     console.error("Toggle user block error:", error);
@@ -188,24 +176,19 @@ export async function deleteUser(req, res) {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
-
     if (id === adminId) {
       return res.status(400).json({ error: "You cannot delete yourself" });
     }
-
     const user = await prisma.user.findUnique({
       where: { id },
       select: { id: true, email: true, role: true }
     });
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     await prisma.user.delete({
       where: { id }
     });
-
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     console.error("Delete user error:", error);
@@ -256,7 +239,6 @@ export async function getSystemStats(req, res) {
       }),
       prisma.$queryRaw`SELECT 1 as healthy`
     ]);
-
     res.json({
       stats: {
         totalUsers,

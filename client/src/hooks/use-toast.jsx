@@ -5,6 +5,7 @@ const ToastContext = React.createContext(null)
 let toastCount = 0
 
 export function ToastProvider({ children }) {
+
   const [toasts, setToasts] = React.useState([])
 
   const removeToast = React.useCallback((id) => {
@@ -12,6 +13,7 @@ export function ToastProvider({ children }) {
   }, [])
 
   const addToast = React.useCallback(({ title, description, variant = 'default', duration = 5000 }) => {
+
     const id = ++toastCount
     const newToast = {
       id,
@@ -51,6 +53,7 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
+
   const context = React.useContext(ToastContext)
   
   if (!context) {

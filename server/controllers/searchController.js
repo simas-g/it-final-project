@@ -1,24 +1,22 @@
 import { PrismaClient } from "@prisma/client"
+
 import { getFieldValues } from "../lib/fieldMapping.js"
+
 const prisma = new PrismaClient()
 
 export async function globalSearch(req, res) {
   try {
     const { q: query, type = "all", page = 1, limit = 20 } = req.query;
-    
     if (!query || query.trim().length === 0) {
       return res.status(400).json({ error: "Search query is required" });
     }
-
     const searchTerm = query.trim();
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
     let results = {
       inventories: [],
       items: [],
       total: 0
     };
-
     if (type === "all" || type === "inventories") {
       const [inventories, inventoryCount] = await Promise.all([
         prisma.inventory.findMany({
@@ -53,13 +51,11 @@ export async function globalSearch(req, res) {
           }
         })
       ]);
-
       results.inventories = inventories;
       if (type === "inventories") {
         results.total = inventoryCount;
       }
     }
-
     if (type === "all" || type === "items") {
       const searchWhere = {
         OR: [
@@ -73,7 +69,6 @@ export async function globalSearch(req, res) {
           }
         ]
       }
-
       const [items, itemCount] = await Promise.all([
         prisma.inventoryItem.findMany({
           where: searchWhere,
@@ -108,22 +103,18 @@ export async function globalSearch(req, res) {
         }),
         prisma.inventoryItem.count({ where: searchWhere })
       ])
-
       const itemsWithFields = items.map(item => ({
         ...item,
         fields: getFieldValues(item, item.inventory.fields)
       }))
-
       results.items = itemsWithFields
       if (type === "items") {
         results.total = itemCount
       }
     }
-
     if (type === "all") {
       results.total = results.inventories.length + results.items.length;
     }
-
     res.json({
       results,
       pagination: {
@@ -144,7 +135,6 @@ export async function searchByTag(req, res) {
     const { tag } = req.params;
     const { page = 1, limit = 20 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const [inventories, total] = await Promise.all([
       prisma.inventory.findMany({
         where: {
@@ -184,7 +174,6 @@ export async function searchByTag(req, res) {
         }
       })
     ]);
-
     res.json({
       inventories,
       tag,
@@ -204,13 +193,10 @@ export async function searchByTag(req, res) {
 export async function getSearchSuggestions(req, res) {
   try {
     const { q: query } = req.query;
-    
     if (!query || query.trim().length < 2) {
       return res.json({ suggestions: [] });
     }
-
     const searchTerm = query.trim();
-    
     const [inventoryNames, tagNames, userNames] = await Promise.all([
       prisma.inventory.findMany({
         where: {
@@ -240,13 +226,11 @@ export async function getSearchSuggestions(req, res) {
         orderBy: { name: 'asc' }
       })
     ]);
-
     const suggestions = [
       ...inventoryNames.map(inv => ({ type: 'inventory', text: inv.name })),
       ...tagNames.map(tag => ({ type: 'tag', text: tag.name })),
       ...userNames.map(user => ({ type: 'user', text: user.name || user.email }))
     ];
-
     res.json({ suggestions });
   } catch (error) {
     console.error("Get search suggestions error:", error);

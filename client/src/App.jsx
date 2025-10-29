@@ -1,24 +1,45 @@
 import { Route, Routes } from 'react-router-dom'
+
 import { Toaster } from '@/components/ui/toaster'
+
 import { ToastProvider } from '@/hooks/use-toast'
+
 import { ThemeProvider } from '@/contexts/ThemeContext'
+
 import { AuthProvider } from '@/contexts/AuthContext'
+
 import { I18nProvider } from '@/contexts/I18nContext'
+
 import Layout from '@/components/Layout'
+
 import Home from '@/pages/Home'
+
 import Login from '@/pages/Login'
+
 import Register from '@/pages/Register'
+
 import Dashboard from '@/pages/Dashboard'
+
 import CreateInventory from '@/pages/CreateInventory'
+
 import RequestCreatorAccess from '@/pages/RequestCreatorAccess'
+
 import CustomIdConfig from '@/pages/CustomIdConfig'
+
 import FieldsConfig from '@/pages/FieldsConfig'
+
 import InventoryDetail from '@/pages/InventoryDetail'
+
 import CreateItem from '@/pages/CreateItem'
+
 import ItemDetail from '@/pages/ItemDetail'
+
 import AdminPanel from '@/pages/AdminPanel'
+
 import SearchResults from '@/pages/SearchResults'
+
 import UserProfile from '@/pages/UserProfile'
+
 import './App.css'
 
 function App() {
@@ -46,7 +67,6 @@ function App() {
                   <Route path="profile/:id" element={<UserProfile />} />
                 </Route>
               </Routes>
-              
               <Toaster />
             </div>
           </ToastProvider>

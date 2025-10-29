@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { Badge } from "@/components/ui/badge";
+
 import { api } from "@/lib/api";
 import { 
   ArrowLeft, 
@@ -18,10 +27,15 @@ import {
   Sparkles,
   Hash
 } from "lucide-react";
+
 import { DndContext, closestCorners } from '@dnd-kit/core';
+
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
 import { CSS } from '@dnd-kit/utilities';
+
 import { useDndSensors } from "@/hooks/useDndSensors";
+
 import { ELEMENT_TYPES } from "@/lib/inventoryConstants";
 
 const SortableElementItem = ({ element, index, onUpdate, onRemove, showHelp, onToggleHelp }) => {
@@ -33,16 +47,13 @@ const SortableElementItem = ({ element, index, onUpdate, onRemove, showHelp, onT
     transition,
     isDragging,
   } = useSortable({ id: element.id || `element-${index}` });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
   const Icon = ELEMENT_TYPES.find(et => et.value === element.elementType)?.icon || Hash;
   const info = ELEMENT_TYPES.find(et => et.value === element.elementType);
-
   return (
     <div
       ref={setNodeRef}
@@ -62,7 +73,6 @@ const SortableElementItem = ({ element, index, onUpdate, onRemove, showHelp, onT
             <p className="text-xs text-muted-foreground">{info?.helpText}</p>
           )}
         </div>
-        
         {info?.requiresValue && (
           <Input
             placeholder="Enter text..."
@@ -71,7 +81,6 @@ const SortableElementItem = ({ element, index, onUpdate, onRemove, showHelp, onT
             className="mt-2"
           />
         )}
-        
         {info?.requiresFormat && (
           <Input
             placeholder="Format (e.g., D6, yyyy-MM-dd)"
@@ -113,18 +122,15 @@ export default function CustomIdConfig() {
   const [preview, setPreview] = useState("");
   const [showHelp, setShowHelp] = useState({});
   const sensors = useDndSensors();
-
   useEffect(() => {
     fetchInventory();
     fetchConfig();
   }, [id]);
-
   useEffect(() => {
     if (elements.length > 0) {
       generatePreview();
     }
   }, [elements]);
-
   const fetchInventory = async () => {
     try {
       const response = await api.get(`/inventories/${id}`);
@@ -134,7 +140,6 @@ export default function CustomIdConfig() {
       setError('Failed to load inventory');
     }
   };
-
   const fetchConfig = async () => {
     try {
       setLoading(true);
@@ -149,7 +154,6 @@ export default function CustomIdConfig() {
       setLoading(false);
     }
   };
-
   const generatePreview = async () => {
     try {
       const response = await api.post('/custom-id/preview', { elements });
@@ -159,7 +163,6 @@ export default function CustomIdConfig() {
       setPreview('Error generating preview');
     }
   };
-
   const handleAddElement = (elementType) => {
     const newElement = {
       id: `element-${Date.now()}-${Math.random()}`,
@@ -171,41 +174,33 @@ export default function CustomIdConfig() {
     };
     setElements([...elements, newElement]);
   };
-
   const handleRemoveElement = (index) => {
     setElements(elements.filter((_, i) => i !== index));
   };
-
   const handleUpdateElement = (index, field, value) => {
     const updated = [...elements];
     updated[index] = { ...updated[index], [field]: value };
     setElements(updated);
   };
-
   const handleDragEnd = (event) => {
     const { active, over } = event;
-
     if (active.id !== over.id) {
       setElements((items) => {
         const oldIndex = items.findIndex((item) => (item.id || `element-${items.indexOf(item)}`) === active.id);
         const newIndex = items.findIndex((item) => (item.id || `element-${items.indexOf(item)}`) === over.id);
-        
         return arrayMove(items, oldIndex, newIndex).map((el, i) => ({ ...el, order: i }));
       });
     }
   };
-
   const handleSave = async () => {
     if (elements.length === 0) {
       setError('Please add at least one element');
       return;
     }
-
     if (elements.length > 10) {
       setError('Maximum 10 elements allowed');
       return;
     }
-
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element.elementType === 'FIXED_TEXT' && !element.value) {
@@ -213,7 +208,6 @@ export default function CustomIdConfig() {
         return;
       }
     }
-
     try {
       setSaving(true);
       setError("");
@@ -227,7 +221,6 @@ export default function CustomIdConfig() {
       setSaving(false);
     }
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -238,7 +231,6 @@ export default function CustomIdConfig() {
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center flex-wrap justify-between">
@@ -249,19 +241,16 @@ export default function CustomIdConfig() {
         <h1 className="text-3xl font-bold">Custom ID Configuration</h1>
         <div className="w-32"></div>
       </div>
-
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
       {success && (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <AlertDescription className="text-green-700 dark:text-green-300">{success}</AlertDescription>
         </Alert>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-2">
@@ -304,7 +293,6 @@ export default function CustomIdConfig() {
                   </SortableContext>
                 </DndContext>
               )}
-
               <div className="pt-4 border-t">
                 <Button
                   onClick={handleSave}
@@ -326,7 +314,6 @@ export default function CustomIdConfig() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="border-2 border-primary">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -347,7 +334,6 @@ export default function CustomIdConfig() {
             </CardContent>
           </Card>
         </div>
-
         <div className="space-y-4">
           <Card className="border-2">
             <CardHeader>
@@ -379,7 +365,6 @@ export default function CustomIdConfig() {
                   </button>
                 );
               })}
-              
               {elements.length >= 10 && (
                 <Alert>
                   <AlertDescription className="text-xs">
@@ -389,7 +374,6 @@ export default function CustomIdConfig() {
               )}
             </CardContent>
           </Card>
-
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="text-sm">Format Examples</CardTitle>

@@ -1,14 +1,25 @@
 import { useState, useEffect, useCallback } from 'react'
+
 import { useParams, Link, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { Input } from '@/components/ui/input'
+
 import { Label } from '@/components/ui/label'
+
 import { useToast } from '@/hooks/use-toast'
+
 import api from '@/lib/api'
+
 import { ArrowLeft, Edit, Trash2, Heart, Calendar, User, Save, X } from 'lucide-react'
 
 export default function ItemDetail() {
@@ -23,7 +34,6 @@ export default function ItemDetail() {
   const [isEditing, setIsEditing] = useState(false)
   const [editValues, setEditValues] = useState({})
   const [saving, setSaving] = useState(false)
-
   const fetchItem = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true)
@@ -36,11 +46,9 @@ export default function ItemDetail() {
       if (showLoading) setLoading(false)
     }
   }, [id, user?.id])
-
   useEffect(() => {
     fetchItem(true)
   }, [fetchItem])
-
   const startEditing = () => {
     const initialValues = {}
     item.inventory.fields.forEach(field => {
@@ -54,24 +62,20 @@ export default function ItemDetail() {
     setEditValues(initialValues)
     setIsEditing(true)
   }
-
   const cancelEditing = () => {
     setIsEditing(false)
     setEditValues({})
   }
-
   const handleFieldChange = (fieldId, value) => {
     setEditValues(prev => ({
       ...prev,
       [fieldId]: value
     }))
   }
-
   const handleSaveEdit = async () => {
     try {
       setSaving(true)
       const preparedFields = {}
-      
       item.inventory.fields.forEach(field => {
         const value = editValues[field.id]
         if (field.fieldType === 'BOOLEAN' || (value !== '' && value !== null && value !== undefined)) {
@@ -87,12 +91,10 @@ export default function ItemDetail() {
           }
         }
       })
-
       await api.put(`/items/${id}`, {
         fields: preparedFields,
         version: item.version
       })
-
       await fetchItem(false)
       setIsEditing(false)
       setEditValues({})
@@ -128,7 +130,6 @@ export default function ItemDetail() {
 
   const handleDelete = async () => {
     if (!confirm(getTranslation('confirmDeleteItem', language))) return
-
     try {
       await api.delete(`/items/${id}`)
       toast({
@@ -258,7 +259,6 @@ export default function ItemDetail() {
                         {field.title}
                         {field.isRequired && <span className="text-destructive ml-1">*</span>}
                       </Label>
-                      
                       {isEditing ? (
                         <>
                           {field.fieldType === 'SINGLE_LINE_TEXT' && (
@@ -270,7 +270,6 @@ export default function ItemDetail() {
                               className="mt-1"
                             />
                           )}
-
                           {field.fieldType === 'MULTI_LINE_TEXT' && (
                             <textarea
                               value={editValues[field.id] || ''}
@@ -279,7 +278,6 @@ export default function ItemDetail() {
                               className="w-full min-h-[100px] px-3 py-2 border-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring mt-1"
                             />
                           )}
-
                           {field.fieldType === 'NUMERIC' && (
                             <Input
                               type="number"
@@ -290,7 +288,6 @@ export default function ItemDetail() {
                               className="mt-1"
                             />
                           )}
-
                           {field.fieldType === 'IMAGE_URL' && (
                             <Input
                               type="url"
@@ -301,7 +298,6 @@ export default function ItemDetail() {
                               className="mt-1"
                             />
                           )}
-
                           {field.fieldType === 'BOOLEAN' && (
                             <div className="flex items-center space-x-2 mt-1">
                               <input

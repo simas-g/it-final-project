@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
+
 import api from '@/lib/api'
 
 const AuthContext = createContext()
@@ -48,6 +49,7 @@ function authReducer(state, action) {
 }
 
 export function AuthProvider({ children }) {
+
   const [state, dispatch] = useReducer(authReducer, initialState)
 
   useEffect(() => {
@@ -71,7 +73,6 @@ export function AuthProvider({ children }) {
         dispatch({ type: 'SET_LOADING', payload: false })
       }
     }
-
     initAuth()
   }, [])
 
@@ -82,14 +83,11 @@ export function AuthProvider({ children }) {
       const response = await api.post('/auth/login', { email, password })
       console.log('Login response:', response.data)
       const { user, token } = response.data
-      
       localStorage.setItem('token', token)
-      
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }
       })
-      
       return { success: true }
     } catch (error) {
       console.error('Login error details:', {
@@ -112,16 +110,12 @@ export function AuthProvider({ children }) {
       console.log('Attempting registration with:', { email, name })
       const response = await api.post('/auth/register', { email, password, name })
       console.log('Registration response:', response.data)
-      
       const { user, token } = response.data
-      
       localStorage.setItem('token', token)
-      
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }
       })
-      
       return { success: true }
     } catch (error) {
       console.error('Registration error details:', {
@@ -148,7 +142,9 @@ export function AuthProvider({ children }) {
   }
 
   const isAdmin = () => state.user?.role === 'ADMIN'
+
   const isCreator = () => state.user?.role === 'CREATOR' || state.user?.role === 'ADMIN'
+
   const isAuthenticated = () => !!state.user
 
   const value = {
@@ -170,6 +166,7 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
+
   const context = useContext(AuthContext)
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')

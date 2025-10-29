@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
+
 import { useParams, useNavigate, Link } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { Badge } from "@/components/ui/badge";
+
 import { api } from "@/lib/api";
 import { 
   ArrowLeft, 
@@ -30,24 +39,20 @@ export default function CreateItem() {
   const [customId, setCustomId] = useState("");
   const [generatingId, setGeneratingId] = useState(false);
   const [previewId, setPreviewId] = useState("");
-
   useEffect(() => {
     fetchInventory();
   }, [inventoryId]);
-
   useEffect(() => {
     if (inventory?.customIdConfig) {
       generatePreviewId();
     }
   }, [inventory]);
-
   const fetchInventory = async () => {
     try {
       setFetchingInventory(true);
       const response = await api.get(`/inventories/${inventoryId}`);
       setInventory(response.data);
       setCustomFields(response.data.fields || []);
-      
       const initialValues = {};
       (response.data.fields || []).forEach(field => {
         initialValues[field.id] = field.fieldType === 'BOOLEAN' ? false : '';
@@ -60,10 +65,8 @@ export default function CreateItem() {
       setFetchingInventory(false);
     }
   };
-
   const generatePreviewId = async () => {
     if (!inventory?.customIdConfig?.elementsList) return;
-    
     try {
       const response = await api.post('/custom-id/preview', { 
         elements: inventory.customIdConfig.elementsList 
@@ -73,14 +76,12 @@ export default function CreateItem() {
       console.error('Error generating preview:', error);
     }
   };
-
   const handleFieldChange = (fieldId, value) => {
     setFieldValues(prev => ({
       ...prev,
       [fieldId]: value
     }));
   };
-
   const handleGenerateCustomId = async () => {
     setGeneratingId(true);
     try {
@@ -95,7 +96,6 @@ export default function CreateItem() {
       setGeneratingId(false);
     }
   };
-
   const validateForm = () => {
     for (const field of customFields) {
       if (field.isRequired && !fieldValues[field.id] && field.fieldType !== 'BOOLEAN') {
@@ -105,17 +105,13 @@ export default function CreateItem() {
     }
     return true;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       const preparedFields = {};
       customFields.forEach(field => {
@@ -133,16 +129,13 @@ export default function CreateItem() {
           }
         }
       });
-
       const payload = {
         fields: preparedFields,
         customId: customId || undefined
       };
-
       console.log('Creating item with payload:', payload);
       const response = await api.post(`/inventories/${inventoryId}/items`, payload);
       console.log('Item created:', response.data);
-
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating item:', error);
@@ -156,7 +149,6 @@ export default function CreateItem() {
       setLoading(false);
     }
   };
-
   if (fetchingInventory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -167,7 +159,6 @@ export default function CreateItem() {
       </div>
     );
   }
-
   if (!inventory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -180,7 +171,6 @@ export default function CreateItem() {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
@@ -192,7 +182,6 @@ export default function CreateItem() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Inventory
         </Button>
-        
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 border-2 rounded-lg flex items-center justify-center">
             <Package className="h-8 w-8" />
@@ -205,7 +194,6 @@ export default function CreateItem() {
           </div>
         </div>
       </div>
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <Alert variant="destructive">
@@ -213,7 +201,6 @@ export default function CreateItem() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
         {inventory.customIdConfig && (
           <Card className="border-2 border-primary">
             <CardHeader>
@@ -251,7 +238,6 @@ export default function CreateItem() {
                   )}
                 </Button>
               </div>
-              
               {previewId && (
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-xs text-muted-foreground mb-1">Preview format:</p>
@@ -261,7 +247,6 @@ export default function CreateItem() {
             </CardContent>
           </Card>
         )}
-
         {customFields.length > 0 ? (
           <Card className="border-2">
             <CardHeader>
@@ -277,11 +262,9 @@ export default function CreateItem() {
                     {field.title}
                     {field.isRequired && <span className="text-destructive ml-1">*</span>}
                   </Label>
-                  
                   {field.description && (
                     <p className="text-xs text-muted-foreground">{field.description}</p>
                   )}
-
                   {field.fieldType === 'SINGLE_LINE_TEXT' && (
                     <Input
                       id={field.id}
@@ -292,7 +275,6 @@ export default function CreateItem() {
                       className="h-11 border-2"
                     />
                   )}
-
                   {field.fieldType === 'MULTI_LINE_TEXT' && (
                     <textarea
                       id={field.id}
@@ -302,7 +284,6 @@ export default function CreateItem() {
                       className="w-full min-h-[100px] px-3 py-2 border-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   )}
-
                   {field.fieldType === 'NUMERIC' && (
                     <Input
                       id={field.id}
@@ -314,7 +295,6 @@ export default function CreateItem() {
                       className="h-11 border-2"
                     />
                   )}
-
                   {field.fieldType === 'IMAGE_URL' && (
                     <Input
                       id={field.id}
@@ -326,7 +306,6 @@ export default function CreateItem() {
                       className="h-11 border-2"
                     />
                   )}
-
                   {field.fieldType === 'BOOLEAN' && (
                     <div className="flex items-center space-x-2">
                       <input
@@ -366,7 +345,6 @@ export default function CreateItem() {
             </CardContent>
           </Card>
         )}
-
         <div className="flex items-center justify-between pt-6 border-t-2">
           <Button
             type="button"

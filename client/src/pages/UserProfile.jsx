@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react'
+
 import { useParams, Link } from 'react-router-dom'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
 import api from '@/lib/api'
+
 import { User, Package, FileText, MessageSquare, Heart, Calendar, Mail, Clock } from 'lucide-react'
 
 export default function UserProfile() {
@@ -16,7 +25,6 @@ export default function UserProfile() {
   const [profileUser, setProfileUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('inventories')
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -28,10 +36,8 @@ export default function UserProfile() {
         setLoading(false)
       }
     }
-
     fetchUserProfile()
   }, [id])
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -42,7 +48,6 @@ export default function UserProfile() {
       </div>
     )
   }
-
   if (!profileUser) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -55,9 +60,7 @@ export default function UserProfile() {
       </div>
     )
   }
-
   const isOwnProfile = currentUser?.id === profileUser.id
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-start gap-6 pb-6 border-b">
@@ -96,7 +99,6 @@ export default function UserProfile() {
           </div>
         </div>
       </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="inventories" className="flex items-center">
@@ -116,7 +118,6 @@ export default function UserProfile() {
             {getTranslation('likes', language)} ({profileUser._count?.itemLikes || 0})
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="inventories" className="space-y-4">
           <Card>
             <CardHeader>
@@ -183,7 +184,6 @@ export default function UserProfile() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="items" className="space-y-4">
           <Card>
             <CardHeader>
@@ -250,7 +250,6 @@ export default function UserProfile() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="posts" className="space-y-4">
           <Card>
             <CardHeader>
@@ -306,7 +305,6 @@ export default function UserProfile() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="likes" className="space-y-4">
           <Card>
             <CardHeader>

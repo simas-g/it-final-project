@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+
 import { Input } from '@/components/ui/input'
+
 import { Label } from '@/components/ui/label'
+
 import { Badge } from '@/components/ui/badge'
+
 import { useToast } from '@/hooks/use-toast'
+
 import api from '@/lib/api'
 import { 
   Users, 
@@ -18,21 +27,34 @@ import {
   UserPlus,
   X
 } from 'lucide-react'
+
 import { Link } from 'react-router-dom'
 
 export default function AccessManagement({ inventoryId, isOwner }) {
+
   const { user } = useAuth()
+
   const { t } = useI18n()
+
   const { toast } = useToast()
   
+
   const [accessList, setAccessList] = useState([])
+
   const [isPublic, setIsPublic] = useState(false)
+
   const [loading, setLoading] = useState(true)
+
   const [showAddUser, setShowAddUser] = useState(false)
+
   const [searchQuery, setSearchQuery] = useState('')
+
   const [searchResults, setSearchResults] = useState([])
+
   const [searching, setSearching] = useState(false)
+
   const [selectedUser, setSelectedUser] = useState(null)
+
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -47,7 +69,6 @@ export default function AccessManagement({ inventoryId, isOwner }) {
         setSearchResults([])
       }
     }, 300)
-
     return () => clearTimeout(delayDebounceFn)
   }, [searchQuery])
 
@@ -86,12 +107,10 @@ export default function AccessManagement({ inventoryId, isOwner }) {
       console.log('No user selected')
       return
     }
-
     console.log('Adding access for:', { 
       inventoryId, 
       userId: selectedUser.id
     })
-
     try {
       setSubmitting(true)
       const response = await api.post(`/inventories/${inventoryId}/access`, {
@@ -206,6 +225,7 @@ export default function AccessManagement({ inventoryId, isOwner }) {
               </div>
             </div>
             <Button
+
               variant={isPublic ? 'outline' : 'default'}
               onClick={handleTogglePublic}
             >
@@ -303,6 +323,7 @@ export default function AccessManagement({ inventoryId, isOwner }) {
                         <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                       </div>
                       <Button
+
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedUser(null)}
@@ -361,6 +382,7 @@ export default function AccessManagement({ inventoryId, isOwner }) {
 
                   <div className="flex items-center space-x-2">
                     <Button
+
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveAccess(access.id)}

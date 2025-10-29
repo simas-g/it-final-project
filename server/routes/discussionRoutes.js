@@ -5,6 +5,7 @@ import {
   updateDiscussionPost,
   deleteDiscussionPost
 } from "../controllers/discussionController.js";
+
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();

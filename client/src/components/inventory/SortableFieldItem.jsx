@@ -1,9 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable';
+
 import { CSS } from '@dnd-kit/utilities';
+
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
+
 import { Badge } from "@/components/ui/badge";
+
 import { GripVertical, X, Type } from "lucide-react";
+
 import { FIELD_TYPES } from "@/lib/inventoryConstants";
 
 const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
@@ -15,16 +21,13 @@ const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
     transition,
     isDragging,
   } = useSortable({ id: field.id });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
   const Icon = FIELD_TYPES.find(ft => ft.value === field.fieldType)?.icon || Type;
   const typeInfo = FIELD_TYPES.find(t => t.value === field.fieldType);
-
   return (
     <div
       ref={setNodeRef}

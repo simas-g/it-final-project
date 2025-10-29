@@ -1,15 +1,27 @@
 import { useState, useEffect } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
+
 import { api } from "@/lib/api";
+
 import { useToast } from "@/hooks/use-toast";
+
 import { ArrowLeft, Package } from "lucide-react";
+
 import { arrayMove } from '@dnd-kit/sortable';
+
 import { useDndSensors } from "@/hooks/useDndSensors";
+
 import { FIELD_TYPES } from "@/lib/inventoryConstants";
+
 import Step1BasicInfo from "@/components/inventory/Step1BasicInfo";
+
 import Step2CustomId from "@/components/inventory/Step2CustomId";
+
 import Step3CustomFields from "@/components/inventory/Step3CustomFields";
 
 export default function CreateInventory() {
@@ -17,7 +29,6 @@ export default function CreateInventory() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const sensors = useDndSensors();
-  
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
@@ -32,11 +43,9 @@ export default function CreateInventory() {
   const [customIdElements, setCustomIdElements] = useState([]);
   const [preview, setPreview] = useState("");
   const [customFields, setCustomFields] = useState([]);
-
   useEffect(() => {
     fetchCategories();
   }, []);
-
   useEffect(() => {
     if (customIdElements.length > 0) {
       generatePreview();
@@ -44,7 +53,6 @@ export default function CreateInventory() {
       setPreview("");
     }
   }, [customIdElements]);
-
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories');
@@ -53,7 +61,6 @@ export default function CreateInventory() {
       console.error('Error fetching categories:', error);
     }
   };
-
   const generatePreview = async () => {
     try {
       const response = await api.post('/custom-id/preview', { elements: customIdElements });
@@ -63,7 +70,6 @@ export default function CreateInventory() {
       setPreview('Error generating preview');
     }
   };
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -71,7 +77,6 @@ export default function CreateInventory() {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
-
   const handleAddElement = (elementType) => {
     const newElement = {
       id: `element-${Date.now()}-${Math.random()}`,
@@ -83,17 +88,14 @@ export default function CreateInventory() {
     };
     setCustomIdElements([...customIdElements, newElement]);
   };
-
   const handleRemoveElement = (index) => {
     setCustomIdElements(customIdElements.filter((_, i) => i !== index));
   };
-
   const handleUpdateElement = (index, field, value) => {
     const updated = [...customIdElements];
     updated[index] = { ...updated[index], [field]: value };
     setCustomIdElements(updated);
   };
-
   const handleElementDragEnd = (event) => {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -104,16 +106,13 @@ export default function CreateInventory() {
       });
     }
   };
-
   const getFieldTypeCount = (fieldType) => {
     return customFields.filter(f => f.fieldType === fieldType).length;
   };
-
   const canAddFieldType = (fieldType) => {
     const typeInfo = FIELD_TYPES.find(t => t.value === fieldType);
     return getFieldTypeCount(fieldType) < typeInfo.max;
   };
-
   const handleAddField = (fieldType) => {
     if (!canAddFieldType(fieldType)) return;
     const newField = {
@@ -127,17 +126,14 @@ export default function CreateInventory() {
     };
     setCustomFields([...customFields, newField]);
   };
-
   const handleRemoveField = (index) => {
     setCustomFields(customFields.filter((_, i) => i !== index));
   };
-
   const handleUpdateField = (index, fieldName, value) => {
     const updated = [...customFields];
     updated[index] = { ...updated[index], [fieldName]: value };
     setCustomFields(updated);
   };
-
   const handleFieldDragEnd = (event) => {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -148,7 +144,6 @@ export default function CreateInventory() {
       });
     }
   };
-
   const validateStep1 = () => {
     if (!formData.name.trim()) {
       toast({ title: "Inventory name is required", variant: 'destructive' });
@@ -156,7 +151,6 @@ export default function CreateInventory() {
     }
     return true;
   };
-
   const validateStep2 = () => {
     if (customIdElements.length === 0) {
       toast({ title: "Please add at least one Custom ID element", variant: 'destructive' });
@@ -171,7 +165,6 @@ export default function CreateInventory() {
     }
     return true;
   };
-
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
       setCurrentStep(2);
@@ -179,16 +172,13 @@ export default function CreateInventory() {
       setCurrentStep(3);
     }
   };
-
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (customFields.length > 0) {
       for (let i = 0; i < customFields.length; i++) {
         if (!customFields[i].title.trim()) {
@@ -197,7 +187,6 @@ export default function CreateInventory() {
         }
       }   
     }
-
     try {
       setLoading(true);
       const inventoryPayload = {
@@ -208,12 +197,9 @@ export default function CreateInventory() {
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
         isPublic: formData.isPublic
       };
-
       const inventoryResponse = await api.post('/inventories', inventoryPayload);
       const inventoryId = inventoryResponse.data.id;
-
       await api.put(`/inventories/${inventoryId}/custom-id`, { elements: customIdElements });
-
       if (customFields.length > 0) {
         for (const field of customFields) {
           await api.post(`/inventories/${inventoryId}/fields`, {
@@ -225,7 +211,6 @@ export default function CreateInventory() {
           });
         }
       }
-
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating inventory:', error);

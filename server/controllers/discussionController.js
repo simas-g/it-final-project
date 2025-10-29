@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 export async function getDiscussionPosts(req, res) {
@@ -6,7 +7,6 @@ export async function getDiscussionPosts(req, res) {
     const { inventoryId } = req.params;
     const { page = 1, limit = 50 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const [posts, total] = await Promise.all([
       prisma.discussionPost.findMany({
         where: { inventoryId },
@@ -23,7 +23,6 @@ export async function getDiscussionPosts(req, res) {
         where: { inventoryId }
       })
     ]);
-
     res.json({
       posts,
       pagination: {
@@ -44,19 +43,15 @@ export async function createDiscussionPost(req, res) {
     const { inventoryId } = req.params;
     const { content } = req.body;
     const userId = req.user.id;
-
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: "Content is required" });
     }
-
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId }
     });
-
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-
     const post = await prisma.discussionPost.create({
       data: {
         inventoryId,
@@ -69,7 +64,6 @@ export async function createDiscussionPost(req, res) {
         }
       }
     });
-
     res.status(201).json(post);
   } catch (error) {
     console.error("Create discussion post error:", error);
@@ -82,11 +76,9 @@ export async function updateDiscussionPost(req, res) {
     const { postId } = req.params;
     const { content } = req.body;
     const userId = req.user.id;
-
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: "Content is required" });
     }
-
     const existingPost = await prisma.discussionPost.findUnique({
       where: { id: postId },
       include: {
@@ -95,19 +87,15 @@ export async function updateDiscussionPost(req, res) {
         }
       }
     });
-
     if (!existingPost) {
       return res.status(404).json({ error: "Post not found" });
     }
-
     const canEdit = existingPost.userId === userId || 
                     existingPost.inventory.userId === userId || 
                     req.user.role === 'ADMIN';
-
     if (!canEdit) {
       return res.status(403).json({ error: "You can only edit your own posts" });
     }
-
     const post = await prisma.discussionPost.update({
       where: { id: postId },
       data: {
@@ -119,7 +107,6 @@ export async function updateDiscussionPost(req, res) {
         }
       }
     });
-
     res.json(post);
   } catch (error) {
     console.error("Update discussion post error:", error);
@@ -131,7 +118,6 @@ export async function deleteDiscussionPost(req, res) {
   try {
     const { postId } = req.params;
     const userId = req.user.id;
-
     const existingPost = await prisma.discussionPost.findUnique({
       where: { id: postId },
       include: {
@@ -140,23 +126,18 @@ export async function deleteDiscussionPost(req, res) {
         }
       }
     });
-
     if (!existingPost) {
       return res.status(404).json({ error: "Post not found" });
     }
-
     const canDelete = existingPost.userId === userId || 
                       existingPost.inventory.userId === userId || 
                       req.user.role === 'ADMIN';
-
     if (!canDelete) {
       return res.status(403).json({ error: "You can only delete your own posts" });
     }
-
     await prisma.discussionPost.delete({
       where: { id: postId }
     });
-
     res.json({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("Delete discussion post error:", error);

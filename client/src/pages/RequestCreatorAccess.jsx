@@ -1,8 +1,13 @@
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, 
@@ -14,7 +19,6 @@ import {
 export default function RequestCreatorAccess() {
   const { user, isCreator } = useAuth();
   const navigate = useNavigate();
-
   if (isCreator()) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -35,7 +39,6 @@ export default function RequestCreatorAccess() {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <Button 
@@ -46,7 +49,6 @@ export default function RequestCreatorAccess() {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Dashboard
       </Button>
-
       <div className="flex items-center space-x-4 mb-8">
         <div className="w-16 h-16 border-2 rounded-lg flex items-center justify-center">
           <Crown className="h-8 w-8" />
@@ -58,7 +60,6 @@ export default function RequestCreatorAccess() {
           </p>
         </div>
       </div>
-
       <div className="space-y-6">
         <Card className="border-2">
           <CardHeader>
@@ -81,7 +82,6 @@ export default function RequestCreatorAccess() {
             </div>
           </CardContent>
         </Card>
-
         <Card className="border-2">
           <CardHeader>
             <CardTitle>Creator Benefits</CardTitle>
@@ -119,7 +119,6 @@ export default function RequestCreatorAccess() {
             </div>
           </CardContent>
         </Card>
-
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -134,7 +133,6 @@ export default function RequestCreatorAccess() {
             </p>
           </AlertDescription>
         </Alert>
-
         <div className="pt-6 border-t-2">
           <Button
             onClick={() => navigate('/dashboard')}

@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 export async function getInventories(req, res) {
   try {
     const { page = 1, limit = 10, search = "", category = "", tag = "" } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
     const where = {
       ...(search && {
         OR: [
@@ -24,7 +24,6 @@ export async function getInventories(req, res) {
         }
       })
     };
-
     const [inventories, total] = await Promise.all([
       prisma.inventory.findMany({
         where,
@@ -46,7 +45,6 @@ export async function getInventories(req, res) {
       }),
       prisma.inventory.count({ where })
     ]);
-
     res.json({
       inventories,
       pagination: {
@@ -65,7 +63,6 @@ export async function getInventories(req, res) {
 export async function getInventory(req, res) {
   try {
     const { id } = req.params;
-    
     const inventory = await prisma.inventory.findUnique({
       where: { id },
       include: {
@@ -114,11 +111,9 @@ export async function getInventory(req, res) {
         }
       }
     });
-
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-
     res.json(inventory);
   } catch (error) {
     console.error("Get inventory error:", error);
@@ -130,7 +125,6 @@ export async function createInventory(req, res) {
   try {
     const { name, description, categoryId, imageUrl, tags = [], isPublic = false } = req.body;
     const userId = req.user.id;
-
     const inventory = await prisma.inventory.create({
       data: {
         name,
@@ -160,7 +154,6 @@ export async function createInventory(req, res) {
         }
       }
     });
-
     res.status(201).json(inventory);
   } catch (error) {
     console.error("Create inventory error:", error);
@@ -173,27 +166,22 @@ export async function updateInventory(req, res) {
     const { id } = req.params;
     const { name, description, categoryId, imageUrl, tags = [], isPublic, version } = req.body;
     const userId = req.user.id;
-
     const existingInventory = await prisma.inventory.findUnique({
       where: { id },
       select: { userId: true, version: true }
     });
-
     if (!existingInventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-
     if (existingInventory.userId !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: "Only the owner or admin can edit this inventory" });
     }
-
     if (version && existingInventory.version !== version) {
       return res.status(409).json({ 
         error: "Inventory was modified by another user. Please refresh and try again.",
         currentVersion: existingInventory.version
       });
     }
-
     const inventory = await prisma.inventory.update({
       where: { id },
       data: {
@@ -225,7 +213,6 @@ export async function updateInventory(req, res) {
         }
       }
     });
-
     res.json(inventory);
   } catch (error) {
     console.error("Update inventory error:", error);
@@ -237,24 +224,19 @@ export async function deleteInventory(req, res) {
   try {
     const { id } = req.params;
     const userId = req.user.id;
-
     const existingInventory = await prisma.inventory.findUnique({
       where: { id },
       select: { userId: true }
     });
-
     if (!existingInventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-
     if (existingInventory.userId !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: "Only the owner or admin can delete this inventory" });
     }
-
     await prisma.inventory.delete({
       where: { id }
     });
-
     res.json({ message: "Inventory deleted successfully" });
   } catch (error) {
     console.error("Delete inventory error:", error);
@@ -266,7 +248,6 @@ export async function getUserInventories(req, res) {
   try {
     const userId = req.user.id;
     const { type = "all" } = req.query; // "owned", "access", "all"
-
     let where = {};
     if (type === "owned") {
       where = { userId };
@@ -288,7 +269,6 @@ export async function getUserInventories(req, res) {
         ]
       };
     }
-
     const inventories = await prisma.inventory.findMany({
       where,
       include: {
@@ -309,7 +289,6 @@ export async function getUserInventories(req, res) {
       },
       orderBy: { updatedAt: 'desc' }
     });
-
     res.json(inventories);
   } catch (error) {
     console.error("Get user inventories error:", error);
@@ -339,7 +318,6 @@ export async function getPopularInventories(req, res) {
       },
       take: 5
     });
-
     res.json(inventories);
   } catch (error) {
     console.error("Get popular inventories error:", error);
@@ -362,7 +340,6 @@ export async function getCategories(req, res) {
 export async function getTags(req, res) {
   try {
     const { search = "" } = req.query;
-    
     const tags = await prisma.tag.findMany({
       where: search ? {
         name: { contains: search, mode: 'insensitive' }
@@ -374,31 +351,25 @@ export async function getTags(req, res) {
       },
       orderBy: { name: 'asc' }
     });
-
     res.json(tags);
   } catch (error) {
     console.error("Get tags error:", error);
     res.status(500).json({ error: "Failed to fetch tags" });
   }
 }
-
 export async function getInventoryStatistics(req, res) {
   try {
     const { id } = req.params;
-
     const inventory = await prisma.inventory.findUnique({
       where: { id },
       select: { id: true, createdAt: true }
     });
-
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
     const [
       totalItems,
       itemsLast7Days,
@@ -452,19 +423,16 @@ export async function getInventoryStatistics(req, res) {
         where: { inventoryId: id }
       })
     ]);
-
     const contributorUsers = await prisma.user.findMany({
       where: {
         id: { in: topContributors.map(c => c.userId) }
       },
       select: { id: true, name: true, email: true }
     });
-
     const contributorsWithDetails = topContributors.map(contributor => ({
       user: contributorUsers.find(u => u.id === contributor.userId),
       itemCount: contributor._count.id
     }));
-
     const itemsByDay = await prisma.inventoryItem.findMany({
       where: {
         inventoryId: id,
@@ -472,7 +440,6 @@ export async function getInventoryStatistics(req, res) {
       },
       select: { createdAt: true }
     });
-
     const dailyStats = {};
     for (let i = 29; i >= 0; i--) {
       const date = new Date(now);
@@ -480,19 +447,16 @@ export async function getInventoryStatistics(req, res) {
       const dateStr = date.toISOString().split('T')[0];
       dailyStats[dateStr] = 0;
     }
-
     itemsByDay.forEach(item => {
       const dateStr = item.createdAt.toISOString().split('T')[0];
       if (dailyStats[dateStr] !== undefined) {
         dailyStats[dateStr]++;
       }
     });
-
     const itemsOverTime = Object.entries(dailyStats).map(([date, count]) => ({
       date,
       count
     }));
-
     const statistics = {
       overview: {
         totalItems,
@@ -506,7 +470,6 @@ export async function getInventoryStatistics(req, res) {
       recentItems,
       itemsOverTime
     };
-
     res.json(statistics);
   } catch (error) {
     console.error("Get inventory statistics error:", error);

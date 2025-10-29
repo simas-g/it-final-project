@@ -8,11 +8,9 @@ export const getFieldValue = (item, fieldId) => {
 
 export const getFieldValues = (item, inventoryFields) => {
   const fieldValues = {}
-  
   if (!item.fieldValues || !Array.isArray(item.fieldValues)) {
     return fieldValues
   }
-  
   inventoryFields.forEach(field => {
     const fieldValue = item.fieldValues.find(fv => fv.fieldId === field.id)
     if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
@@ -24,13 +22,11 @@ export const getFieldValues = (item, inventoryFields) => {
       }
     }
   })
-  
   return fieldValues
 }
 
 export const createFieldValueData = (fieldValues, inventoryFields) => {
   const fieldValueData = []
-  
   Object.entries(fieldValues).forEach(([fieldId, value]) => {
     const field = inventoryFields.find(f => f.id === fieldId)
     if (field) {
@@ -43,7 +39,6 @@ export const createFieldValueData = (fieldValues, inventoryFields) => {
       }
     }
   })
-  
   return fieldValueData
 }
 
@@ -57,7 +52,6 @@ export const validateFieldValue = (value, fieldType) => {
   if (value === null || value === undefined || value === '') {
     return { isValid: true, value: null }
   }
-  
   switch (fieldType) {
     case 'NUMERIC':
       const numValue = parseFloat(value)
@@ -75,7 +69,6 @@ export const formatFieldValueForDisplay = (value, fieldType) => {
   if (value === null || value === undefined || value === '') {
     return ''
   }
-  
   switch (fieldType) {
     case 'BOOLEAN':
       return Boolean(value) ? 'Yes' : 'No'

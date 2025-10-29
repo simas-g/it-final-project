@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { Badge } from "@/components/ui/badge";
+
 import { api } from "@/lib/api";
 import { 
   ArrowLeft, 
@@ -19,10 +28,15 @@ import {
   AlertCircle,
   Info
 } from "lucide-react";
+
 import { DndContext, closestCorners } from '@dnd-kit/core';
+
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
 import { CSS } from '@dnd-kit/utilities';
+
 import { useDndSensors } from "@/hooks/useDndSensors";
+
 import { FIELD_TYPES } from "@/lib/inventoryConstants";
 
 const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
@@ -34,16 +48,13 @@ const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
     transition,
     isDragging,
   } = useSortable({ id: field.id || field.tempId });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
   const Icon = FIELD_TYPES.find(ft => ft.value === field.fieldType)?.icon || Type;
   const typeInfo = FIELD_TYPES.find(t => t.value === field.fieldType);
-
   return (
     <div
       ref={setNodeRef}
@@ -117,11 +128,9 @@ export default function FieldsConfig() {
   const [inventory, setInventory] = useState(null);
   const [fields, setFields] = useState([]);
   const sensors = useDndSensors();
-
   useEffect(() => {
     fetchInventoryAndFields();
   }, [id]);
-
   const fetchInventoryAndFields = async () => {
     try {
       setLoading(true);
@@ -138,19 +147,15 @@ export default function FieldsConfig() {
       setLoading(false);
     }
   };
-
   const getFieldTypeCount = (fieldType) => {
     return fields.filter(f => f.fieldType === fieldType).length;
   };
-
   const canAddFieldType = (fieldType) => {
     const typeInfo = FIELD_TYPES.find(t => t.value === fieldType);
     return getFieldTypeCount(fieldType) < typeInfo.max;
   };
-
   const handleAddField = (fieldType) => {
     if (!canAddFieldType(fieldType)) return;
-
     const newField = {
       title: '',
       description: '',
@@ -163,10 +168,8 @@ export default function FieldsConfig() {
     };
     setFields([...fields, newField]);
   };
-
   const handleRemoveField = async (index) => {
     const field = fields[index];
-    
     if (field.isNew) {
       setFields(fields.filter((_, i) => i !== index));
     } else {
@@ -181,26 +184,21 @@ export default function FieldsConfig() {
       }
     }
   };
-
   const handleUpdateField = (index, fieldName, value) => {
     const updated = [...fields];
     updated[index] = { ...updated[index], [fieldName]: value };
     setFields(updated);
   };
-
   const handleDragEnd = (event) => {
     const { active, over } = event;
-
     if (active.id !== over.id) {
       setFields((items) => {
         const oldIndex = items.findIndex((item) => (item.id || item.tempId) === active.id);
         const newIndex = items.findIndex((item) => (item.id || item.tempId) === over.id);
-        
         return arrayMove(items, oldIndex, newIndex).map((field, i) => ({ ...field, order: i }));
       });
     }
   };
-
   const handleSave = async () => {
     for (let i = 0; i < fields.length; i++) {
       if (!fields[i].title.trim()) {
@@ -208,11 +206,9 @@ export default function FieldsConfig() {
         return;
       }
     }
-
     try {
       setSaving(true);
       setError("");
-      
       const newFields = fields.filter(f => f.isNew);
       for (const field of newFields) {
         await api.post(`/inventories/${id}/fields`, {
@@ -223,7 +219,6 @@ export default function FieldsConfig() {
           showInTable: field.showInTable
         });
       }
-
       const existingFields = fields.filter(f => !f.isNew);
       for (const field of existingFields) {
         await api.put(`/fields/${field.id}`, {
@@ -233,16 +228,13 @@ export default function FieldsConfig() {
           showInTable: field.showInTable
         });
       }
-
       const fieldOrders = fields.map((field, index) => ({
         fieldId: field.id || field.tempId,
         order: index
       })).filter(fo => !fo.fieldId.startsWith('temp-'));
-
       if (fieldOrders.length > 0) {
         await api.put(`/inventories/${id}/fields/reorder`, { fieldOrders });
       }
-
       setSuccess('Fields configuration saved successfully!');
       setTimeout(() => {
         setSuccess("");
@@ -374,8 +366,11 @@ export default function FieldsConfig() {
             </CardHeader>
             <CardContent className="space-y-2">
               {FIELD_TYPES.map(type => {
+
                 const Icon = type.icon;
+
                 const count = getFieldTypeCount(type.value);
+
                 const canAdd = canAddFieldType(type.value);
                 
                 return (

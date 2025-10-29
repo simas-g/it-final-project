@@ -1,22 +1,39 @@
 import { useState, useEffect } from 'react'
+
 import { useAuth } from '@/contexts/AuthContext'
+
 import { useI18n } from '@/contexts/I18nContext'
+
 import { Button } from '@/components/ui/button'
+
 import { Card, CardContent } from '@/components/ui/card'
+
 import { useToast } from '@/hooks/use-toast'
+
 import api from '@/lib/api'
+
 import { MessageSquare, Send, Edit2, Trash2, X, LogIn } from 'lucide-react'
+
 import { Link } from 'react-router-dom'
 
 export default function Discussion({ inventoryId }) {
+
   const { user, isAuthenticated } = useAuth()
+
   const { t, language } = useI18n()
+
   const { toast } = useToast()
+
   const [posts, setPosts] = useState([])
+
   const [loading, setLoading] = useState(true)
+
   const [newPostContent, setNewPostContent] = useState('')
+
   const [editingPostId, setEditingPostId] = useState(null)
+
   const [editContent, setEditContent] = useState('')
+
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -43,7 +60,6 @@ export default function Discussion({ inventoryId }) {
   const handleCreatePost = async (e) => {
     e.preventDefault()
     if (!newPostContent.trim()) return
-
     try {
       setSubmitting(true)
       const response = await api.post(`/inventories/${inventoryId}/discussion`, {
@@ -125,11 +141,17 @@ export default function Discussion({ inventoryId }) {
   }
 
   const formatDate = (dateString) => {
+
     const date = new Date(dateString)
+
     const now = new Date()
+
     const diffMs = now - date
+
     const diffMins = Math.floor(diffMs / 60000)
+
     const diffHours = Math.floor(diffMs / 3600000)
+
     const diffDays = Math.floor(diffMs / 86400000)
 
     if (diffMins < 1) return t('justNow')
@@ -140,6 +162,7 @@ export default function Discussion({ inventoryId }) {
     if (diffDays === 1) return t('daysAgo', { count: 1 })
     if (diffDays < 7) return t('daysAgo', { count: diffDays })
     
+
     const locale = language === 'es' ? 'es-ES' : language === 'pl' ? 'pl-PL' : 'en-US'
     return date.toLocaleDateString(locale, {
       year: 'numeric',
@@ -276,6 +299,7 @@ export default function Discussion({ inventoryId }) {
                     />
                     <div className="flex justify-end space-x-2">
                       <Button
+
                         variant="outline"
                         size="sm"
                         onClick={cancelEditing}

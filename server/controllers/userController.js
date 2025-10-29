@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 export async function getUserProfile(req, res) {
@@ -70,11 +71,9 @@ export async function getUserProfile(req, res) {
         }
       }
     });
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     if (user.isBlocked) {
       return res.json({
         id: user.id,
@@ -95,7 +94,6 @@ export async function getUserProfile(req, res) {
         }
       });
     }
-
     res.json(user);
   } catch (error) {
     console.error("Get user profile error:", error);
@@ -107,7 +105,6 @@ export async function getPublicUsers(req, res) {
   try {
     const { search, role, page = 1, limit = 20 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const where = {
       isBlocked: false,
       ...(search && {
@@ -118,7 +115,6 @@ export async function getPublicUsers(req, res) {
       }),
       ...(role && { role })
     };
-
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
@@ -144,7 +140,6 @@ export async function getPublicUsers(req, res) {
       }),
       prisma.user.count({ where })
     ]);
-
     res.json({
       users,
       pagination: {
