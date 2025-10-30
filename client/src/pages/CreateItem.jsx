@@ -17,6 +17,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 import { api } from "@/lib/api";
+import { prepareFieldValues, initializeFieldValues, validateFields } from "@/lib/fieldUtils";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { 
   ArrowLeft, 
   Save, 
@@ -53,11 +55,7 @@ export default function CreateItem() {
       const response = await api.get(`/inventories/${inventoryId}`);
       setInventory(response.data);
       setCustomFields(response.data.fields || []);
-      const initialValues = {};
-      (response.data.fields || []).forEach(field => {
-        initialValues[field.id] = field.fieldType === 'BOOLEAN' ? false : '';
-      });
-      setFieldValues(initialValues);
+      setFieldValues(initializeFieldValues(response.data.fields || []));
     } catch (error) {
       console.error('Error fetching inventory:', error);
       setError('Failed to load inventory');
@@ -97,11 +95,10 @@ export default function CreateItem() {
     }
   };
   const validateForm = () => {
-    for (const field of customFields) {
-      if (field.isRequired && !fieldValues[field.id] && field.fieldType !== 'BOOLEAN') {
-        setError(`${field.title} is required`);
-        return false;
-      }
+    const validation = validateFields(customFields, fieldValues);
+    if (!validation.isValid) {
+      setError(validation.error);
+      return false;
     }
     return true;
   };
@@ -113,29 +110,12 @@ export default function CreateItem() {
     setLoading(true);
     setError("");
     try {
-      const preparedFields = {};
-      customFields.forEach(field => {
-        const value = fieldValues[field.id];
-        if (field.fieldType === 'BOOLEAN' || (value !== '' && value !== null && value !== undefined)) {
-          switch (field.fieldType) {
-            case 'NUMERIC':
-              preparedFields[field.id] = parseFloat(value) || 0;
-              break;
-            case 'BOOLEAN':
-              preparedFields[field.id] = value === 'true' || value === true;
-              break;
-            default:
-              preparedFields[field.id] = String(value);
-          }
-        }
-      });
+      const preparedFields = prepareFieldValues(customFields, fieldValues);
       const payload = {
         fields: preparedFields,
         customId: customId || undefined
       };
-      console.log('Creating item with payload:', payload);
       const response = await api.post(`/inventories/${inventoryId}/items`, payload);
-      console.log('Item created:', response.data);
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating item:', error);
@@ -150,14 +130,7 @@ export default function CreateItem() {
     }
   };
   if (fetchingInventory) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading inventory...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading inventory..." />;
   }
   if (!inventory) {
     return (

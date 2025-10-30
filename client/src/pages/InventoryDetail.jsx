@@ -123,6 +123,16 @@ export default function InventoryDetail() {
           )}
         </div>
       </div>
+      {inventory.imageUrl && (
+        <div className="w-full">
+          <img
+            src={inventory.imageUrl}
+            alt={inventory.name}
+            className="w-full max-h-64 object-cover rounded-lg border"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+        </div>
+      )}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="items" className="flex items-center">

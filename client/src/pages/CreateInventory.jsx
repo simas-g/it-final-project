@@ -202,7 +202,7 @@ export default function CreateInventory() {
         const imageFormData = new FormData();
         imageFormData.append('image', formData.imageFile);
         
-        const imageResponse = await api.post('/upload/image', imageFormData);
+        const imageResponse = await api.post('/upload/image', imageFormData, { headers: { 'Content-Type': 'multipart/form-data' } });
         imageUrl = imageResponse.data.url;
       }
       

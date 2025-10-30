@@ -95,7 +95,7 @@ const ImageUpload = ({
   }, [onChange]);
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-2 sm:w-fit", className)}>
       <Label className="text-sm font-medium flex items-center">
         <ImageIcon className="h-4 w-4 mr-2" />
         Image
@@ -119,7 +119,7 @@ const ImageUpload = ({
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full h-48 object-cover rounded-lg"
+                className="w-full max-h-48 object-contain rounded-lg"
               />
               <Button
                 type="button"

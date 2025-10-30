@@ -1,8 +1,5 @@
-import { PrismaClient } from "@prisma/client"
-
+import prisma from "../lib/prisma.js"
 import { getFieldValues } from "../lib/fieldMapping.js"
-
-const prisma = new PrismaClient()
 
 export async function globalSearch(req, res) {
   try {

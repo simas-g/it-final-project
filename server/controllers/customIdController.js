@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../lib/prisma.js";
+import { isOwnerOrAdmin } from "../lib/permissions.js";
+import { handleError } from "../lib/errors.js";
 
 export async function getCustomIdConfig(req, res) {
   try {
@@ -15,8 +15,7 @@ export async function getCustomIdConfig(req, res) {
     });
     res.json(config);
   } catch (error) {
-    console.error("Get custom ID config error:", error);
-    res.status(500).json({ error: "Failed to fetch custom ID configuration" });
+    handleError(error, "Failed to fetch custom ID configuration", res);
   }
 }
 
@@ -32,7 +31,7 @@ export async function updateCustomIdConfig(req, res) {
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    if (inventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(inventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can configure custom IDs" });
     }
     if (!Array.isArray(elements) || elements.length === 0) {
@@ -85,8 +84,7 @@ export async function updateCustomIdConfig(req, res) {
     });
     res.json(updatedConfig);
   } catch (error) {
-    console.error("Update custom ID config error:", error);
-    res.status(500).json({ error: "Failed to update custom ID configuration" });
+    handleError(error, "Failed to update custom ID configuration", res);
   }
 }
 

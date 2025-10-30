@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../lib/prisma.js";
+import { isOwnerOrAdmin } from "../lib/permissions.js";
+import { handleError } from "../lib/errors.js";
 
 export async function getInventories(req, res) {
   try {
@@ -55,8 +55,7 @@ export async function getInventories(req, res) {
       }
     });
   } catch (error) {
-    console.error("Get inventories error:", error);
-    res.status(500).json({ error: "Failed to fetch inventories" });
+    handleError(error, "Failed to fetch inventories", res);
   }
 }
 
@@ -116,8 +115,7 @@ export async function getInventory(req, res) {
     }
     res.json(inventory);
   } catch (error) {
-    console.error("Get inventory error:", error);
-    res.status(500).json({ error: "Failed to fetch inventory" });
+    handleError(error, "Failed to fetch inventory", res);
   }
 }
 
@@ -156,8 +154,7 @@ export async function createInventory(req, res) {
     });
     res.status(201).json(inventory);
   } catch (error) {
-    console.error("Create inventory error:", error);
-    res.status(500).json({ error: "Failed to create inventory" });
+    handleError(error, "Failed to create inventory", res);
   }
 }
 
@@ -173,7 +170,7 @@ export async function updateInventory(req, res) {
     if (!existingInventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    if (existingInventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(existingInventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can edit this inventory" });
     }
     if (version && existingInventory.version !== version) {
@@ -215,8 +212,7 @@ export async function updateInventory(req, res) {
     });
     res.json(inventory);
   } catch (error) {
-    console.error("Update inventory error:", error);
-    res.status(500).json({ error: "Failed to update inventory" });
+    handleError(error, "Failed to update inventory", res);
   }
 }
 
@@ -231,7 +227,7 @@ export async function deleteInventory(req, res) {
     if (!existingInventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    if (existingInventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(existingInventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can delete this inventory" });
     }
     await prisma.inventory.delete({
@@ -239,8 +235,7 @@ export async function deleteInventory(req, res) {
     });
     res.json({ message: "Inventory deleted successfully" });
   } catch (error) {
-    console.error("Delete inventory error:", error);
-    res.status(500).json({ error: "Failed to delete inventory" });
+    handleError(error, "Failed to delete inventory", res);
   }
 }
 
@@ -291,8 +286,7 @@ export async function getUserInventories(req, res) {
     });
     res.json(inventories);
   } catch (error) {
-    console.error("Get user inventories error:", error);
-    res.status(500).json({ error: "Failed to fetch user inventories" });
+    handleError(error, "Failed to fetch user inventories", res);
   }
 }
 
@@ -320,8 +314,7 @@ export async function getPopularInventories(req, res) {
     });
     res.json(inventories);
   } catch (error) {
-    console.error("Get popular inventories error:", error);
-    res.status(500).json({ error: "Failed to fetch popular inventories" });
+    handleError(error, "Failed to fetch popular inventories", res);
   }
 }
 
@@ -332,8 +325,7 @@ export async function getCategories(req, res) {
     });
     res.json(categories);
   } catch (error) {
-    console.error("Get categories error:", error);
-    res.status(500).json({ error: "Failed to fetch categories" });
+    handleError(error, "Failed to fetch categories", res);
   }
 }
 
@@ -353,8 +345,7 @@ export async function getTags(req, res) {
     });
     res.json(tags);
   } catch (error) {
-    console.error("Get tags error:", error);
-    res.status(500).json({ error: "Failed to fetch tags" });
+    handleError(error, "Failed to fetch tags", res);
   }
 }
 export async function getInventoryStatistics(req, res) {
@@ -472,7 +463,6 @@ export async function getInventoryStatistics(req, res) {
     };
     res.json(statistics);
   } catch (error) {
-    console.error("Get inventory statistics error:", error);
-    res.status(500).json({ error: "Failed to fetch inventory statistics" });
+    handleError(error, "Failed to fetch inventory statistics", res);
   }
 }

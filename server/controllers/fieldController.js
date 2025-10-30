@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
+import { isOwnerOrAdmin } from "../lib/permissions.js"
+import { handleError } from "../lib/errors.js"
 
 export async function getInventoryFields(req, res) {
   try {
@@ -11,8 +11,7 @@ export async function getInventoryFields(req, res) {
     });
     res.json(fields);
   } catch (error) {
-    console.error("Get inventory fields error:", error);
-    res.status(500).json({ error: "Failed to fetch fields" });
+    handleError(error, "Failed to fetch fields", res);
   }
 }
 
@@ -28,7 +27,7 @@ export async function createField(req, res) {
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    if (inventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(inventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can manage fields" });
     }
     // No field limits in the new system since we use ItemFieldValue table
@@ -50,8 +49,7 @@ export async function createField(req, res) {
     })
     res.status(201).json(field);
   } catch (error) {
-    console.error("Create field error:", error);
-    res.status(500).json({ error: "Failed to create field" });
+    handleError(error, "Failed to create field", res);
   }
 }
 
@@ -71,7 +69,7 @@ export async function updateField(req, res) {
     if (!existingField) {
       return res.status(404).json({ error: "Field not found" });
     }
-    if (existingField.inventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(existingField.inventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can edit fields" });
     }
     const field = await prisma.inventoryField.update({
@@ -85,8 +83,7 @@ export async function updateField(req, res) {
     });
     res.json(field);
   } catch (error) {
-    console.error("Update field error:", error);
-    res.status(500).json({ error: "Failed to update field" });
+    handleError(error, "Failed to update field", res);
   }
 }
 
@@ -105,7 +102,7 @@ export async function deleteField(req, res) {
     if (!existingField) {
       return res.status(404).json({ error: "Field not found" });
     }
-    if (existingField.inventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(existingField.inventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can delete fields" });
     }
     await prisma.inventoryField.delete({
@@ -113,8 +110,7 @@ export async function deleteField(req, res) {
     });
     res.json({ message: "Field deleted successfully" });
   } catch (error) {
-    console.error("Delete field error:", error);
-    res.status(500).json({ error: "Failed to delete field" });
+    handleError(error, "Failed to delete field", res);
   }
 }
 
@@ -130,7 +126,7 @@ export async function reorderFields(req, res) {
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    if (inventory.userId !== userId && req.user.role !== 'ADMIN') {
+    if (!isOwnerOrAdmin(inventory.userId, userId, req.user.role)) {
       return res.status(403).json({ error: "Only the owner or admin can reorder fields" });
     }
     const updatePromises = fieldOrders.map(({ fieldId, order }) =>
@@ -146,7 +142,6 @@ export async function reorderFields(req, res) {
     });
     res.json(fields);
   } catch (error) {
-    console.error("Reorder fields error:", error);
-    res.status(500).json({ error: "Failed to reorder fields" });
+    handleError(error, "Failed to reorder fields", res);
   }
 }

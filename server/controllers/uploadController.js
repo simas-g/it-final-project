@@ -38,10 +38,19 @@ export const uploadImage = async (req, res) => {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read',
     };
 
-    await s3Client.send(new PutObjectCommand(uploadParams));
+    const useAcl = process.env.AWS_S3_USE_ACL === 'true'
+    const paramsWithAcl = useAcl ? { ...uploadParams, ACL: 'public-read' } : uploadParams
+    try {
+      await s3Client.send(new PutObjectCommand(paramsWithAcl));
+    } catch (err) {
+      if (useAcl && err?.name === 'AccessDenied') {
+        await s3Client.send(new PutObjectCommand(uploadParams))
+      } else {
+        throw err
+      }
+    }
 
     const imageUrl = `https://${BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${fileName}`;
 

@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
 import api from '@/lib/api'
-
+import { prepareFieldValues } from '@/lib/fieldUtils'
 import { ArrowLeft, Edit, Trash2, Heart, Calendar, User, Save, X } from 'lucide-react'
 
 export default function ItemDetail() {
@@ -52,7 +52,7 @@ export default function ItemDetail() {
   const startEditing = () => {
     const initialValues = {}
     item.inventory.fields.forEach(field => {
-      const existingValue = item.fields?.[field.id]
+      const existingValue = item.fields?.[field.id]?.value
       if (field.fieldType === 'BOOLEAN') {
         initialValues[field.id] = existingValue === true || existingValue === 'true'
       } else {
@@ -75,22 +75,7 @@ export default function ItemDetail() {
   const handleSaveEdit = async () => {
     try {
       setSaving(true)
-      const preparedFields = {}
-      item.inventory.fields.forEach(field => {
-        const value = editValues[field.id]
-        if (field.fieldType === 'BOOLEAN' || (value !== '' && value !== null && value !== undefined)) {
-          switch (field.fieldType) {
-            case 'NUMERIC':
-              preparedFields[field.id] = parseFloat(value) || 0
-              break
-            case 'BOOLEAN':
-              preparedFields[field.id] = value === 'true' || value === true
-              break
-            default:
-              preparedFields[field.id] = String(value)
-          }
-        }
-      })
+      const preparedFields = prepareFieldValues(item.inventory.fields, editValues)
       await api.put(`/items/${id}`, {
         fields: preparedFields,
         version: item.version
@@ -151,8 +136,8 @@ export default function ItemDetail() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">{getTranslation('loading', language)}</p>
+          <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{getTranslation('loading', language)}</p>
         </div>
       </div>
     )
@@ -316,12 +301,12 @@ export default function ItemDetail() {
                         <div className="mt-1">
                           {field.fieldType === 'BOOLEAN' ? (
                             <p className="text-sm">
-                              {item.fields[field.id] ? getTranslation('yes', language) : getTranslation('no', language)}
+                              {item.fields[field.id]?.value ? getTranslation('yes', language) : getTranslation('no', language)}
                             </p>
-                          ) : field.fieldType === 'IMAGE_URL' && item.fields[field.id] ? (
+                          ) : field.fieldType === 'IMAGE_URL' && item.fields[field.id]?.value ? (
                             <div className="space-y-2">
                               <img 
-                                src={item.fields[field.id]} 
+                                src={item.fields[field.id].value} 
                                 alt={field.title}
                                 className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
                                 onError={(e) => {
@@ -330,12 +315,12 @@ export default function ItemDetail() {
                                 }}
                               />
                               <p className="text-xs text-muted-foreground break-all" style={{display: 'none'}}>
-                                {item.fields[field.id]}
+                                {item.fields[field.id].value}
                               </p>
                             </div>
                           ) : (
                             <p className="text-sm">
-                              {item.fields[field.id] || getTranslation('notSet', language)}
+                              {item.fields[field.id]?.value || getTranslation('notSet', language)}
                             </p>
                           )}
                         </div>

@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client"
-
+import prisma from "../lib/prisma.js"
 import { getFieldValues, createFieldValueData, formatFieldValueForDisplay } from "../lib/fieldMapping.js"
-
-const prisma = new PrismaClient()
+import { handleError } from "../lib/errors.js"
 
 async function generateCustomId(inventoryId) {
   const config = await prisma.customIdConfig.findUnique({
@@ -173,8 +171,7 @@ export async function getInventoryItems(req, res) {
       }
     })
   } catch (error) {
-    console.error("Get inventory items error:", error)
-    res.status(500).json({ error: "Failed to fetch items" })
+    handleError(error, "Failed to fetch items", res)
   }
 }
 
@@ -217,8 +214,7 @@ export async function getItem(req, res) {
     }
     res.json(itemWithFields)
   } catch (error) {
-    console.error("Get item error:", error)
-    res.status(500).json({ error: "Failed to fetch item" })
+    handleError(error, "Failed to fetch item", res)
   }
 }
 
@@ -241,7 +237,8 @@ export async function createItem(req, res) {
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" })
     }
-    const hasWriteAccess = inventory.userId === userId || 
+    const hasWriteAccess = inventory.isPublic ||
+                          inventory.userId === userId || 
                           req.user.role === 'ADMIN' ||
                           inventory.inventoryAccess.some(access => access.accessType === 'WRITE')
     if (!hasWriteAccess) {
@@ -302,8 +299,7 @@ export async function createItem(req, res) {
     }
     res.status(201).json(itemWithFields)
   } catch (error) {
-    console.error("Create item error:", error)
-    res.status(500).json({ error: "Failed to create item" })
+    handleError(error, "Failed to create item", res)
   }
 }
 
@@ -407,8 +403,7 @@ export async function updateItem(req, res) {
     }
     res.json(itemWithFields)
   } catch (error) {
-    console.error("Update item error:", error)
-    res.status(500).json({ error: "Failed to update item" })
+    handleError(error, "Failed to update item", res)
   }
 }
 
@@ -442,8 +437,7 @@ export async function deleteItem(req, res) {
     });
     res.json({ message: "Item deleted successfully" });
   } catch (error) {
-    console.error("Delete item error:", error);
-    res.status(500).json({ error: "Failed to delete item" });
+    handleError(error, "Failed to delete item", res);
   }
 }
 
