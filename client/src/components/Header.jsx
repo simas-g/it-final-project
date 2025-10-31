@@ -109,8 +109,8 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
             <Menu className="h-5 w-5" />
           </Button>
           
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-9 h-9 border-2 border-foreground rounded-lg flex items-center justify-center group-hover:bg-foreground group-hover:text-background transition-colors">
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-9 h-9 border-2 border-foreground rounded-lg flex items-center justify-center">
               <Package className="h-5 w-5" />
             </div>
             <span className="font-bold text-xl hidden sm:inline tracking-tight">

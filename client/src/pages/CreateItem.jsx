@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import { useParams, useNavigate, Link } from "react-router-dom";
 
-import { useAuth } from "@/contexts/AuthContext";
 
 import { Button } from "@/components/ui/button";
 
@@ -14,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { Badge } from "@/components/ui/badge";
 
 import { api } from "@/lib/api";
 import { prepareFieldValues, initializeFieldValues, validateFields } from "@/lib/fieldUtils";
@@ -25,8 +23,6 @@ import {
   Package, 
   AlertCircle,
   Hash,
-  Sparkles,
-  RefreshCw
 } from "lucide-react";
 
 export default function CreateItem() {
@@ -38,8 +34,6 @@ export default function CreateItem() {
   const [inventory, setInventory] = useState(null);
   const [customFields, setCustomFields] = useState([]);
   const [fieldValues, setFieldValues] = useState({});
-  const [customId, setCustomId] = useState("");
-  const [generatingId, setGeneratingId] = useState(false);
   const [previewId, setPreviewId] = useState("");
   useEffect(() => {
     fetchInventory();
@@ -80,20 +74,6 @@ export default function CreateItem() {
       [fieldId]: value
     }));
   };
-  const handleGenerateCustomId = async () => {
-    setGeneratingId(true);
-    try {
-      const response = await api.post('/custom-id/preview', { 
-        elements: inventory.customIdConfig.elementsList 
-      });
-      setCustomId(response.data.preview);
-    } catch (error) {
-      console.error('Error generating custom ID:', error);
-      setError('Failed to generate custom ID');
-    } finally {
-      setGeneratingId(false);
-    }
-  };
   const validateForm = () => {
     const validation = validateFields(customFields, fieldValues);
     if (!validation.isValid) {
@@ -112,19 +92,13 @@ export default function CreateItem() {
     try {
       const preparedFields = prepareFieldValues(customFields, fieldValues);
       const payload = {
-        fields: preparedFields,
-        customId: customId || undefined
+        fields: preparedFields
       };
       const response = await api.post(`/inventories/${inventoryId}/items`, payload);
       navigate(`/inventory/${inventoryId}`);
     } catch (error) {
       console.error('Error creating item:', error);
-      if (error.response?.data?.suggestedId) {
-        setError(`${error.response.data.error}. Suggested ID: ${error.response.data.suggestedId}`);
-        setCustomId(error.response.data.suggestedId);
-      } else {
-        setError(error.response?.data?.error || 'Failed to create item');
-      }
+      setError(error.response?.data?.error || 'Failed to create item');
     } finally {
       setLoading(false);
     }
@@ -182,39 +156,17 @@ export default function CreateItem() {
                 Custom ID
               </CardTitle>
               <CardDescription>
-                The ID will be auto-generated when you save, or you can enter a custom one
+                The ID will be auto-generated automatically when you save the item
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Leave empty for auto-generation"
-                    value={customId}
-                    onChange={(e) => setCustomId(e.target.value)}
-                    className="h-11 border-2 font-mono"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  onClick={handleGenerateCustomId}
-                  disabled={generatingId}
-                  variant="outline"
-                >
-                  {generatingId ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate
-                    </>
-                  )}
-                </Button>
-              </div>
+            <CardContent>
               {previewId && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">Preview format:</p>
+                  <p className="text-xs text-muted-foreground mb-1">Example ID format:</p>
                   <p className="font-mono text-sm">{previewId}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Your actual ID will be generated on the server
+                  </p>
                 </div>
               )}
             </CardContent>

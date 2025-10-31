@@ -242,9 +242,11 @@ export async function deleteInventory(req, res) {
 export async function getUserInventories(req, res) {
   try {
     const userId = req.user.id;
-    const { type = "all" } = req.query; // "owned", "access", "all"
+    const { type = "all" } = req.query;
     let where = {};
-    if (type === "owned") {
+    if (req.user.role === 'ADMIN') {
+      where = {};
+    } else if (type === "owned") {
       where = { userId };
     } else if (type === "access") {
       where = {

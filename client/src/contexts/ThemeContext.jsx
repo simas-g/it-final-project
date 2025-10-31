@@ -28,15 +28,12 @@ export function ThemeProvider({ children }) {
   const [state, dispatch] = useReducer(themeReducer, initialState)
 
   useEffect(() => {
-    // Apply theme to document
     document.documentElement.classList.remove('light', 'dark')
     document.documentElement.classList.add(state.theme)
-    // Save to localStorage
     localStorage.setItem('theme', state.theme)
   }, [state.theme])
 
   useEffect(() => {
-    // Save language to localStorage
     localStorage.setItem('language', state.language)
   }, [state.language])
 

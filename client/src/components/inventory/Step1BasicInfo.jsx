@@ -96,7 +96,7 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
 
     <Card className="border-2">
       <CardHeader>
-        <CardTitle>Media & Visibility</CardTitle>
+        <CardTitle>Media & Accessibility</CardTitle>
         <CardDescription>Customize how your inventory appears</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -109,7 +109,7 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         />
 
         <div className="space-y-4">
-          <Label className="text-sm font-medium">Visibility</Label>
+          <Label className="text-sm font-medium">Accessibility</Label>
           <div className="flex items-center space-x-4 p-4 border-2 rounded-lg">
             <input
               type="checkbox"
@@ -135,8 +135,8 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
               </label>
               <p className="text-xs text-muted-foreground mt-1">
                 {formData.isPublic 
-                  ? "Anyone can view this inventory"
-                  : "Only you and people you share with can view this inventory"
+                  ? "Anyone can edit this inventory"
+                  : "Only you and people you share with can edit this inventory"
                 }
               </p>
             </div>

@@ -88,33 +88,46 @@ export default function InventoryDetail() {
   return (
     <div className="w-full space-y-6">
       <div className="pb-6 border-b">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold">{inventory.name}</h1>
-              {inventory.isPublic && (
-                <Badge variant="secondary">{getTranslation('public', language)}</Badge>
-              )}
+        <div className="flex flex-row items-start justify-between gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-start gap-4 flex-wrap flex-1 min-w-0">
+            {inventory.imageUrl && (
+            <div className="">
+              <img
+                src={inventory.imageUrl}
+                alt={inventory.name}
+                className="w-48 h-48 object-cover rounded-lg border"
+                onError={(e) => { e.target.style.display = 'none' }}
+              />
             </div>
-            <p className="text-muted-foreground">
-              {inventory.description || getTranslation('noDescription', language)}
-            </p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link 
-                to={`/profile/${inventory.user.id}`}
-                className="flex items-center hover:text-foreground transition-colors"
-              >
-                <Users className="h-4 w-4 mr-1" />
-                {inventory.user.name || inventory.user.email}
-              </Link>
-              <span className="flex items-center">
-                <Package className="h-4 w-4 mr-1" />
-                {inventory._count?.items || 0} {getTranslation('items', language)}
-              </span>
+            )}
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-3xl font-bold">{inventory.name}</h1>
+                {inventory.isPublic && (
+                  <Badge variant="secondary">{getTranslation('public', language)}</Badge>
+                )}
+              </div>
+              <p className="text-muted-foreground">
+                {inventory.description || getTranslation('noDescription', language)}
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                <Link 
+                  to={`/profile/${inventory.user.id}`}
+                  className="flex items-center hover:text-foreground transition-colors"
+                >
+                  <Users className="h-4 w-4 mr-1" />
+                  {inventory.user.name || inventory.user.email}
+                </Link>
+                <span className="flex items-center">
+                  <Package className="h-4 w-4 mr-1" />
+                  {inventory._count?.items || 0} {getTranslation('items', language)}
+                </span>
+              </div>
             </div>
           </div>
-          {isAuthenticated() && user && (user.id === inventory.userId || user.role === 'ADMIN') && (
-            <Button asChild>
+          
+          {isAuthenticated() && user && (user.id === inventory.userId || inventory.isPublic) && (
+            <Button asChild className="flex-shrink-0">
               <Link to={`/inventory/${id}/item/new`}>
                 <Plus className="mr-2 h-4 w-4" />
                 {getTranslation('addItem', language)}
@@ -123,16 +136,7 @@ export default function InventoryDetail() {
           )}
         </div>
       </div>
-      {inventory.imageUrl && (
-        <div className="w-full">
-          <img
-            src={inventory.imageUrl}
-            alt={inventory.name}
-            className="w-full max-h-64 object-cover rounded-lg border"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-        </div>
-      )}
+      
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="items" className="flex items-center">
@@ -143,13 +147,13 @@ export default function InventoryDetail() {
             <MessageSquare className="h-4 w-4 mr-2" />
             {getTranslation('discussion', language)}
           </TabsTrigger>
-          {user && user.id === inventory.userId && (
+          {user && (user.id === inventory.userId || user.role === 'ADMIN') && (
             <TabsTrigger value="access" className="flex items-center">
               <Lock className="h-4 w-4 mr-2" />
               {getTranslation('access', language)}
             </TabsTrigger>
           )}
-          {user && user.id === inventory.userId && (
+          {user && (user.id === inventory.userId || user.role === 'ADMIN') && (
             <TabsTrigger value="settings" className="flex items-center">
               <Settings className="h-4 w-4 mr-2" />
               {getTranslation('settings', language)}
@@ -311,7 +315,7 @@ export default function InventoryDetail() {
         <TabsContent value="access" className="space-y-4">
           <AccessManagement 
             inventoryId={id} 
-            isOwner={user && user.id === inventory.userId}
+            isOwner={user && user.id === inventory.userId || user.role === 'ADMIN'}
           />
         </TabsContent>
         <TabsContent value="settings" className="space-y-4">

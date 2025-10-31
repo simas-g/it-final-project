@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js"
 import { getFieldValues, createFieldValueData, formatFieldValueForDisplay } from "../lib/fieldMapping.js"
 import { handleError } from "../lib/errors.js"
+import { v4 as uuidv4 } from 'uuid';
 
 async function generateCustomId(inventoryId) {
   const config = await prisma.customIdConfig.findUnique({
@@ -35,7 +36,7 @@ async function generateCustomId(inventoryId) {
         customId += formatNumber(random9, element.format);
         break;
       case 'GUID':
-        customId += generateGUID();
+        customId += uuidv4();
         break;
       case 'DATE_TIME':
         const now = new Date();
@@ -93,14 +94,6 @@ function formatDateTime(date, format) {
     .replace('ss', seconds);
 }
 
-function generateGUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 export async function getInventoryItems(req, res) {
   try {
     const { inventoryId } = req.params
@@ -115,7 +108,6 @@ export async function getInventoryItems(req, res) {
       const searchConditions = [
         { customId: { contains: search, mode: 'insensitive' } }
       ]
-      // Add search conditions for text fields through fieldValues
       const textFields = inventoryFields.filter(field => 
         field.fieldType === 'SINGLE_LINE_TEXT' || field.fieldType === 'MULTI_LINE_TEXT'
       )
@@ -221,7 +213,7 @@ export async function getItem(req, res) {
 export async function createItem(req, res) {
   try {
     const { inventoryId } = req.params
-    const { fields = {}, customId } = req.body
+    const { fields = {} } = req.body
     const userId = req.user.id
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
@@ -244,23 +236,31 @@ export async function createItem(req, res) {
     if (!hasWriteAccess) {
       return res.status(403).json({ error: "You don't have write access to this inventory" })
     }
-    let finalCustomId = customId
-    if (!finalCustomId) {
-      finalCustomId = await generateCustomId(inventoryId)
-    }
-    if (finalCustomId) {
+    
+    let finalCustomId = await generateCustomId(inventoryId)
+    let attempts = 0
+    const maxAttempts = 10
+    
+    while (finalCustomId && attempts < maxAttempts) {
       const existingItem = await prisma.inventoryItem.findFirst({
         where: {
           inventoryId,
           customId: finalCustomId
         }
       })
-      if (existingItem) {
-        return res.status(409).json({ 
-          error: "Custom ID already exists in this inventory",
-          suggestedId: await generateCustomId(inventoryId)
-        })
+      if (!existingItem) {
+        break
       }
+      finalCustomId = await generateCustomId(inventoryId)
+      attempts++
+    }
+    
+    if (!finalCustomId) {
+      return res.status(500).json({ error: "Failed to generate unique custom ID" })
+    }
+    
+    if (attempts >= maxAttempts) {
+      return res.status(500).json({ error: "Unable to generate unique custom ID after multiple attempts" })
     }
     const fieldValueData = createFieldValueData(fields, inventory.fields)
     const item = await prisma.inventoryItem.create({
@@ -306,7 +306,7 @@ export async function createItem(req, res) {
 export async function updateItem(req, res) {
   try {
     const { id } = req.params
-    const { fields, customId, version } = req.body
+    const { fields, version } = req.body
     const userId = req.user.id
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
@@ -343,28 +343,11 @@ export async function updateItem(req, res) {
         currentVersion: existingItem.version
       })
     }
-    if (customId && customId !== existingItem.customId) {
-      const duplicateItem = await prisma.inventoryItem.findFirst({
-        where: {
-          inventoryId: existingItem.inventoryId,
-          customId,
-          id: { not: id }
-        }
-      })
-      if (duplicateItem) {
-        return res.status(409).json({ 
-          error: "Custom ID already exists in this inventory"
-        })
-      }
-    }
     const fieldValueData = fields ? createFieldValueData(fields, existingItem.inventory.fields) : []
-    // Update field values
     if (fieldValueData.length > 0) {
-      // Delete existing field values
       await prisma.itemFieldValue.deleteMany({
         where: { itemId: id }
       })
-      // Create new field values
       await prisma.itemFieldValue.createMany({
         data: fieldValueData.map(fv => ({
           itemId: id,
@@ -376,7 +359,6 @@ export async function updateItem(req, res) {
     const item = await prisma.inventoryItem.update({
       where: { id },
       data: {
-        customId,
         version: { increment: 1 }
       },
       include: {

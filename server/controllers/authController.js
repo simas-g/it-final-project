@@ -12,7 +12,7 @@ const generateToken = (userId, email, role) => {
 
 export async function registerEmail(req, res) {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name} = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
@@ -26,6 +26,7 @@ export async function registerEmail(req, res) {
     const user = await prisma.user.create({
       data: {
         email,
+        name: name || null,
         password: hashedPassword,
         role: "USER",
       },
