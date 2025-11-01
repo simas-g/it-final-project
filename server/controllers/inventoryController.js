@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import { isOwnerOrAdmin } from "../lib/permissions.js";
 import { handleError } from "../lib/errors.js";
+import { getFieldValues } from "../lib/fieldMapping.js";
 
 export async function getInventories(req, res) {
   try {
@@ -87,6 +88,13 @@ export async function getInventory(req, res) {
             user: {
               select: { id: true, name: true, email: true }
             },
+            fieldValues: {
+              include: {
+                field: {
+                  select: { id: true, title: true, fieldType: true }
+                }
+              }
+            },
             likes: {
               include: {
                 user: {
@@ -113,7 +121,14 @@ export async function getInventory(req, res) {
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });
     }
-    res.json(inventory);
+    const itemsWithFields = inventory.items.map(item => ({
+      ...item,
+      fields: getFieldValues(item, inventory.fields)
+    }))
+    res.json({
+      ...inventory,
+      items: itemsWithFields
+    });
   } catch (error) {
     handleError(error, "Failed to fetch inventory", res);
   }

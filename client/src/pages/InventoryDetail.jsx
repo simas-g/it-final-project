@@ -36,6 +36,7 @@ export default function InventoryDetail() {
       try {
         const response = await api.get(`/inventories/${id}`)
         setInventory(response.data)
+        console.log('Inventory fetched:', response.data)
       } catch (error) {
         console.error('Error fetching inventory:', error)
       } finally {

@@ -1,17 +1,11 @@
 import { DndContext, closestCorners } from '@dnd-kit/core';
-
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-
 import { Button } from "@/components/ui/button";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import { ArrowLeft, Hash, Sparkles, Plus } from "lucide-react";
-
 import { ELEMENT_TYPES } from "@/lib/inventoryConstants";
-
+import { useI18n } from "@/contexts/I18nContext";
 import SortableElementItem from "./SortableElementItem";
 
 const Step2CustomId = ({ 
@@ -24,25 +18,28 @@ const Step2CustomId = ({
   onAddElement,
   onBack,
   onNext 
-}) => (
+}) => {
+  const { t } = useI18n();
+  
+  return (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div className="lg:col-span-2 space-y-6">
       <Card className="border-2">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Hash className="mr-2 h-5 w-5" />
-            Custom ID Elements <span className="text-destructive ml-1">*</span>
+            {t('customIdElements')} <span className="text-destructive ml-1">*</span>
           </CardTitle>
           <CardDescription>
-            Drag to reorder. Click X to remove. At least one element required.
+            {t('dragToReorder')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {customIdElements.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed rounded-lg">
               <Hash className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground mb-4">No elements added yet</p>
-              <p className="text-sm text-muted-foreground">Add elements from the right panel to start building your custom ID</p>
+              <p className="text-muted-foreground mb-4">{t('noElementsAdded')}</p>
+              <p className="text-sm text-muted-foreground">{t('addElementsFromPanel')}</p>
             </div>
           ) : (
             <DndContext
@@ -75,13 +72,13 @@ const Step2CustomId = ({
         <CardHeader>
           <CardTitle className="flex items-center">
             <Sparkles className="mr-2 h-5 w-5" />
-            Live Preview
+            {t('livePreview')}
           </CardTitle>
-          <CardDescription>Example of generated ID</CardDescription>
+          <CardDescription>{t('exampleGeneratedId')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="p-4 bg-muted rounded-lg font-mono text-lg break-all">
-            {preview || 'Add elements to see preview'}
+            {preview || t('addElementsToSeePreview')}
           </div>
         </CardContent>
       </Card>
@@ -90,8 +87,8 @@ const Step2CustomId = ({
     <div className="space-y-4">
       <Card className="border-2">
         <CardHeader>
-          <CardTitle>Available Elements</CardTitle>
-          <CardDescription>Click to add</CardDescription>
+          <CardTitle>{t('availableElements')}</CardTitle>
+          <CardDescription>{t('clickToAdd')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {ELEMENT_TYPES.map((elementType) => {
@@ -121,7 +118,7 @@ const Step2CustomId = ({
           {customIdElements.length >= 10 && (
             <Alert>
               <AlertDescription className="text-xs">
-                Maximum 10 elements reached
+                {t('maximumElementsReached')}
               </AlertDescription>
             </Alert>
           )}
@@ -132,7 +129,7 @@ const Step2CustomId = ({
     <div className="col-span-full flex items-center justify-between pt-6 border-t-2">
       <Button type="button" variant="outline" onClick={onBack}>
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {t('back')}
       </Button>
       <Button
         type="button"
@@ -140,11 +137,12 @@ const Step2CustomId = ({
         disabled={customIdElements.length === 0}
         className="min-w-[200px]"
       >
-        Next: Custom Fields (Optional)
+        {t('nextCustomFields')}
       </Button>
     </div>
   </div>
-);
+  );
+};
 
 export default Step2CustomId;
 

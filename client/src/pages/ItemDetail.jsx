@@ -51,14 +51,16 @@ export default function ItemDetail() {
   }, [fetchItem])
   const startEditing = () => {
     const initialValues = {}
-    item.inventory.fields.forEach(field => {
-      const existingValue = item.fields?.[field.id]?.value
-      if (field.fieldType === 'BOOLEAN') {
-        initialValues[field.id] = existingValue === true || existingValue === 'true'
-      } else {
-        initialValues[field.id] = existingValue || ''
-      }
-    })
+    if (item?.inventory?.fields) {
+      item.inventory.fields.forEach(field => {
+        const existingValue = item.fields?.[field.id]
+        if (field.fieldType === 'BOOLEAN') {
+          initialValues[field.id] = existingValue === true || existingValue === 'true'
+        } else {
+          initialValues[field.id] = existingValue || ''
+        }
+      })
+    }
     setEditValues(initialValues)
     setIsEditing(true)
   }
@@ -301,12 +303,12 @@ export default function ItemDetail() {
                         <div className="mt-1">
                           {field.fieldType === 'BOOLEAN' ? (
                             <p className="text-sm">
-                              {item.fields[field.id]?.value ? getTranslation('yes', language) : getTranslation('no', language)}
+                              {item.fields?.[field.id] ? getTranslation('yes', language) : getTranslation('no', language)}
                             </p>
-                          ) : field.fieldType === 'IMAGE_URL' && item.fields[field.id]?.value ? (
+                          ) : field.fieldType === 'IMAGE_URL' && item.fields?.[field.id] ? (
                             <div className="space-y-2">
                               <img 
-                                src={item.fields[field.id].value} 
+                                src={item.fields[field.id]} 
                                 alt={field.title}
                                 className="max-w-full h-auto max-h-64 rounded-lg border shadow-sm"
                                 onError={(e) => {
@@ -315,12 +317,12 @@ export default function ItemDetail() {
                                 }}
                               />
                               <p className="text-xs text-muted-foreground break-all" style={{display: 'none'}}>
-                                {item.fields[field.id].value}
+                                {item.fields[field.id]}
                               </p>
                             </div>
                           ) : (
                             <p className="text-sm">
-                              {item.fields[field.id]?.value || getTranslation('notSet', language)}
+                              {item.fields?.[field.id] || getTranslation('notSet', language)}
                             </p>
                           )}
                         </div>

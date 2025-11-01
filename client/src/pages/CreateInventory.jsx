@@ -1,33 +1,23 @@
 import { useState, useEffect } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "@/contexts/AuthContext";
-
 import { Button } from "@/components/ui/button";
-
 import { api } from "@/lib/api";
-
 import { useToast } from "@/hooks/use-toast";
-
+import { useI18n } from "@/contexts/I18nContext";
 import { ArrowLeft, Package } from "lucide-react";
-
 import { arrayMove } from '@dnd-kit/sortable';
-
 import { useDndSensors } from "@/hooks/useDndSensors";
-
 import { FIELD_TYPES } from "@/lib/inventoryConstants";
-
 import Step1BasicInfo from "@/components/inventory/Step1BasicInfo";
-
 import Step2CustomId from "@/components/inventory/Step2CustomId";
-
 import Step3CustomFields from "@/components/inventory/Step3CustomFields";
 
 export default function CreateInventory() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useI18n();
   const sensors = useDndSensors();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -67,7 +57,7 @@ export default function CreateInventory() {
       setPreview(response.data.preview);
     } catch (error) {
       console.error('Error generating preview:', error);
-      setPreview('Error generating preview');
+      setPreview(t('errorGeneratingPreview'));
     }
   };
   const handleInputChange = (e) => {
@@ -153,20 +143,20 @@ export default function CreateInventory() {
   };
   const validateStep1 = () => {
     if (!formData.name.trim()) {
-      toast({ title: "Inventory name is required", variant: 'destructive' });
+      toast({ title: t('inventoryNameRequired'), variant: 'destructive' });
       return false;
     }
     return true;
   };
   const validateStep2 = () => {
     if (customIdElements.length === 0) {
-      toast({ title: "Please add at least one Custom ID element", variant: 'destructive' });
+      toast({ title: t('addAtLeastOneElement'), variant: 'destructive' });
       return false;
     }
     for (let i = 0; i < customIdElements.length; i++) {
       const element = customIdElements[i];
       if (element.elementType === 'FIXED_TEXT' && !element.value) {
-        toast({ title: `Element ${i + 1}: Fixed text requires a value`, variant: 'destructive' });
+        toast({ title: t('elementFixedTextRequired', { number: i + 1 }), variant: 'destructive' });
         return false;
       }
     }
@@ -189,7 +179,7 @@ export default function CreateInventory() {
     if (customFields.length > 0) {
       for (let i = 0; i < customFields.length; i++) {
         if (!customFields[i].title.trim()) {
-          toast({ title: `Field ${i + 1}: Title is required`, variant: 'destructive' });
+          toast({ title: t('fieldTitleRequired', { number: i + 1 }), variant: 'destructive' });
           return;
         }
       }   
@@ -232,7 +222,7 @@ export default function CreateInventory() {
     } catch (error) {
       console.error('Error creating inventory:', error);
       toast({
-        title: error.response?.data?.error || 'Failed to create inventory',
+        title: error.response?.data?.error || t('failedToCreateInventory'),
         variant: 'destructive',
       });
     } finally {
@@ -245,7 +235,7 @@ export default function CreateInventory() {
       <div className="mb-8">
         <Button onClick={() => navigate('/dashboard')} variant="ghost" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t('backToDashboard')}
         </Button>
         
         <div className="flex items-center space-x-4">
@@ -253,9 +243,9 @@ export default function CreateInventory() {
             <Package className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Create New Inventory</h1>
+            <h1 className="text-4xl font-bold tracking-tight">{t('createNewInventory')}</h1>
             <p className="text-muted-foreground mt-1">
-              Step {currentStep} of 3: {currentStep === 1 ? 'Basic Information' : currentStep === 2 ? 'Custom ID Configuration' : 'Custom Fields (Optional)'}
+              {t('stepOf', { step: currentStep, total: 3 })}: {currentStep === 1 ? t('basicInformation') : currentStep === 2 ? t('customIdConfiguration') : t('customFieldsOptional')}
             </p>
           </div>
         </div>
@@ -267,21 +257,21 @@ export default function CreateInventory() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted'}`}>
               1
             </div>
-            <span className="ml-2 font-medium hidden sm:inline">Basic Info</span>
+            <span className="ml-2 font-medium hidden sm:inline">{t('basicInfo')}</span>
           </div>
           <div className={`flex-1 h-0.5 ${currentStep >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
           <div className={`flex items-center ${currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted'}`}>
               2
             </div>
-            <span className="ml-2 font-medium hidden sm:inline">Custom ID</span>
+            <span className="ml-2 font-medium hidden sm:inline">{t('customId')}</span>
           </div>
           <div className={`flex-1 h-0.5 ${currentStep >= 3 ? 'bg-primary' : 'bg-muted'}`}></div>
           <div className={`flex items-center ${currentStep >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 3 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted'}`}>
               3
             </div>
-            <span className="ml-2 font-medium hidden sm:inline">Fields</span>
+            <span className="ml-2 font-medium hidden sm:inline">{t('fieldsShort')}</span>
           </div>
         </div>
       </div>

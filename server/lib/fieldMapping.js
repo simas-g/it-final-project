@@ -14,11 +14,12 @@ export const getFieldValues = (item, inventoryFields) => {
   inventoryFields.forEach(field => {
     const fieldValue = item.fieldValues.find(fv => fv.fieldId === field.id)
     if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
-      fieldValues[field.id] = {
-        value: fieldValue.value,
-        fieldType: field.fieldType,
-        title: field.title,
-        isRequired: field.isRequired
+      if (field.fieldType === 'BOOLEAN') {
+        fieldValues[field.id] = fieldValue.value === 'true' || fieldValue.value === true
+      } else if (field.fieldType === 'NUMERIC') {
+        fieldValues[field.id] = parseFloat(fieldValue.value)
+      } else {
+        fieldValues[field.id] = fieldValue.value
       }
     }
   })

@@ -1,36 +1,32 @@
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import { Label } from "@/components/ui/label";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
 import ImageUpload from "@/components/ui/image-upload";
-
 import { Tag as TagIcon, Lock, Globe } from "lucide-react";
-
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/contexts/I18nContext";
 
 const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange, onNext }) => {
   const { toast } = useToast();
+  const { t } = useI18n();
   
   return (
   <>
     <Card className="border-2">
       <CardHeader>
-        <CardTitle>Basic Information</CardTitle>
-        <CardDescription>Give your inventory a name and description</CardDescription>
+        <CardTitle>{t('basicInformation')}</CardTitle>
+        <CardDescription>{t('giveInventoryNameDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-sm font-medium">
-            Name <span className="text-destructive">*</span>
+            {t('nameRequired')} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="name"
             name="name"
-            placeholder="My Collection"
+            placeholder={t('myCollection')}
             value={formData.name}
             onChange={onInputChange}
             className="h-11 border-2"
@@ -39,11 +35,11 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+          <Label htmlFor="description" className="text-sm font-medium">{t('description')}</Label>
           <textarea
             id="description"
             name="description"
-            placeholder="Describe your inventory..."
+            placeholder={t('describeInventory')}
             value={formData.description}
             onChange={onInputChange}
             className="w-full min-h-[100px] px-3 py-2 border-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
@@ -54,13 +50,13 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
 
     <Card className="border-2">
       <CardHeader>
-        <CardTitle>Categorization</CardTitle>
-        <CardDescription>Help others find your inventory</CardDescription>
+        <CardTitle>{t('categorization')}</CardTitle>
+        <CardDescription>{t('helpOthersFind')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {categories.length > 0 && (
           <div className="space-y-2">
-            <Label htmlFor="categoryId" className="text-sm font-medium">Category</Label>
+            <Label htmlFor="categoryId" className="text-sm font-medium">{t('category')}</Label>
             <select
               id="categoryId"
               name="categoryId"
@@ -68,7 +64,7 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
               onChange={onInputChange}
               className="w-full h-11 px-3 border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="">No category</option>
+              <option value="">{t('noCategory')}</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
@@ -79,25 +75,25 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         <div className="space-y-2">
           <Label htmlFor="tags" className="text-sm font-medium flex items-center">
             <TagIcon className="h-4 w-4 mr-2" />
-            Tags
+            {t('tags')}
           </Label>
           <Input
             id="tags"
             name="tags"
-            placeholder="vintage, rare, collectible (comma separated)"
+            placeholder={t('tagsPlaceholder')}
             value={formData.tags}
             onChange={onInputChange}
             className="h-11 border-2"
           />
-          <p className="text-xs text-muted-foreground">Separate tags with commas</p>
+          <p className="text-xs text-muted-foreground">{t('separateTagsWithCommas')}</p>
         </div>
       </CardContent>
     </Card>
 
     <Card className="border-2">
       <CardHeader>
-        <CardTitle>Media & Accessibility</CardTitle>
-        <CardDescription>Customize how your inventory appears</CardDescription>
+        <CardTitle>{t('mediaAccessibility')}</CardTitle>
+        <CardDescription>{t('customizeAppearance')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <ImageUpload
@@ -109,7 +105,7 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         />
 
         <div className="space-y-4">
-          <Label className="text-sm font-medium">Accessibility</Label>
+          <Label className="text-sm font-medium">{t('accessibility')}</Label>
           <div className="flex items-center space-x-4 p-4 border-2 rounded-lg">
             <input
               type="checkbox"
@@ -124,19 +120,19 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
                 {formData.isPublic ? (
                   <>
                     <Globe className="h-4 w-4 mr-2" />
-                    Public
+                    {t('public')}
                   </>
                 ) : (
                   <>
                     <Lock className="h-4 w-4 mr-2" />
-                    Private
+                    {t('private')}
                   </>
                 )}
               </label>
               <p className="text-xs text-muted-foreground mt-1">
                 {formData.isPublic 
-                  ? "Anyone can edit this inventory"
-                  : "Only you and people you share with can edit this inventory"
+                  ? t('anyoneCanEdit')
+                  : t('onlySharedCanEdit')
                 }
               </p>
             </div>
@@ -147,7 +143,7 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
 
     <div className="flex justify-end">
       <Button type="button" onClick={onNext} size="lg">
-        Next: Custom ID Configuration
+        {t('nextCustomId')}
       </Button>
     </div>
   </>
