@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast'
 
 import api from '@/lib/api'
 import { prepareFieldValues } from '@/lib/fieldUtils'
+import { hasItemWriteAccess } from '@/lib/permissions'
 import { ArrowLeft, Edit, Trash2, Heart, Calendar, User, Save, X } from 'lucide-react'
 
 export default function ItemDetail() {
@@ -186,7 +187,7 @@ export default function ItemDetail() {
               {item.likes?.length || 0}
             </Button>
           )}
-          {isAuthenticated() && (item.userId === user?.id || item.inventory.userId === user?.id) && (
+          {isAuthenticated() && hasItemWriteAccess(item, user) && (
             <>
               {isEditing ? (
                 <>
@@ -408,7 +409,7 @@ export default function ItemDetail() {
                   {getTranslation('viewInventory', language)}
                 </Link>
               </Button>
-              {isAuthenticated() && (item.userId === user?.id || item.inventory.userId === user?.id) && !isEditing && (
+              {isAuthenticated() && hasItemWriteAccess(item, user) && !isEditing && (
                 <Button className="w-full" variant="outline" onClick={startEditing}>
                   <Edit className="h-4 w-4 mr-2" />
                   {getTranslation('editItem', language)}

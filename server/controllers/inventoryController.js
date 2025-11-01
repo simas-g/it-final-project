@@ -2,7 +2,7 @@ import prisma from "../lib/prisma.js";
 import { isOwnerOrAdmin } from "../lib/permissions.js";
 import { handleError } from "../lib/errors.js";
 import { getFieldValues } from "../lib/fieldMapping.js";
-
+import { getUserIdFromToken } from "../lib/user.js";
 export async function getInventories(req, res) {
   try {
     const { page = 1, limit = 10, search = "", category = "", tag = "" } = req.query;
@@ -63,11 +63,19 @@ export async function getInventories(req, res) {
 export async function getInventory(req, res) {
   try {
     const { id } = req.params;
+    const headers = req.headers;
+    const authorization = headers.authorization;
+    const token = authorization?.split(" ")[1];
+    const userId = await getUserIdFromToken(token);
     const inventory = await prisma.inventory.findUnique({
       where: { id },
       include: {
+        inventoryAccess: {
+          where: { userId },
+          select: { accessType: true, userId: true }
+        },
         user: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, name: true, email: true, role: true }
         },
         category: true,
         inventoryTags: {

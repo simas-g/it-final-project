@@ -65,28 +65,28 @@ export default function Home() {
     )
   }
   return (
-    <div className={`max-w-6xl mx-auto space-y-12 ${isAuthenticated() ? '' : 'p-10'}`}>
+    <div className={`max-w-6xl mx-auto space-y-8 sm:space-y-12 px-4 ${isAuthenticated() ? 'py-6' : 'py-8 md:p-10'}`}>
       <section>
-        <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">
           <div>
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl sm:text-2xl font-bold">
               {t('latestCollections')}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {t('recentlyCreated')}
             </p>
           </div>
-          <Button variant="ghost" asChild>
+          <Button variant="ghost" asChild className="self-start sm:self-auto">
             <Link to="/search">
               {t('viewAll')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {latestInventories.map((inventory) => (
-            <Card key={inventory.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
+            <Card key={inventory.id} className="hover:shadow-md transition-shadow flex flex-col">
+              <CardHeader className="pb-2 flex-shrink-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-base font-semibold mb-1 truncate">
@@ -98,7 +98,7 @@ export default function Home() {
                       </Link>
                     </CardTitle>
                     {inventory.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-1">
+                      <p className="text-xs text-muted-foreground line-clamp-2">
                         {inventory.description}
                       </p>
                     )}
@@ -110,7 +110,7 @@ export default function Home() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="pt-3">
+              <CardContent className="pt-3 flex-grow flex flex-col justify-between">
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                   <div className="flex items-center space-x-1">
                     <Package className="h-3.5 w-3.5" />
@@ -144,46 +144,46 @@ export default function Home() {
         </div>
       </section>
       <section>
-        <div className="mb-6 pb-4 border-b">
-          <h2 className="text-2xl font-bold">
+        <div className="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">
+          <h2 className="text-xl sm:text-2xl font-bold">
             {t('trending')}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             {t('mostPopular')}
           </p>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 grid grid-cols-1 gap-4">
           {popularInventories.slice(0, 5).map((inventory, idx) => (
             <Card key={inventory.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl font-bold text-muted-foreground w-8 text-center shrink-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="text-xl sm:text-2xl font-bold text-muted-foreground w-6 sm:w-8 text-center pt-1 sm:pt-0">
                     {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <Link 
                       to={`/inventory/${inventory.id}`}
-                      className="text-base font-semibold hover:underline underline-offset-4 block truncate"
+                      className="text-sm sm:text-base font-semibold hover:underline underline-offset-4 block truncate"
                     >
                       {inventory.name}
                     </Link>
                     {inventory.description && (
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground line-clamp-1 sm:truncate">
                         {inventory.description}
                       </p>
                     )}
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center shrink-0">
                         <Package className="h-3 w-3 mr-1" />
                         {inventory._count.items} {t('items')}
                       </span>
-                      <span className="flex items-center truncate">
-                        <Users className="h-3 w-3 mr-1" />
-                        {inventory.user.name || inventory.user.email}
+                      <span className="flex items-center min-w-0">
+                        <Users className="h-3 w-3 mr-1 shrink-0" />
+                        <span className="truncate">{inventory.user.name || inventory.user.email}</span>
                       </span>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="shrink-0 text-xs sm:text-sm">
                     <Link to={`/inventory/${inventory.id}`}>
                       {t('view')}
                     </Link>
@@ -196,8 +196,8 @@ export default function Home() {
       </section>
       {tags.length > 0 && (
         <section>
-          <div className="mb-6 pb-4 border-b">
-            <h2 className="text-2xl font-bold">
+          <div className="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">
+            <h2 className="text-xl sm:text-2xl font-bold">
               {t('browseByTags')}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
@@ -209,12 +209,12 @@ export default function Home() {
               <Badge
                 key={tag.id}
                 variant="outline"
-                className="px-3 py-1 cursor-pointer hover:bg-foreground hover:text-background transition-colors"
+                className="px-2 sm:px-3 py-1 cursor-pointer hover:bg-foreground hover:text-background transition-colors max-w-full"
               >
-                <Link to={`/search?tag=${encodeURIComponent(tag.name)}`} className="flex items-center">
-                  <Tag className="h-3 w-3 mr-1" />
-                  {tag.name}
-                  <span className="ml-1.5 text-xs opacity-60">
+                <Link to={`/search?tag=${encodeURIComponent(tag.name)}`} className="flex items-center min-w-0">
+                  <Tag className="h-3 w-3 mr-1 shrink-0" />
+                  <span className="truncate">{tag.name}</span>
+                  <span className="ml-1.5 text-xs opacity-60 shrink-0">
                     {tag._count?.inventories || 0}
                   </span>
                 </Link>
@@ -224,12 +224,12 @@ export default function Home() {
         </section>
       )}
       {!isAuthenticated() && (
-        <section className="text-center space-y-6 py-16 border-t">
+        <section className="text-center space-y-6 py-12 sm:py-16 border-t">
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl sm:text-3xl font-bold">
               {t('startManagingToday')}
             </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-muted-foreground max-w-lg mx-auto px-4">
               {t('joinPlatform')}
             </p>
           </div>
