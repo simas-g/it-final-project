@@ -65,7 +65,7 @@ export default function Home() {
     )
   }
   return (
-    <div className={`max-w-6xl mx-auto space-y-8 sm:space-y-12 px-4 ${isAuthenticated() ? 'py-6' : 'py-8 md:p-10'}`}>
+    <div className={`max-w-6xl mx-auto space-y-6 sm:space-y-12`}>
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">
           <div>

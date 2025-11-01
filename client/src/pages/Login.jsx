@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { ArrowRight, Mail, Lock } from "lucide-react";
+import { ArrowRight, Mail, Lock, ArrowLeft } from "lucide-react";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -53,7 +53,11 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex flex-col gap-2">
+          <Link to="/" className="flex items-center justify-center gap-2"> 
+            <ArrowLeft className="h-4 w-4" />
+            {t('home')}
+          </Link>
           <h1 className="text-4xl font-bold tracking-tight mb-2">{t('welcomeBack')}</h1>
           <p className="text-muted-foreground">{t('loginDescription')}</p>
         </div>

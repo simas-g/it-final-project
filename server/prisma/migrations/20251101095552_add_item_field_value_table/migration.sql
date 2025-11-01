@@ -12,7 +12,6 @@ CREATE TABLE "ItemFieldValue" (
 
     CONSTRAINT "ItemFieldValue_pkey" PRIMARY KEY ("id")
 );
-
 -- CreateIndex
 CREATE UNIQUE INDEX "ItemFieldValue_itemId_fieldId_key" ON "ItemFieldValue"("itemId", "fieldId");
 

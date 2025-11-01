@@ -15,8 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-import { ArrowRight, Mail, Lock, User } from "lucide-react";
+import { ArrowRight, Mail, Lock, User, ArrowLeft } from "lucide-react";
 
 function Register() {
   const [name, setName] = useState("");
@@ -47,17 +46,15 @@ function Register() {
       setLoading(false);
     }
   };
-  const features = [
-    t('unlimitedInventories'),
-    t('customFieldTypes'),
-    t('realtimeCollaboration'),
-    t('advancedSearch')
-  ];
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md mx-auto gap-12 items-center">
         <div>
-          <div className="text-center mb-6">
+          <div className="text-center mb-6 flex flex-col gap-2">
+            <Link to="/" className="flex items-center justify-center gap-2"> 
+              <ArrowLeft className="h-4 w-4" />
+              {t('home')}
+            </Link>
             <h2 className="text-3xl font-bold tracking-tight mb-2">{t('createAccount')}</h2>
             <p className="text-muted-foreground">{t('getStarted')}</p>
           </div>

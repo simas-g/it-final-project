@@ -2,10 +2,6 @@ import { Outlet } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/AuthContext'
 
-import { useTheme } from '@/contexts/ThemeContext'
-
-import { useI18n } from '@/contexts/I18nContext'
-
 import Header from './Header'
 
 import Sidebar from './Sidebar'
@@ -14,8 +10,6 @@ import { useState } from 'react'
 
 export default function Layout() {
   const { isAuthenticated } = useAuth()
-  const { theme, language } = useTheme()
-  const { getTranslation } = useI18n()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   if (!isAuthenticated()) {
     return (
@@ -24,7 +18,7 @@ export default function Layout() {
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
-        <main>
+        <main className="p-8 md:p-10">
           <Outlet />
         </main>
       </div>

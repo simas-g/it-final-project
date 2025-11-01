@@ -27,7 +27,7 @@ import Statistics from '@/components/inventory/Statistics'
 
 export default function InventoryDetail() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { getTranslation, language } = useI18n()
   const [inventory, setInventory] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +39,6 @@ export default function InventoryDetail() {
       try {
         const response = await api.get(`/inventories/${id}`)
         setInventory(response.data)
-        console.log('Inventory fetched:', response.data)
       } catch (error) {
         console.error('Error fetching inventory:', error)
       } finally {
@@ -90,7 +89,7 @@ export default function InventoryDetail() {
     )
   }
   return (
-    <div className="w-full space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="pb-6 border-b">
         <div className="flex flex-row items-start justify-between gap-4 flex-wrap">
           <div className="flex flex-col sm:flex-row items-start gap-4 flex-wrap flex-1 min-w-0">
