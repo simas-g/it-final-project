@@ -89,13 +89,16 @@ export async function authProvider(req, res) {
       where: { email },
     });
     if (user) {
-      if (user.password && !user.provider) {
-        return res.status(400).json({
-          error:
-            "An account with this email already exists. Please sign in with email and password.",
+      if (!user.provider || user.provider !== provider) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { 
+            provider,
+            providerId,
+            name: name || user.name,
+          },
         });
-      }
-      if (name && name !== user.name) {
+      } else if (name && name !== user.name) {
         user = await prisma.user.update({
           where: { id: user.id },
           data: { name },
@@ -122,6 +125,20 @@ export async function authProvider(req, res) {
   } catch (error) {
     console.error("OAuth error:", error);
     res.status(500).json({ error: "Authentication failed" });
+  }
+}
+
+export const handleOAuthCallback = (req, res) => {
+  try {
+    if (!req.user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=Authentication failed`);
+    }
+    
+    const token = generateToken(req.user.id, req.user.email, req.user.role);
+    res.redirect(`${process.env.CLIENT_URL}/oauth/callback?token=${token}`);
+  } catch (error) {
+    console.error("OAuth callback error:", error);
+    res.redirect(`${process.env.CLIENT_URL}/login?error=Authentication failed`);
   }
 }
 

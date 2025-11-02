@@ -57,6 +57,12 @@ export async function getUsers(req, res) {
 export async function getUser(req, res) {
   try {
     const { id } = req.params;
+    const { 
+      inventoriesPage = 1, inventoriesLimit = 10,
+      itemsPage = 1, itemsLimit = 10,
+      postsPage = 1, postsLimit = 10
+    } = req.query;
+    
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -68,33 +74,6 @@ export async function getUser(req, res) {
         provider: true,
         createdAt: true,
         updatedAt: true,
-        inventories: {
-          include: {
-            category: true,
-            _count: {
-              select: { items: true }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
-        },
-        items: {
-          include: {
-            inventory: {
-              select: { id: true, name: true }
-            }
-          },
-          orderBy: { createdAt: 'desc' },
-          take: 10
-        },
-        discussionPosts: {
-          include: {
-            inventory: {
-              select: { id: true, name: true }
-            }
-          },
-          orderBy: { createdAt: 'desc' },
-          take: 10
-        },
         _count: {
           select: {
             inventories: true,
@@ -105,10 +84,81 @@ export async function getUser(req, res) {
         }
       }
     });
+    
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+    
+    const inventoriesSkip = (parseInt(inventoriesPage) - 1) * parseInt(inventoriesLimit);
+    const itemsSkip = (parseInt(itemsPage) - 1) * parseInt(itemsLimit);
+    const postsSkip = (parseInt(postsPage) - 1) * parseInt(postsLimit);
+    
+    const [inventories, inventoriesTotal, items, itemsTotal, discussionPosts, postsTotal] = await Promise.all([
+      prisma.inventory.findMany({
+        where: { userId: id },
+        include: {
+          category: true,
+          _count: {
+            select: { items: true }
+          }
+        },
+        skip: inventoriesSkip,
+        take: parseInt(inventoriesLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.inventory.count({ where: { userId: id } }),
+      prisma.inventoryItem.findMany({
+        where: { userId: id },
+        include: {
+          inventory: {
+            select: { id: true, name: true }
+          }
+        },
+        skip: itemsSkip,
+        take: parseInt(itemsLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.inventoryItem.count({ where: { userId: id } }),
+      prisma.discussionPost.findMany({
+        where: { userId: id },
+        include: {
+          inventory: {
+            select: { id: true, name: true }
+          }
+        },
+        skip: postsSkip,
+        take: parseInt(postsLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.discussionPost.count({ where: { userId: id } })
+    ]);
+    
+    res.json({
+      ...user,
+      inventories,
+      items,
+      discussionPosts,
+      pagination: {
+        inventories: {
+          page: parseInt(inventoriesPage),
+          limit: parseInt(inventoriesLimit),
+          total: inventoriesTotal,
+          pages: Math.ceil(inventoriesTotal / parseInt(inventoriesLimit))
+        },
+        items: {
+          page: parseInt(itemsPage),
+          limit: parseInt(itemsLimit),
+          total: itemsTotal,
+          pages: Math.ceil(itemsTotal / parseInt(itemsLimit))
+        },
+        posts: {
+          page: parseInt(postsPage),
+          limit: parseInt(postsLimit),
+          total: postsTotal,
+          pages: Math.ceil(postsTotal / parseInt(postsLimit))
+        }
+      }
+    });
   } catch (error) {
     console.error("Get user error:", error);
     res.status(500).json({ error: "Failed to fetch user" });

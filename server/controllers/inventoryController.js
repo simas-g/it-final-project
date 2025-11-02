@@ -63,10 +63,12 @@ export async function getInventories(req, res) {
 export async function getInventory(req, res) {
   try {
     const { id } = req.params;
+    const { includeItems = 'false', itemsPage = 1, itemsLimit = 20 } = req.query;
     const headers = req.headers;
     const authorization = headers.authorization;
     const token = authorization?.split(" ")[1];
     const userId = await getUserIdFromToken(token);
+    
     const inventory = await prisma.inventory.findUnique({
       where: { id },
       include: {
@@ -91,7 +93,24 @@ export async function getInventory(req, res) {
             }
           }
         },
-        items: {
+        _count: {
+          select: { items: true, discussionPosts: true }
+        }
+      }
+    });
+    
+    if (!inventory) {
+      return res.status(404).json({ error: "Inventory not found" });
+    }
+    
+    let items = [];
+    let itemsPagination = null;
+    
+    if (includeItems === 'true') {
+      const itemsSkip = (parseInt(itemsPage) - 1) * parseInt(itemsLimit);
+      const [itemsData, itemsTotal] = await Promise.all([
+        prisma.inventoryItem.findMany({
+          where: { inventoryId: id },
           include: {
             user: {
               select: { id: true, name: true, email: true }
@@ -111,31 +130,30 @@ export async function getInventory(req, res) {
               }
             }
           },
+          skip: itemsSkip,
+          take: parseInt(itemsLimit),
           orderBy: { createdAt: 'desc' }
-        },
-        discussionPosts: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true }
-            }
-          },
-          orderBy: { createdAt: 'asc' }
-        },
-        _count: {
-          select: { items: true }
-        }
-      }
-    });
-    if (!inventory) {
-      return res.status(404).json({ error: "Inventory not found" });
+        }),
+        prisma.inventoryItem.count({ where: { inventoryId: id } })
+      ]);
+      
+      items = itemsData.map(item => ({
+        ...item,
+        fields: getFieldValues(item, inventory.fields)
+      }));
+      
+      itemsPagination = {
+        page: parseInt(itemsPage),
+        limit: parseInt(itemsLimit),
+        total: itemsTotal,
+        pages: Math.ceil(itemsTotal / parseInt(itemsLimit))
+      };
     }
-    const itemsWithFields = inventory.items.map(item => ({
-      ...item,
-      fields: getFieldValues(item, inventory.fields)
-    }))
+    
     res.json({
       ...inventory,
-      items: itemsWithFields
+      items,
+      itemsPagination
     });
   } catch (error) {
     handleError(error, "Failed to fetch inventory", res);
@@ -265,7 +283,9 @@ export async function deleteInventory(req, res) {
 export async function getUserInventories(req, res) {
   try {
     const userId = req.user.id;
-    const { type = "all" } = req.query;
+    const { type = "all", page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
     let where = {};
     if (req.user.role === 'ADMIN') {
       where = {};
@@ -289,27 +309,42 @@ export async function getUserInventories(req, res) {
         ]
       };
     }
-    const inventories = await prisma.inventory.findMany({
-      where,
-      include: {
-        user: {
-          select: { id: true, name: true, email: true }
+    
+    const [inventories, total] = await Promise.all([
+      prisma.inventory.findMany({
+        where,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true }
+          },
+          category: true,
+          inventoryTags: {
+            include: { tag: true }
+          },
+          inventoryAccess: {
+            where: { userId },
+            select: { accessType: true }
+          },
+          _count: {
+            select: { items: true }
+          }
         },
-        category: true,
-        inventoryTags: {
-          include: { tag: true }
-        },
-        inventoryAccess: {
-          where: { userId },
-          select: { accessType: true }
-        },
-        _count: {
-          select: { items: true }
-        }
-      },
-      orderBy: { updatedAt: 'desc' }
+        skip,
+        take: parseInt(limit),
+        orderBy: { updatedAt: 'desc' }
+      }),
+      prisma.inventory.count({ where })
+    ]);
+    
+    res.json({
+      inventories,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
     });
-    res.json(inventories);
   } catch (error) {
     handleError(error, "Failed to fetch user inventories", res);
   }

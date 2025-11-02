@@ -1,117 +1,91 @@
 import prisma from "../lib/prisma.js"
 import { getFieldValues } from "../lib/fieldMapping.js"
+import { sanitizeSearchQuery, searchInventories, searchItems, searchTags, searchSuggestions } from "../lib/fullTextSearch.js"
 
-export async function globalSearch(req, res) {
+export const globalSearch = async (req, res) => {
   try {
     const { q: query, type = "all", page = 1, limit = 20 } = req.query;
     if (!query || query.trim().length === 0) {
       return res.status(400).json({ error: "Search query is required" });
     }
-    const searchTerm = query.trim();
+    
+    const sanitizedQuery = sanitizeSearchQuery(query.trim());
+    if (!sanitizedQuery) {
+      return res.json({
+        results: { inventories: [], items: [], total: 0 },
+        pagination: { page: 1, limit: parseInt(limit), total: 0, pages: 0 }
+      });
+    }
+    
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    let results = {
-      inventories: [],
-      items: [],
-      total: 0
-    };
+    let results = { inventories: [], items: [], total: 0 };
+
     if (type === "all" || type === "inventories") {
-      const [inventories, inventoryCount] = await Promise.all([
-        prisma.inventory.findMany({
-          where: {
-            OR: [
-              { name: { contains: searchTerm, mode: 'insensitive' } },
-              { description: { contains: searchTerm, mode: 'insensitive' } }
-            ]
-          },
+      const inventorySkip = type === "inventories" ? skip : 0;
+      const inventoryLimit = type === "inventories" ? parseInt(limit) : 10;
+      
+      const { results: inventoriesRaw, total: inventoryTotal } = await searchInventories(
+        prisma, sanitizedQuery, inventoryLimit, inventorySkip
+      );
+
+      if (inventoriesRaw.length > 0) {
+        const inventoriesWithRelations = await prisma.inventory.findMany({
+          where: { id: { in: inventoriesRaw.map(inv => inv.id) } },
           include: {
-            user: {
-              select: { id: true, name: true, email: true }
-            },
+            user: { select: { id: true, name: true, email: true } },
             category: true,
-            inventoryTags: {
-              include: { tag: true }
-            },
-            _count: {
-              select: { items: true }
-            }
-          },
-          skip: type === "inventories" ? skip : 0,
-          take: type === "inventories" ? parseInt(limit) : 10,
-          orderBy: { createdAt: 'desc' }
-        }),
-        prisma.inventory.count({
-          where: {
-            OR: [
-              { name: { contains: searchTerm, mode: 'insensitive' } },
-              { description: { contains: searchTerm, mode: 'insensitive' } }
-            ]
+            inventoryTags: { include: { tag: true } },
+            _count: { select: { items: true } }
           }
-        })
-      ]);
-      results.inventories = inventories;
-      if (type === "inventories") {
-        results.total = inventoryCount;
+        });
+
+        const inventoryMap = new Map(inventoriesWithRelations.map(inv => [inv.id, inv]));
+        results.inventories = inventoriesRaw.map(rawInv => ({
+          ...inventoryMap.get(rawInv.id),
+          searchRank: Number(rawInv.rank)
+        }));
       }
+
+      if (type === "inventories") results.total = inventoryTotal;
     }
+
     if (type === "all" || type === "items") {
-      const searchWhere = {
-        OR: [
-          { customId: { contains: searchTerm, mode: 'insensitive' } },
-          {
-            fieldValues: {
-              some: {
-                value: { contains: searchTerm, mode: 'insensitive' }
-              }
-            }
-          }
-        ]
-      }
-      const [items, itemCount] = await Promise.all([
-        prisma.inventoryItem.findMany({
-          where: searchWhere,
+      const itemSkip = type === "items" ? skip : 0;
+      const itemLimit = type === "items" ? parseInt(limit) : 10;
+      
+      const { results: itemsRaw, total: itemTotal } = await searchItems(
+        prisma, sanitizedQuery, itemLimit, itemSkip
+      );
+
+      if (itemsRaw.length > 0) {
+        const itemsWithRelations = await prisma.inventoryItem.findMany({
+          where: { id: { in: itemsRaw.map(item => item.id) } },
           include: {
-            inventory: {
-              select: { id: true, name: true, description: true },
-              include: {
-                fields: {
-                  orderBy: { order: 'asc' }
-                }
-              }
-            },
-            user: {
-              select: { id: true, name: true, email: true }
-            },
-            likes: {
-              include: {
-                user: {
-                  select: { id: true, name: true }
-                }
-              }
-            },
-            fieldValues: {
-              include: {
-                field: true
-              }
-            }
-          },
-          skip: type === "items" ? skip : 0,
-          take: type === "items" ? parseInt(limit) : 10,
-          orderBy: { createdAt: 'desc' }
-        }),
-        prisma.inventoryItem.count({ where: searchWhere })
-      ])
-      const itemsWithFields = items.map(item => ({
-        ...item,
-        fields: getFieldValues(item, item.inventory.fields)
-      }))
-      results.items = itemsWithFields
-      if (type === "items") {
-        results.total = itemCount
+            inventory: { include: { fields: { orderBy: { order: 'asc' } } } },
+            user: { select: { id: true, name: true, email: true } },
+            likes: { include: { user: { select: { id: true, name: true } } } },
+            fieldValues: { include: { field: true } }
+          }
+        });
+
+        const itemMap = new Map(itemsWithRelations.map(item => [item.id, item]));
+        results.items = itemsRaw.map(rawItem => {
+          const item = itemMap.get(rawItem.id);
+          return {
+            ...item,
+            fields: getFieldValues(item, item.inventory.fields),
+            searchRank: Number(rawItem.rank)
+          };
+        });
       }
+
+      if (type === "items") results.total = itemTotal;
     }
+
     if (type === "all") {
       results.total = results.inventories.length + results.items.length;
     }
+
     res.json({
       results,
       pagination: {
@@ -123,54 +97,48 @@ export async function globalSearch(req, res) {
     });
   } catch (error) {
     console.error("Global search error:", error);
-    res.status(500).json({ error: "Search failed" });
+    res.status(500).json({ error: "Search failed", details: error.message });
   }
 }
 
-export async function searchByTag(req, res) {
+export const searchByTag = async (req, res) => {
   try {
     const { tag } = req.params;
     const { page = 1, limit = 20 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [inventories, total] = await Promise.all([
-      prisma.inventory.findMany({
-        where: {
-          inventoryTags: {
-            some: {
-              tag: {
-                name: { contains: tag, mode: 'insensitive' }
-              }
-            }
-          }
-        },
+    const sanitizedQuery = sanitizeSearchQuery(tag);
+    
+    if (!sanitizedQuery) {
+      return res.json({
+        inventories: [],
+        tag,
+        pagination: { page: 1, limit: parseInt(limit), total: 0, pages: 0 }
+      });
+    }
+
+    const { results: inventoriesRaw, total } = await searchTags(
+      prisma, sanitizedQuery, parseInt(limit), skip
+    );
+
+    let inventories = [];
+    if (inventoriesRaw.length > 0) {
+      const inventoriesWithRelations = await prisma.inventory.findMany({
+        where: { id: { in: inventoriesRaw.map(inv => inv.id) } },
         include: {
-          user: {
-            select: { id: true, name: true, email: true }
-          },
+          user: { select: { id: true, name: true, email: true } },
           category: true,
-          inventoryTags: {
-            include: { tag: true }
-          },
-          _count: {
-            select: { items: true }
-          }
-        },
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.inventory.count({
-        where: {
-          inventoryTags: {
-            some: {
-              tag: {
-                name: { contains: tag, mode: 'insensitive' }
-              }
-            }
-          }
+          inventoryTags: { include: { tag: true } },
+          _count: { select: { items: true } }
         }
-      })
-    ]);
+      });
+
+      const inventoryMap = new Map(inventoriesWithRelations.map(inv => [inv.id, inv]));
+      inventories = inventoriesRaw.map(rawInv => ({
+        ...inventoryMap.get(rawInv.id),
+        searchRank: Number(rawInv.rank)
+      }));
+    }
+
     res.json({
       inventories,
       tag,
@@ -187,47 +155,19 @@ export async function searchByTag(req, res) {
   }
 }
 
-export async function getSearchSuggestions(req, res) {
+export const getSearchSuggestions = async (req, res) => {
   try {
     const { q: query } = req.query;
     if (!query || query.trim().length < 2) {
       return res.json({ suggestions: [] });
     }
-    const searchTerm = query.trim();
-    const [inventoryNames, tagNames, userNames] = await Promise.all([
-      prisma.inventory.findMany({
-        where: {
-          name: { contains: searchTerm, mode: 'insensitive' }
-        },
-        select: { name: true },
-        take: 5,
-        orderBy: { name: 'asc' }
-      }),
-      prisma.tag.findMany({
-        where: {
-          name: { contains: searchTerm, mode: 'insensitive' }
-        },
-        select: { name: true },
-        take: 5,
-        orderBy: { name: 'asc' }
-      }),
-      prisma.user.findMany({
-        where: {
-          OR: [
-            { name: { contains: searchTerm, mode: 'insensitive' } },
-            { email: { contains: searchTerm, mode: 'insensitive' } }
-          ]
-        },
-        select: { name: true, email: true },
-        take: 5,
-        orderBy: { name: 'asc' }
-      })
-    ]);
-    const suggestions = [
-      ...inventoryNames.map(inv => ({ type: 'inventory', text: inv.name })),
-      ...tagNames.map(tag => ({ type: 'tag', text: tag.name })),
-      ...userNames.map(user => ({ type: 'user', text: user.name || user.email }))
-    ];
+    
+    const sanitizedQuery = sanitizeSearchQuery(query.trim());
+    if (!sanitizedQuery) {
+      return res.json({ suggestions: [] });
+    }
+
+    const suggestions = await searchSuggestions(prisma, sanitizedQuery);
     res.json({ suggestions });
   } catch (error) {
     console.error("Get search suggestions error:", error);

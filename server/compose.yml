@@ -11,11 +11,17 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/mydb?schema=public}
       JWT_SECRET: ${JWT_SECRET:-jwt-secret-change-in-production}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
       PORT: ${PORT:-8080}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-eu-north-1}
       AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      SESSION_SECRET: ${SESSION_SECRET:-session-secret-change-in-production}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET}
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

@@ -3,6 +3,13 @@ import prisma from "../lib/prisma.js";
 export async function getUserProfile(req, res) {
   try {
     const { id } = req.params;
+    const {
+      inventoriesPage = 1, inventoriesLimit = 12,
+      itemsPage = 1, itemsLimit = 10,
+      postsPage = 1, postsLimit = 10,
+      likesPage = 1, likesLimit = 10
+    } = req.query;
+    
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -10,55 +17,8 @@ export async function getUserProfile(req, res) {
         email: true,
         name: true,
         role: true,
+        isBlocked: true,
         createdAt: true,
-        inventories: {
-          include: {
-            category: true,
-            inventoryTags: {
-              include: {
-                tag: true
-              }
-            },
-            _count: {
-              select: { 
-                items: true,
-                discussionPosts: true
-              }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
-        },
-        items: {
-          include: {
-            inventory: {
-              select: { id: true, name: true, isPublic: true }
-            },
-            _count: {
-              select: { likes: true }
-            }
-          },
-          orderBy: { createdAt: 'desc' },
-        },
-        discussionPosts: {
-          include: {
-            inventory: {
-              select: { id: true, name: true, isPublic: true }
-            }
-          },
-          orderBy: { createdAt: 'desc' },
-        },
-        itemLikes: {
-          include: {
-            item: {
-              include: {
-                inventory: {
-                  select: { id: true, name: true, isPublic: true }
-                }
-              }
-            }
-          },
-          orderBy: { id: 'desc' },
-        },
         _count: {
           select: {
             inventories: true,
@@ -69,87 +29,134 @@ export async function getUserProfile(req, res) {
         }
       }
     });
+    
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    
     if (user.isBlocked) {
       return res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isBlocked: true,
-        createdAt: user.createdAt,
+        ...user,
         inventories: [],
         items: [],
         discussionPosts: [],
         itemLikes: [],
-        _count: {
-          inventories: 0,
-          items: 0,
-          discussionPosts: 0,
-          itemLikes: 0
+        pagination: {
+          inventories: { page: 1, limit: 12, total: 0, pages: 0 },
+          items: { page: 1, limit: 10, total: 0, pages: 0 },
+          posts: { page: 1, limit: 10, total: 0, pages: 0 },
+          likes: { page: 1, limit: 10, total: 0, pages: 0 }
         }
       });
     }
-    res.json(user);
+    
+    const inventoriesSkip = (parseInt(inventoriesPage) - 1) * parseInt(inventoriesLimit);
+    const itemsSkip = (parseInt(itemsPage) - 1) * parseInt(itemsLimit);
+    const postsSkip = (parseInt(postsPage) - 1) * parseInt(postsLimit);
+    const likesSkip = (parseInt(likesPage) - 1) * parseInt(likesLimit);
+    
+    const [inventories, inventoriesTotal, items, itemsTotal, discussionPosts, postsTotal, itemLikes, likesTotal] = await Promise.all([
+      prisma.inventory.findMany({
+        where: { userId: id },
+        include: {
+          category: true,
+          inventoryTags: {
+            include: {
+              tag: true
+            }
+          },
+          _count: {
+            select: { 
+              items: true,
+              discussionPosts: true
+            }
+          }
+        },
+        skip: inventoriesSkip,
+        take: parseInt(inventoriesLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.inventory.count({ where: { userId: id } }),
+      prisma.inventoryItem.findMany({
+        where: { userId: id },
+        include: {
+          inventory: {
+            select: { id: true, name: true, isPublic: true }
+          },
+          _count: {
+            select: { likes: true }
+          }
+        },
+        skip: itemsSkip,
+        take: parseInt(itemsLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.inventoryItem.count({ where: { userId: id } }),
+      prisma.discussionPost.findMany({
+        where: { userId: id },
+        include: {
+          inventory: {
+            select: { id: true, name: true, isPublic: true }
+          }
+        },
+        skip: postsSkip,
+        take: parseInt(postsLimit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.discussionPost.count({ where: { userId: id } }),
+      prisma.itemLike.findMany({
+        where: { userId: id },
+        include: {
+          item: {
+            include: {
+              inventory: {
+                select: { id: true, name: true, isPublic: true }
+              }
+            }
+          }
+        },
+        skip: likesSkip,
+        take: parseInt(likesLimit),
+        orderBy: { id: 'desc' }
+      }),
+      prisma.itemLike.count({ where: { userId: id } })
+    ]);
+    
+    res.json({
+      ...user,
+      inventories,
+      items,
+      discussionPosts,
+      itemLikes,
+      pagination: {
+        inventories: {
+          page: parseInt(inventoriesPage),
+          limit: parseInt(inventoriesLimit),
+          total: inventoriesTotal,
+          pages: Math.ceil(inventoriesTotal / parseInt(inventoriesLimit))
+        },
+        items: {
+          page: parseInt(itemsPage),
+          limit: parseInt(itemsLimit),
+          total: itemsTotal,
+          pages: Math.ceil(itemsTotal / parseInt(itemsLimit))
+        },
+        posts: {
+          page: parseInt(postsPage),
+          limit: parseInt(postsLimit),
+          total: postsTotal,
+          pages: Math.ceil(postsTotal / parseInt(postsLimit))
+        },
+        likes: {
+          page: parseInt(likesPage),
+          limit: parseInt(likesLimit),
+          total: likesTotal,
+          pages: Math.ceil(likesTotal / parseInt(likesLimit))
+        }
+      }
+    });
   } catch (error) {
     console.error("Get user profile error:", error);
     res.status(500).json({ error: "Failed to fetch user profile" });
   }
 }
-
-export async function getPublicUsers(req, res) {
-  try {
-    const { search, role, page = 1, limit = 20 } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const where = {
-      isBlocked: false,
-      ...(search && {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } }
-        ]
-      }),
-      ...(role && { role })
-    };
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          provider: true,
-          createdAt: true,
-          _count: {
-            select: {
-              inventories: true,
-              items: true,
-              discussionPosts: true,
-              itemLikes: true
-            }
-          }
-        },
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.user.count({ where })
-    ]);
-    res.json({
-      users,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
-    });
-  } catch (error) {
-    console.error("Get public users error:", error);
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
-}
-

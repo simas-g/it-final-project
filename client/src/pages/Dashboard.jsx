@@ -41,11 +41,12 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [ownedRes, accessRes] = await Promise.all([
-          api.get('/user/inventories?type=owned'),
-          api.get('/user/inventories?type=access')
+          api.get('/user/inventories?type=owned&limit=100'),
+          api.get('/user/inventories?type=access&limit=100')
         ]);
-        const owned = ownedRes.data;
-        const writeAccess = accessRes.data.filter(inv => 
+        const owned = ownedRes.data.inventories || ownedRes.data;
+        const accessData = accessRes.data.inventories || accessRes.data;
+        const writeAccess = accessData.filter(inv => 
           inv.inventoryAccess?.[0]?.accessType === 'WRITE'
         );
         setOwnedInventories(owned);

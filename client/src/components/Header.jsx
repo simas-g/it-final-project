@@ -48,7 +48,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
             <div className="w-9 h-9 border-2 border-foreground rounded-lg flex items-center justify-center ">
               <Package className="h-5 w-5" />
             </div>
-            <span className="font-bold text-xl tracking-tight">
+            <span className="font-bold text-xl tracking-tight hidden sm:inline">
               InventoryManager
             </span>
           </Link>

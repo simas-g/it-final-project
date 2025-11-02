@@ -14,6 +14,10 @@ import { Badge } from '@/components/ui/badge'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+import { Pagination } from '@/components/ui/pagination'
+
+import { usePagination } from '@/hooks/usePagination'
+
 import Discussion from '@/components/Discussion'
 
 import AccessManagement from '@/components/AccessManagement'
@@ -30,14 +34,18 @@ export default function InventoryDetail() {
   const { user, isAuthenticated } = useAuth()
   const { getTranslation, language } = useI18n()
   const [inventory, setInventory] = useState(null)
+  const [items, setItems] = useState([])
+  const [itemsPagination, setItemsPagination] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [itemsLoading, setItemsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('items')
   const [statistics, setStatistics] = useState(null)
   const [statsLoading, setStatsLoading] = useState(false)
+  const { page: itemsPage, limit: itemsLimit, goToPage: goToItemsPage } = usePagination(1, 20)
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await api.get(`/inventories/${id}`)
+        const response = await api.get(`/inventories/${id}?includeItems=false`)
         setInventory(response.data)
       } catch (error) {
         console.error('Error fetching inventory:', error)
@@ -47,6 +55,25 @@ export default function InventoryDetail() {
     }
     fetchInventory()
   }, [id])
+  
+  useEffect(() => {
+    const fetchItems = async () => {
+      if (!inventory || activeTab !== 'items') return
+      setItemsLoading(true)
+      try {
+        const response = await api.get(`/inventories/${id}/items?page=${itemsPage}&limit=${itemsLimit}`)
+        setItems(response.data.items)
+        setItemsPagination(response.data.pagination)
+      } catch (error) {
+        console.error('Error fetching items:', error)
+        setItems([])
+        setItemsPagination(null)
+      } finally {
+        setItemsLoading(false)
+      }
+    }
+    fetchItems()
+  }, [id, inventory, activeTab, itemsPage, itemsLimit])
   useEffect(() => {
     const fetchStatistics = async () => {
       if (activeTab === 'stats') {
@@ -173,7 +200,12 @@ export default function InventoryDetail() {
               <CardTitle>{getTranslation('items', language)}</CardTitle>
             </CardHeader>
             <CardContent>
-              {inventory.items?.length === 0 ? (
+              {itemsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-muted-foreground">{getTranslation('loading', language)}</p>
+                </div>
+              ) : items?.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">
@@ -209,7 +241,7 @@ export default function InventoryDetail() {
                         </tr>
                       </thead>
                       <tbody>
-                        {inventory.items?.map((item) => (
+                        {items?.map((item) => (
                           <tr key={item.id} className="border-b hover:bg-muted/50 transition-colors">
                             <td className="py-3 px-4">
                               <span className="font-mono font-medium">{item.customId || item.id.substring(0, 8)}</span>
@@ -266,7 +298,7 @@ export default function InventoryDetail() {
                     </table>
                   </div>
                   <div className="md:hidden space-y-3">
-                    {inventory.items?.map((item) => (
+                    {items?.map((item) => (
                       <Card key={item.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4 space-y-3">
                           <div className="flex items-start justify-between">
@@ -311,6 +343,9 @@ export default function InventoryDetail() {
               )}
             </CardContent>
           </Card>
+          {itemsPagination && itemsPagination.pages > 1 && (
+            <Pagination pagination={itemsPagination} onPageChange={goToItemsPage} />
+          )}
         </TabsContent>
         <TabsContent value="discussion" className="space-y-4">
           <Discussion inventoryId={id} />

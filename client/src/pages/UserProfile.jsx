@@ -14,9 +14,13 @@ import { Badge } from '@/components/ui/badge'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+import { Pagination } from '@/components/ui/pagination'
+
+import { usePagination } from '@/hooks/usePagination'
+
 import api from '@/lib/api'
 
-import { User, Package, FileText, MessageSquare, Heart, Calendar, Mail, Clock } from 'lucide-react'
+import { User, Package, FileText, MessageSquare, Heart, Calendar } from 'lucide-react'
 
 export default function UserProfile() {
   const { id } = useParams()
@@ -25,11 +29,17 @@ export default function UserProfile() {
   const [profileUser, setProfileUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('inventories')
+  const inventoriesPagination = usePagination(1, 12)
+  const itemsPagination = usePagination(1, 10)
+  const postsPagination = usePagination(1, 10)
+  const likesPagination = usePagination(1, 10)
   useEffect(() => {
     const fetchUserProfile = async () => {
+      setLoading(true)
       try {
-        const response = await api.get(`/users/${id}`)
+        const response = await api.get(`/users/${id}?inventoriesPage=${inventoriesPagination.page}&inventoriesLimit=${inventoriesPagination.limit}&itemsPage=${itemsPagination.page}&itemsLimit=${itemsPagination.limit}&postsPage=${postsPagination.page}&postsLimit=${postsPagination.limit}&likesPage=${likesPagination.page}&likesLimit=${likesPagination.limit}`)
         setProfileUser(response.data)
+        console.log(response.data)
       } catch (error) {
         console.error('Error fetching user profile:', error)
       } finally {
@@ -37,7 +47,7 @@ export default function UserProfile() {
       }
     }
     fetchUserProfile()
-  }, [id])
+  }, [id, inventoriesPagination.page, itemsPagination.page, postsPagination.page, likesPagination.page])
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -183,6 +193,12 @@ export default function UserProfile() {
               )}
             </CardContent>
           </Card>
+          {profileUser?.pagination?.inventories && profileUser.pagination.inventories.pages > 1 && (
+            <Pagination 
+              pagination={profileUser.pagination.inventories} 
+              onPageChange={inventoriesPagination.goToPage} 
+            />
+          )}
         </TabsContent>
         <TabsContent value="items" className="space-y-4">
           <Card>
@@ -249,6 +265,12 @@ export default function UserProfile() {
               )}
             </CardContent>
           </Card>
+          {profileUser?.pagination?.items && profileUser.pagination.items.pages > 1 && (
+            <Pagination 
+              pagination={profileUser.pagination.items} 
+              onPageChange={itemsPagination.goToPage} 
+            />
+          )}
         </TabsContent>
         <TabsContent value="posts" className="space-y-4">
           <Card>
@@ -304,6 +326,12 @@ export default function UserProfile() {
               )}
             </CardContent>
           </Card>
+          {profileUser?.pagination?.posts && profileUser.pagination.posts.pages > 1 && (
+            <Pagination 
+              pagination={profileUser.pagination.posts} 
+              onPageChange={postsPagination.goToPage} 
+            />
+          )}
         </TabsContent>
         <TabsContent value="likes" className="space-y-4">
           <Card>
@@ -362,6 +390,12 @@ export default function UserProfile() {
               )}
             </CardContent>
           </Card>
+          {profileUser?.pagination?.likes && profileUser.pagination.likes.pages > 1 && (
+            <Pagination 
+              pagination={profileUser.pagination.likes} 
+              onPageChange={likesPagination.goToPage} 
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>

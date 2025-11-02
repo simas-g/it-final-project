@@ -2,6 +2,10 @@ import express from "express";
 
 import cors from "cors";
 
+import session from "express-session";
+
+import passport from "./lib/passport.js";
+
 import authRoutes from "./routes/authRoutes.js";
 
 import inventoryRoutes from "./routes/inventoryRoutes.js";
@@ -37,6 +41,21 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api", authRoutes);
 app.use("/api", inventoryRoutes);

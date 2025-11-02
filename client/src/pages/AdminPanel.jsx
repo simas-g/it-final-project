@@ -12,6 +12,10 @@ import { Badge } from '@/components/ui/badge'
 
 import { Input } from '@/components/ui/input'
 
+import { Pagination } from '@/components/ui/pagination'
+
+import { usePagination } from '@/hooks/usePagination'
+
 import api from '@/lib/api'
 
 import { Users, UserCheck, UserX, Shield, Trash2, Search } from 'lucide-react'
@@ -20,23 +24,36 @@ export default function AdminPanel() {
   const { user, isAdmin } = useAuth()
   const { getTranslation, language } = useI18n()
   const [users, setUsers] = useState([])
+  const [pagination, setPagination] = useState(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalInventories: 0,
     totalItems: 0,
     totalPosts: 0
   })
+  const { page, limit, goToPage } = usePagination(1, 20)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      goToPage(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+  
   useEffect(() => {
     if (!isAdmin()) return
     const fetchData = async () => {
+      setLoading(true)
       try {
         const [usersRes, statsRes] = await Promise.all([
-          api.get('/admin/users'),
+          api.get(`/admin/users?page=${page}&limit=${limit}&search=${debouncedSearch}`),
           api.get('/admin/stats')
         ])
         setUsers(usersRes.data.users)
+        setPagination(usersRes.data.pagination)
         setStats(statsRes.data.stats)
       } catch (error) {
         console.error('Error fetching admin data:', error)
@@ -45,7 +62,7 @@ export default function AdminPanel() {
       }
     }
     fetchData()
-  }, [isAdmin])
+  }, [isAdmin, page, limit, debouncedSearch])
   const handleToggleBlock = async (userId, isBlocked) => {
     try {
       await api.put(`/admin/users/${userId}/block`, { isBlocked: !isBlocked })
@@ -97,10 +114,6 @@ export default function AdminPanel() {
       </div>
     )
   }
-  const filteredUsers = users.filter(user => 
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -176,7 +189,7 @@ export default function AdminPanel() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredUsers.map((user) => (
+            {users.map((user) => (
               <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
@@ -236,6 +249,11 @@ export default function AdminPanel() {
               </div>
             ))}
           </div>
+          {pagination && pagination.pages > 1 && (
+            <div className="mt-6">
+              <Pagination pagination={pagination} onPageChange={goToPage} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

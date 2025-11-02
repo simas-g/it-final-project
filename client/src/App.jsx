@@ -40,6 +40,8 @@ import SearchResults from '@/pages/SearchResults'
 
 import UserProfile from '@/pages/UserProfile'
 
+import OAuthCallback from '@/pages/OAuthCallback'
+
 import './App.css'
 
 function App() {
@@ -52,6 +54,7 @@ function App() {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/oauth/callback" element={<OAuthCallback />} />
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="dashboard" element={<Dashboard />} />

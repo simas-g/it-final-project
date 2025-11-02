@@ -16,6 +16,10 @@ import { Input } from '@/components/ui/input'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+import { Pagination } from '@/components/ui/pagination'
+
+import { usePagination } from '@/hooks/usePagination'
+
 import api from '@/lib/api'
 
 import { Search, Package, FileText, User, Calendar, Heart } from 'lucide-react'
@@ -26,12 +30,14 @@ export default function SearchResults() {
   const { isAuthenticated } = useAuth()
   const { getTranslation, language } = useI18n()
   const [results, setResults] = useState({ inventories: [], items: [] })
+  const [pagination, setPagination] = useState(null)
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [activeTab, setActiveTab] = useState('all')
-  const [searchType, setSearchType] = useState(null) // 'query' or 'tag'
+  const [searchType, setSearchType] = useState(null)
   const [currentTag, setCurrentTag] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
+  const { page, limit, goToPage, reset } = usePagination(1, 20)
   useEffect(() => {
     const query = searchParams.get('q')
     const tag = searchParams.get('tag')
@@ -40,29 +46,43 @@ export default function SearchResults() {
       setSearchType('tag')
       setSearchQuery('')
       setHasSearched(true)
+      reset()
       performTagSearch(tag)
     } else if (query && query.trim()) {
       setSearchQuery(query)
       setSearchType('query')
       setCurrentTag(null)
       setHasSearched(true)
+      reset()
       performSearch(query)
     } else {
-      // No query provided, stay in search prompt mode
       setSearchType(null)
       setCurrentTag(null)
       setHasSearched(false)
       setResults({ inventories: [], items: [] })
+      setPagination(null)
     }
-  }, [searchParams, activeTab])
+  }, [searchParams])
+  
+  useEffect(() => {
+    if (searchType === 'query' && searchQuery) {
+      performSearch(searchQuery)
+    } else if (searchType === 'tag' && currentTag) {
+      performTagSearch(currentTag)
+    }
+  }, [activeTab, page])
+  
   const performSearch = async (query) => {
     if (!query.trim()) return
     setLoading(true)
     try {
-      const response = await api.get(`/search?q=${encodeURIComponent(query)}&type=${activeTab}`)
+      const response = await api.get(`/search?q=${encodeURIComponent(query)}&type=${activeTab}&page=${page}&limit=${limit}`)
       setResults(response.data.results)
+      setPagination(response.data.pagination)
     } catch (error) {
       console.error('Error performing search:', error)
+      setResults({ inventories: [], items: [] })
+      setPagination(null)
     } finally {
       setLoading(false)
     }
@@ -71,10 +91,13 @@ export default function SearchResults() {
     if (!tag.trim()) return
     setLoading(true)
     try {
-      const response = await api.get(`/search/tag/${encodeURIComponent(tag)}`)
+      const response = await api.get(`/search/tag/${encodeURIComponent(tag)}?page=${page}&limit=${limit}`)
       setResults({ inventories: response.data.inventories, items: [] })
+      setPagination(response.data.pagination)
     } catch (error) {
       console.error('Error performing tag search:', error)
+      setResults({ inventories: [], items: [] })
+      setPagination(null)
     } finally {
       setLoading(false)
     }
@@ -348,6 +371,9 @@ export default function SearchResults() {
               </p>
             </div>
           )}
+          {pagination && pagination.pages > 1 && (
+            <Pagination pagination={pagination} onPageChange={goToPage} className="mt-6" />
+          )}
         </TabsContent>
         <TabsContent value="inventories" className="space-y-4">
           {results.inventories?.length > 0 ? (
@@ -408,6 +434,9 @@ export default function SearchResults() {
               </p>
             </div>
           )}
+          {pagination && pagination.pages > 1 && (
+            <Pagination pagination={pagination} onPageChange={goToPage} className="mt-6" />
+          )}
         </TabsContent>
         <TabsContent value="items" className="space-y-4">
           {results.items?.length > 0 ? (
@@ -465,6 +494,9 @@ export default function SearchResults() {
                 {getTranslation('tryDifferentSearch', language)}
               </p>
             </div>
+          )}
+          {pagination && pagination.pages > 1 && (
+            <Pagination pagination={pagination} onPageChange={goToPage} className="mt-6" />
           )}
         </TabsContent>
         </Tabs>

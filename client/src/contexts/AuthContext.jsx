@@ -141,6 +141,25 @@ export function AuthProvider({ children }) {
     dispatch({ type: 'CLEAR_ERROR' })
   }
 
+  const setError = (error) => {
+    dispatch({ type: 'LOGIN_FAILURE', payload: error })
+  }
+
+  const loadUser = async () => {
+    try {
+      const response = await api.get('/auth/me')
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: {
+          user: response.data.user,
+          token: localStorage.getItem('token')
+        }
+      })
+    } catch (error) {
+      throw error
+    }
+  }
+
   const isAdmin = () => state.user?.role === 'ADMIN'
 
   const isCreator = () => state.user?.role === 'CREATOR' || state.user?.role === 'ADMIN'
@@ -153,6 +172,8 @@ export function AuthProvider({ children }) {
     register,
     logout,
     clearError,
+    setError,
+    loadUser,
     isAdmin,
     isCreator,
     isAuthenticated

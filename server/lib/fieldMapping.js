@@ -28,13 +28,13 @@ export const getFieldValues = (item, inventoryFields) => {
 
 export const createFieldValueData = (fieldValues, inventoryFields) => {
   const fieldValueData = []
-  Object.entries(fieldValues).forEach(([fieldId, value]) => {
-    const field = inventoryFields.find(f => f.id === fieldId)
+  Object.entries(fieldValues).forEach(([key, value]) => {
+    const field = inventoryFields.find(f => f.id === key || f.title === key)
     if (field) {
       const { isValid, value: validatedValue } = validateFieldValue(value, field.fieldType)
       if (isValid) {
         fieldValueData.push({
-          fieldId,
+          fieldId: field.id,
           value: String(validatedValue)
         })
       }
