@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom"
-import { Card, CardContent, CardHeader, CardTitle} from "../ui/card"
+import { Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import { useI18n } from "@/contexts/I18nContext"
-import { Badge } from "../ui/badge"
+import { Badge } from "@/components/ui/badge"
 import { BarChart3 } from "lucide-react"
-import LoadingSpinner from "../ui/loading-spinner"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 const Statistics = ({statsLoading, statistics}) => {
     const {getTranslation, language} = useI18n()
