@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useI18n } from './I18nContext'
+import { useI18n } from '@/contexts/I18nContext'
 import { useToast } from '@/hooks/use-toast'
 import api from '@/lib/api'
 import { fetchInventoryAccessList, searchUsers as searchUsersApi } from '@/queries/api'

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { DndContext, closestCorners } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDndSensors } from '@/hooks/useDndSensors'
-import SortableFieldItem from '@/components/inventory/SortableFieldItem'
+import SortableFieldItem from '@/features/inventory/SortableFieldItem'
 
 const FieldsList = ({ fields, setFields, onUpdate, onRemove, onSave, saving }) => {
   const sensors = useDndSensors()

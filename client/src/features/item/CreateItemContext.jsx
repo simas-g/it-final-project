@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { prepareFieldValues, initializeFieldValues, validateFields } from '@/lib/fieldUtils'
-import { useI18n } from './I18nContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 const CreateItemContext = createContext(null)
 

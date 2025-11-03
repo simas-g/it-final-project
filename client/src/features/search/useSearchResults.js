@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchSearchResults, fetchTagSearchResults, fetchSearchSuggestions } from '@/queries/api'
-import { usePagination } from './usePagination'
+import { usePagination } from '@/hooks/usePagination'
 
 export const useSearchResults = () => {
   const [searchParams] = useSearchParams()

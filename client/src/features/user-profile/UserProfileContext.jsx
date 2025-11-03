@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from './AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { usePagination } from '@/hooks/usePagination'
 import { fetchUserProfile } from '@/queries/api'
 

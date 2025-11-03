@@ -6,5 +6,5 @@ export {
   renderInventoryCard,
   getAccessInventoryColumns,
   renderAccessInventoryCard
-} from './dashboardTableConfig'
+} from './dashboardTableConfig.jsx'
 

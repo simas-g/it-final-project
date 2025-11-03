@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from './AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { usePagination } from '@/hooks/usePagination'
 import { useInventoryExport } from '@/hooks/useInventoryExport'
 import { hasWriteAccess, isOwner, isAdminOrCreator } from '@/lib/permissions'
