@@ -25,17 +25,18 @@ router.get(
 router.get(
   "/auth/google/callback",
   (req, res, next) => {
+    const clientUrl = process.env.FRONTEND_URL;
     passport.authenticate("google", { session: true }, (err, user, info) => {
       if (err) {
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+        return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);
       }
       if (!user) {
         const message = info?.message || "Authentication failed";
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(message)}`);
+        return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(message)}`);
       }
       req.logIn(user, (err) => {
         if (err) {
-          return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+          return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);
         }
         return handleOAuthCallback(req, res);
       });
@@ -51,17 +52,18 @@ router.get(
 router.get(
   "/auth/facebook/callback",
   (req, res, next) => {
+    const clientUrl = process.env.FRONTEND_URL;
     passport.authenticate("facebook", { session: true }, (err, user, info) => {
       if (err) {
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+        return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);
       }
       if (!user) {
         const message = info?.message || "Authentication failed";
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(message)}`);
+        return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(message)}`);
       }
       req.logIn(user, (err) => {
         if (err) {
-          return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+          return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);
         }
         return handleOAuthCallback(req, res);
       });
