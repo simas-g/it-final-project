@@ -25,7 +25,7 @@ import {
   Package
 } from 'lucide-react'
 
-export default function Header({ sidebarOpen, setSidebarOpen }) {
+const Header = ({ sidebarOpen, setSidebarOpen }) => {
 
   const { user, logout, isAuthenticated } = useAuth()
 
@@ -201,3 +201,5 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
     </header>
   )
 }
+
+export default Header

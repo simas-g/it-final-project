@@ -1,74 +1,49 @@
-import { useState, useEffect } from "react";
-
 import { Link } from "react-router-dom";
-
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-
 import { useI18n } from "@/contexts/I18nContext";
-
 import { Button } from "@/components/ui/button";
+import { fetchUserInventories } from "@/queries/api";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import {
+  StatsCards,
+  InventorySection,
+  calculateStats,
+  getInventoryColumns,
+  renderInventoryCard,
+  getAccessInventoryColumns,
+  renderAccessInventoryCard
+} from "@/features/dashboard";
+import { Plus, Package } from "lucide-react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-import { Badge } from "@/components/ui/badge";
-
-import { api } from "@/lib/api";
-import { 
-  Plus, 
-  Package, 
-  FileText,
-  Users, 
-  Calendar,
-  Globe,
-  Lock,
-  Eye
-} from "lucide-react";
-
-export default function Dashboard() {
+const Dashboard = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useI18n();
-  const [ownedInventories, setOwnedInventories] = useState([]);
-  const [writeAccessInventories, setWriteAccessInventories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalInventories: 0,
-    totalItems: 0,
-    recentActivity: 0
+
+  const { data: ownedInventories = [], isLoading: ownedLoading } = useQuery({
+    queryKey: ['userInventories', 'owned', user?.id],
+    queryFn: () => fetchUserInventories('owned', 100),
+    enabled: !!user && !authLoading,
   });
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-    const fetchData = async () => {
-      try {
-        const [ownedRes, accessRes] = await Promise.all([
-          api.get('/user/inventories?type=owned&limit=100'),
-          api.get('/user/inventories?type=access&limit=100')
-        ]);
-        const owned = ownedRes.data.inventories || ownedRes.data;
-        const accessData = accessRes.data.inventories || accessRes.data;
-        const writeAccess = accessData.filter(inv => 
-          inv.inventoryAccess?.[0]?.accessType === 'WRITE'
-        );
-        setOwnedInventories(owned);
-        setWriteAccessInventories(writeAccess);
-        const allInventories = [...owned, ...writeAccess];
-        const totalItems = allInventories.reduce((sum, inv) => sum + (inv._count?.items || 0), 0);
-        setStats({
-          totalInventories: allInventories.length,
-          totalItems,
-          recentActivity: allInventories.filter(inv => {
-            const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            return new Date(inv.updatedAt) > dayAgo;
-          }).length
-        });
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user, authLoading]);
+
+  const { data: accessInventories = [], isLoading: accessLoading } = useQuery({
+    queryKey: ['userInventories', 'access', user?.id],
+    queryFn: () => fetchUserInventories('access', 100),
+    enabled: !!user && !authLoading,
+  });
+
+  const writeAccessInventories = accessInventories.filter(inv => 
+    inv.inventoryAccess?.[0]?.accessType === 'WRITE'
+  )
+
+  const stats = calculateStats(ownedInventories, writeAccessInventories)
+  const loading = ownedLoading || accessLoading
+
+  const inventoryColumns = getInventoryColumns(t)
+  const accessInventoryColumns = getAccessInventoryColumns(t)
+  
+  if (authLoading || loading) return <LoadingSpinner message={t('loading')} />
+
   if (!isAuthenticated()) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -83,16 +58,7 @@ export default function Dashboard() {
       </div>
     );
   }
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t('loading')}</p>
-        </div>
-      </div>
-    );
-  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center justify-between pb-6 border-b">
@@ -109,187 +75,26 @@ export default function Dashboard() {
           </Link>
         </Button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{t('inventories')}</p>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalInventories}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{t('items')}</p>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalItems}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{t('recentActivity')}</p>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.recentActivity}</div>
-          </CardContent>
-        </Card>
-      </div>
-      <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-bold">{t('yourInventories')}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {ownedInventories.length} {ownedInventories.length === 1 ? t('inventory') : t('inventories')}
-          </p>
-        </div>
-        {ownedInventories.length === 0 ? (
-          <Card>
-            <CardContent className="py-12">
-              <div className="text-center">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{t('noInventories')}</h3>
-                <p className="text-muted-foreground mb-4">{t('createYourFirst')}</p>
-                <Button asChild size="lg">
-                  <Link to="/inventory/new">
-                    <Plus className="mr-2 h-5 w-5" />
-                    {t('createInventory')}
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3 grid grid-cols-1 gap-4">
-            {ownedInventories.map((inventory) => (
-              <Card key={inventory.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          to={`/inventory/${inventory.id}`}
-                          className="text-lg font-semibold hover:underline truncate"
-                        >
-                          {inventory.name}
-                        </Link>
-                        {inventory.isPublic ? (
-                          <Badge variant="secondary" className="text-xs">
-                            <Globe className="h-3 w-3 mr-1" />
-                            {t('public')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            <Lock className="h-3 w-3 mr-1" />
-                            {t('private')}
-                          </Badge>
-                        )}
-                      </div>
-                      {inventory.description && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {inventory.description}
-                        </p>
-                      )}
-                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                        <span className="flex items-center">
-                          <FileText className="h-3 w-3 mr-1" />
-                          {inventory._count?.items || 0} {t('items')}
-                        </span>
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(inventory.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/inventory/${inventory.id}`}>
-                        {t('view')}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+      <StatsCards stats={stats} />
+
+      <InventorySection
+        title={t('yourInventories')}
+        inventories={ownedInventories}
+        columns={inventoryColumns}
+        renderCard={(inv) => renderInventoryCard(inv, t)}
+        showCreateButton={true}
+      />
+
       {writeAccessInventories.length > 0 && (
-        <div>
-          <div className="mb-4">
-            <h2 className="text-xl font-bold">{t('inventoriesWithWriteAccess')}</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {writeAccessInventories.length} {writeAccessInventories.length === 1 ? t('inventory') : t('inventories')}
-            </p>
-          </div>
-          <div className="space-y-3 grid grid-cols-1">
-            {writeAccessInventories.map((inventory) => (
-              <Card key={inventory.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          to={`/inventory/${inventory.id}`}
-                          className="text-lg font-semibold hover:underline truncate"
-                        >
-                          {inventory.name}
-                        </Link>
-                        {inventory.isPublic ? (
-                          <Badge variant="secondary" className="text-xs">
-                            <Globe className="h-3 w-3 mr-1" />
-                            {t('public')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            <Lock className="h-3 w-3 mr-1" />
-                            {t('private')}
-                          </Badge>
-                        )}
-                        <Badge variant="default" className="text-xs">
-                          <Eye className="h-3 w-3 mr-1" />
-                          {t('writeAccess')}
-                        </Badge>
-                      </div>
-                      {inventory.description && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {inventory.description}
-                        </p>
-                      )}
-                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                        <span className="flex items-center">
-                          <FileText className="h-3 w-3 mr-1" />
-                          {inventory._count?.items || 0} {t('items')}
-                        </span>
-                        <span className="flex items-center">
-                          <Users className="h-3 w-3 mr-1" />
-                          {inventory.user?.name || inventory.user?.email}
-                        </span>
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(inventory.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/inventory/${inventory.id}`}>
-                        {t('view')}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <InventorySection
+          title={t('inventoriesWithWriteAccess')}
+          inventories={writeAccessInventories}
+          columns={accessInventoryColumns}
+          renderCard={(inv) => renderAccessInventoryCard(inv, t)}
+        />
       )}
     </div>
-  );
+  )
 }
+
+export default Dashboard

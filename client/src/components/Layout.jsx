@@ -1,16 +1,16 @@
 import { Outlet } from 'react-router-dom'
-
-import { useAuth } from '@/contexts/AuthContext'
-
-import Header from './Header'
-
-import Sidebar from './Sidebar'
-
 import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import Header from './Header'
+import Sidebar from './Sidebar'
+import LoadingSpinner from './ui/loading-spinner'
 
-export default function Layout() {
-  const { isAuthenticated } = useAuth()
+const Layout = () => {
+  const { isAuthenticated, loading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  if (loading) return <LoadingSpinner />
+
   if (!isAuthenticated()) {
     return (
       <div className="min-h-screen bg-background">
@@ -44,3 +44,5 @@ export default function Layout() {
     </div>
   )
 }
+
+export default Layout

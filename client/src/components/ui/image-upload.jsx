@@ -10,14 +10,14 @@ const DroppableArea = ({ children, disabled }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: 'image-upload-dropzone',
     disabled
-  });
+  })
 
   return (
     <div ref={setNodeRef} className={isOver && !disabled ? 'opacity-100' : ''}>
       {children}
     </div>
-  );
-};
+  )
+}
 
 const ImageUpload = ({ 
   value, 
@@ -189,7 +189,7 @@ const ImageUpload = ({
         />
       </div>
     </DndContext>
-  );
-};
+  )
+}
 
-export default ImageUpload;
+export default ImageUpload

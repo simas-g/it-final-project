@@ -2,10 +2,10 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Card({
+const Card = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card"
@@ -14,13 +14,13 @@ function Card({
         className
       )}
       {...props} />
-  );
+  )
 }
 
-function CardHeader({
+const CardHeader = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card-header"
@@ -29,37 +29,37 @@ function CardHeader({
         className
       )}
       {...props} />
-  );
+  )
 }
 
-function CardTitle({
+const CardTitle = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card-title"
       className={cn("leading-none font-semibold", className)}
       {...props} />
-  );
+  )
 }
 
-function CardDescription({
+const CardDescription = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card-description"
       className={cn("text-muted-foreground text-sm", className)}
       {...props} />
-  );
+  )
 }
 
-function CardAction({
+const CardAction = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card-action"
@@ -68,26 +68,26 @@ function CardAction({
         className
       )}
       {...props} />
-  );
+  )
 }
 
-function CardContent({
+const CardContent = ({
   className,
   ...props
-}) {
-  return (<div data-slot="card-content" className={cn("px-6", className)} {...props} />);
+}) => {
+  return (<div data-slot="card-content" className={cn("px-6", className)} {...props} />)
 }
 
-function CardFooter({
+const CardFooter = ({
   className,
   ...props
-}) {
+}) => {
   return (
     <div
       data-slot="card-footer"
       className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
       {...props} />
-  );
+  )
 }
 
 export {

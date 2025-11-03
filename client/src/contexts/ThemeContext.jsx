@@ -7,7 +7,7 @@ const initialState = {
   language: localStorage.getItem('language') || 'en'
 }
 
-function themeReducer(state, action) {
+const themeReducer = (state, action) => {
   switch (action.type) {
     case 'SET_THEME':
       return { ...state, theme: action.payload }
@@ -23,7 +23,7 @@ function themeReducer(state, action) {
   }
 }
 
-export function ThemeProvider({ children }) {
+export const ThemeProvider = ({ children }) => {
 
   const [state, dispatch] = useReducer(themeReducer, initialState)
 
@@ -63,7 +63,7 @@ export function ThemeProvider({ children }) {
   )
 }
 
-export function useTheme() {
+export const useTheme = () => {
 
   const context = useContext(ThemeContext)
   if (!context) {

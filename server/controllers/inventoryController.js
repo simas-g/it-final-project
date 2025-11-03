@@ -7,6 +7,7 @@ export async function getInventories(req, res) {
   try {
     const { page = 1, limit = 10, search = "", category = "", tag = "" } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
+    
     const where = {
       ...(search && {
         OR: [
@@ -32,9 +33,15 @@ export async function getInventories(req, res) {
           user: {
             select: { id: true, name: true, email: true }
           },
-          category: true,
+          category: {
+            select: { id: true, name: true }
+          },
           inventoryTags: {
-            include: { tag: true }
+            select: {
+              tag: {
+                select: { id: true, name: true }
+              }
+            }
           },
           _count: {
             select: { items: true }
@@ -79,9 +86,15 @@ export async function getInventory(req, res) {
         user: {
           select: { id: true, name: true, email: true, role: true }
         },
-        category: true,
+        category: {
+          select: { id: true, name: true }
+        },
         inventoryTags: {
-          include: { tag: true }
+          select: {
+            tag: {
+              select: { id: true, name: true }
+            }
+          }
         },
         fields: {
           orderBy: { order: 'asc' }
@@ -116,14 +129,18 @@ export async function getInventory(req, res) {
               select: { id: true, name: true, email: true }
             },
             fieldValues: {
-              include: {
+              select: {
+                fieldId: true,
+                value: true,
                 field: {
                   select: { id: true, title: true, fieldType: true }
                 }
               }
             },
             likes: {
-              include: {
+              select: {
+                id: true,
+                userId: true,
                 user: {
                   select: { id: true, name: true }
                 }
@@ -187,9 +204,15 @@ export async function createInventory(req, res) {
         user: {
           select: { id: true, name: true, email: true }
         },
-        category: true,
+        category: {
+          select: { id: true, name: true }
+        },
         inventoryTags: {
-          include: { tag: true }
+          select: {
+            tag: {
+              select: { id: true, name: true }
+            }
+          }
         }
       }
     });
@@ -245,9 +268,15 @@ export async function updateInventory(req, res) {
         user: {
           select: { id: true, name: true, email: true }
         },
-        category: true,
+        category: {
+          select: { id: true, name: true }
+        },
         inventoryTags: {
-          include: { tag: true }
+          select: {
+            tag: {
+              select: { id: true, name: true }
+            }
+          }
         }
       }
     });
@@ -287,9 +316,7 @@ export async function getUserInventories(req, res) {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     let where = {};
-    if (req.user.role === 'ADMIN') {
-      where = {};
-    } else if (type === "owned") {
+    if (type === "owned") {
       where = { userId };
     } else if (type === "access") {
       where = {
@@ -317,9 +344,15 @@ export async function getUserInventories(req, res) {
           user: {
             select: { id: true, name: true, email: true }
           },
-          category: true,
+          category: {
+            select: { id: true, name: true }
+          },
           inventoryTags: {
-            include: { tag: true }
+            select: {
+              tag: {
+                select: { id: true, name: true }
+              }
+            }
           },
           inventoryAccess: {
             where: { userId },
@@ -350,16 +383,23 @@ export async function getUserInventories(req, res) {
   }
 }
 
-export async function getPopularInventories(req, res) {
+export async function getPopularInventories(_req, res) {
   try {
+    
     const inventories = await prisma.inventory.findMany({
       include: {
         user: {
           select: { id: true, name: true, email: true }
         },
-        category: true,
+        category: {
+          select: { id: true, name: true }
+        },
         inventoryTags: {
-          include: { tag: true }
+          select: {
+            tag: {
+              select: { id: true, name: true }
+            }
+          }
         },
         _count: {
           select: { items: true }
@@ -484,30 +524,8 @@ export async function getInventoryStatistics(req, res) {
       user: contributorUsers.find(u => u.id === contributor.userId),
       itemCount: contributor._count.id
     }));
-    const itemsByDay = await prisma.inventoryItem.findMany({
-      where: {
-        inventoryId: id,
-        createdAt: { gte: thirtyDaysAgo }
-      },
-      select: { createdAt: true }
-    });
-    const dailyStats = {};
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      dailyStats[dateStr] = 0;
-    }
-    itemsByDay.forEach(item => {
-      const dateStr = item.createdAt.toISOString().split('T')[0];
-      if (dailyStats[dateStr] !== undefined) {
-        dailyStats[dateStr]++;
-      }
-    });
-    const itemsOverTime = Object.entries(dailyStats).map(([date, count]) => ({
-      date,
-      count
-    }));
+    const daysSinceCreation = Math.max(1, Math.ceil((now - inventory.createdAt) / (1000 * 60 * 60 * 24)));
+    const averageItemsPerDay = totalItems > 0 ? (totalItems / daysSinceCreation).toFixed(2) : 0;
     const statistics = {
       overview: {
         totalItems,
@@ -515,14 +533,60 @@ export async function getInventoryStatistics(req, res) {
         itemsLast30Days,
         totalLikes,
         totalDiscussions,
-        averageItemsPerDay: itemsLast30Days > 0 ? (itemsLast30Days / 30).toFixed(2) : 0
+        averageItemsPerDay
       },
       topContributors: contributorsWithDetails,
-      recentItems,
-      itemsOverTime
+      recentItems
     };
     res.json(statistics);
   } catch (error) {
     handleError(error, "Failed to fetch inventory statistics", res);
+  }
+}
+
+export async function getInventoryItemsForExport(req, res) {
+  try {
+    const { id } = req.params;
+    const inventory = await prisma.inventory.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true }
+        },
+        fields: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+    if (!inventory) {
+      return res.status(404).json({ error: "Inventory not found" });
+    }
+    const items = await prisma.inventoryItem.findMany({
+      where: { inventoryId: id },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true }
+        },
+        fieldValues: {
+          select: {
+            value: true,
+            field: {
+              select: { id: true, title: true, fieldType: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    const itemsWithFields = items.map(item => ({
+      ...item,
+      fields: getFieldValues(item, inventory.fields)
+    }));
+    res.json({
+      inventory,
+      items: itemsWithFields
+    });
+  } catch (error) {
+    handleError(error, "Failed to fetch inventory items for export", res);
   }
 }

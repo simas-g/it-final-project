@@ -9,7 +9,8 @@ import {
   getPopularInventories,
   getCategories,
   getTags,
-  getInventoryStatistics
+  getInventoryStatistics,
+  getInventoryItemsForExport
 } from "../controllers/inventoryController.js";
 
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
@@ -19,6 +20,7 @@ const router = express.Router();
 router.get("/inventories", getInventories);
 router.get("/inventories/popular", getPopularInventories);
 router.get("/inventories/:id/statistics", getInventoryStatistics);
+router.get("/inventories/:id/export", getInventoryItemsForExport);
 router.get("/inventories/:id", getInventory);
 router.get("/categories", getCategories);
 router.get("/tags", getTags);

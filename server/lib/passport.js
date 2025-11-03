@@ -16,12 +16,22 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+const getGoogleCallbackURL = () => {
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://it-final-project.onrender.com/api/auth/google/callback';
+  }
+  return 'http://localhost:8080/api/auth/google/callback';
+};
+
 passport.use(
 new GoogleStrategy(
     {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback",
+    callbackURL: getGoogleCallbackURL(),
     },
 async (accessToken, refreshToken, profile, done) => {
     try {
@@ -33,6 +43,9 @@ async (accessToken, refreshToken, profile, done) => {
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (user) {
+        if (user.isBlocked) {
+        return done(null, false, { message: "Your account has been blocked. Please contact support." });
+        }
         if (!user.provider || user.provider !== "google") {
         user = await prisma.user.update({
             where: { id: user.id },
@@ -64,12 +77,22 @@ async (accessToken, refreshToken, profile, done) => {
 )
 );
 
+const getFacebookCallbackURL = () => {
+  if (process.env.FACEBOOK_CALLBACK_URL) {
+    return process.env.FACEBOOK_CALLBACK_URL;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://it-final-project.onrender.com/api/auth/facebook/callback';
+  }
+  return 'http://localhost:8080/api/auth/facebook/callback';
+};
+
 passport.use(
 new FacebookStrategy(
     {
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "/api/auth/facebook/callback",
+    callbackURL: getFacebookCallbackURL(),
     profileFields: ["id", "emails", "name", "displayName"],
     },
 async (accessToken, refreshToken, profile, done) => {
@@ -82,6 +105,9 @@ async (accessToken, refreshToken, profile, done) => {
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (user) {
+        if (user.isBlocked) {
+        return done(null, false, { message: "Your account has been blocked. Please contact support." });
+        }
         if (!user.provider || user.provider !== "facebook") {
         user = await prisma.user.update({
             where: { id: user.id },

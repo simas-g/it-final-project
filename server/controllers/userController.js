@@ -59,10 +59,14 @@ export async function getUserProfile(req, res) {
       prisma.inventory.findMany({
         where: { userId: id },
         include: {
-          category: true,
+          category: {
+            select: { id: true, name: true }
+          },
           inventoryTags: {
-            include: {
-              tag: true
+            select: {
+              tag: {
+                select: { id: true, name: true }
+              }
             }
           },
           _count: {
@@ -106,9 +110,14 @@ export async function getUserProfile(req, res) {
       prisma.discussionPost.count({ where: { userId: id } }),
       prisma.itemLike.findMany({
         where: { userId: id },
-        include: {
+        select: {
+          id: true,
+          itemId: true,
           item: {
-            include: {
+            select: {
+              id: true,
+              customId: true,
+              createdAt: true,
               inventory: {
                 select: { id: true, name: true, isPublic: true }
               }

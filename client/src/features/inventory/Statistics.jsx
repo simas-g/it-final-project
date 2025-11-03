@@ -3,14 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle} from "../ui/card"
 import { useI18n } from "@/contexts/I18nContext"
 import { Badge } from "../ui/badge"
 import { BarChart3 } from "lucide-react"
-export default function Statistics({statsLoading, statistics}) {
+import LoadingSpinner from "../ui/loading-spinner"
+
+const Statistics = ({statsLoading, statistics}) => {
     const {getTranslation, language} = useI18n()
     return statsLoading ? (
         <Card>
           <CardContent className="py-12">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <LoadingSpinner />
           </CardContent>
         </Card>
       ) : statistics?.overview?.totalItems > 0 ? (
@@ -133,3 +133,5 @@ export default function Statistics({statsLoading, statistics}) {
         </Card>
       )
 }
+
+export default Statistics

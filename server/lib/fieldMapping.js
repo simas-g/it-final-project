@@ -2,7 +2,7 @@ export const getFieldValue = (item, fieldId) => {
   if (!item.fieldValues || !Array.isArray(item.fieldValues)) {
     return null
   }
-  const fieldValue = item.fieldValues.find(fv => fv.fieldId === fieldId)
+  const fieldValue = item.fieldValues.find(fv => (fv.fieldId === fieldId || fv.field?.id === fieldId))
   return fieldValue ? fieldValue.value : null
 }
 
@@ -12,7 +12,7 @@ export const getFieldValues = (item, inventoryFields) => {
     return fieldValues
   }
   inventoryFields.forEach(field => {
-    const fieldValue = item.fieldValues.find(fv => fv.fieldId === field.id)
+    const fieldValue = item.fieldValues.find(fv => (fv.fieldId === field.id || fv.field?.id === field.id))
     if (fieldValue && fieldValue.value !== null && fieldValue.value !== undefined) {
       if (field.fieldType === 'BOOLEAN') {
         fieldValues[field.id] = fieldValue.value === 'true' || fieldValue.value === true

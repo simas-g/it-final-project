@@ -97,7 +97,9 @@ export async function getUser(req, res) {
       prisma.inventory.findMany({
         where: { userId: id },
         include: {
-          category: true,
+          category: {
+            select: { id: true, name: true }
+          },
           _count: {
             select: { items: true }
           }

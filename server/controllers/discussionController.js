@@ -45,7 +45,8 @@ export async function createDiscussionPost(req, res) {
       return res.status(400).json({ error: "Content is required" });
     }
     const inventory = await prisma.inventory.findUnique({
-      where: { id: inventoryId }
+      where: { id: inventoryId },
+      select: { id: true }
     });
     if (!inventory) {
       return res.status(404).json({ error: "Inventory not found" });

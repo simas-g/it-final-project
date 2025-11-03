@@ -1,4 +1,4 @@
-export default function LoadingSpinner({ message = "Loading..." }) {
+const LoadingSpinner = ({ message = "Loading..." }) => {
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center">
@@ -8,4 +8,6 @@ export default function LoadingSpinner({ message = "Loading..." }) {
     </div>
   )
 }
+
+export default LoadingSpinner
 

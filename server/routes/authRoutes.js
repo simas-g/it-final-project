@@ -24,11 +24,23 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { 
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=Authentication failed`,
-    session: true,
-  }),
-  handleOAuthCallback
+  (req, res, next) => {
+    passport.authenticate("google", { session: true }, (err, user, info) => {
+      if (err) {
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+      }
+      if (!user) {
+        const message = info?.message || "Authentication failed";
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(message)}`);
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+        }
+        return handleOAuthCallback(req, res);
+      });
+    })(req, res, next);
+  }
 );
 
 router.get(
@@ -38,11 +50,23 @@ router.get(
 
 router.get(
   "/auth/facebook/callback",
-  passport.authenticate("facebook", { 
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=Authentication failed`,
-    session: true,
-  }),
-  handleOAuthCallback
+  (req, res, next) => {
+    passport.authenticate("facebook", { session: true }, (err, user, info) => {
+      if (err) {
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+      }
+      if (!user) {
+        const message = info?.message || "Authentication failed";
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(message)}`);
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
+        }
+        return handleOAuthCallback(req, res);
+      });
+    })(req, res, next);
+  }
 );
 
 export default router;

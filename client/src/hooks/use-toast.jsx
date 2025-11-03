@@ -4,7 +4,7 @@ const ToastContext = React.createContext(null)
 
 let toastCount = 0
 
-export function ToastProvider({ children }) {
+export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = React.useState([])
   const removeToast = React.useCallback((id) => {
     setToasts(prev => prev.filter(toast => toast.id !== id))
@@ -42,7 +42,7 @@ export function ToastProvider({ children }) {
   )
 }
 
-export function useToast() {
+export const useToast = () => {
   const context = React.useContext(ToastContext)
   if (!context) {
     throw new Error('useToast must be used within ToastProvider')

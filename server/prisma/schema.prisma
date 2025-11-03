@@ -40,7 +40,7 @@ enum CustomIdElementType {
 model UserPreferences {
   id       String @id @default(uuid())
   userId   String @unique
-  user     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   language String @default("en")
   theme    String @default("light")
 }
@@ -60,7 +60,7 @@ model Tag {
 model InventoryTag {
   id          String    @id @default(uuid())
   inventoryId String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   tagId       String
   tag         Tag       @relation(fields: [tagId], references: [id])
 
@@ -70,7 +70,7 @@ model InventoryTag {
 model InventoryField {
   id          String    @id @default(uuid())
   inventoryId String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   title       String
   description String?
   fieldType   FieldType
@@ -85,7 +85,7 @@ model InventoryField {
 model CustomIdConfig {
   id           String            @id @default(uuid())
   inventoryId  String            @unique
-  inventory    Inventory         @relation(fields: [inventoryId], references: [id])
+  inventory    Inventory         @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   elements     Json
   elementsList CustomIdElement[]
   createdAt    DateTime          @default(now())
@@ -95,7 +95,7 @@ model CustomIdConfig {
 model CustomIdElement {
   id          String              @id @default(uuid())
   configId    String
-  config      CustomIdConfig      @relation(fields: [configId], references: [id])
+  config      CustomIdConfig      @relation(fields: [configId], references: [id], onDelete: Cascade)
   elementType CustomIdElementType
   format      String
   value       String?
@@ -107,9 +107,9 @@ model CustomIdElement {
 model InventoryAccess {
   id          String              @id @default(uuid())
   inventoryId String
-  inventory   Inventory           @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory           @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   userId      String
-  user        User                @relation(fields: [userId], references: [id])
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessType  InventoryAccessType @default(READ)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
@@ -120,9 +120,9 @@ model InventoryAccess {
 model DiscussionPost {
   id          String    @id @default(uuid())
   inventoryId String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   content     String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -131,9 +131,9 @@ model DiscussionPost {
 model ItemLike {
   id     String        @id @default(uuid())
   itemId String
-  item   InventoryItem @relation(fields: [itemId], references: [id])
+  item   InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
   userId String
-  user   User          @relation(fields: [userId], references: [id])
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([itemId, userId])
 }
@@ -170,7 +170,7 @@ model Inventory {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items           InventoryItem[]
   inventoryAccess InventoryAccess[]
@@ -183,13 +183,13 @@ model Inventory {
 model InventoryItem {
   id          String    @id @default(uuid())
   inventoryId String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   customId    String?
   version     Int       @default(1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes       ItemLike[]
   fieldValues ItemFieldValue[]
 

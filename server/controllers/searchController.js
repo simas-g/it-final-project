@@ -24,29 +24,59 @@ export const globalSearch = async (req, res) => {
       const inventorySkip = type === "inventories" ? skip : 0;
       const inventoryLimit = type === "inventories" ? parseInt(limit) : 10;
       
-      const { results: inventoriesRaw, total: inventoryTotal } = await searchInventories(
-        prisma, sanitizedQuery, inventoryLimit, inventorySkip
-      );
+      const [
+        { results: inventoriesRaw, total: inventoryTotal },
+        { results: tagInventoriesRaw, total: tagInventoryTotal }
+      ] = await Promise.all([
+        searchInventories(prisma, sanitizedQuery, inventoryLimit, inventorySkip),
+        searchTags(prisma, sanitizedQuery, inventoryLimit, inventorySkip)
+      ]);
 
-      if (inventoriesRaw.length > 0) {
+      const allInventoryIds = new Set([
+        ...inventoriesRaw.map(inv => inv.id),
+        ...tagInventoriesRaw.map(inv => inv.id)
+      ]);
+
+      const inventoryRankMap = new Map();
+      inventoriesRaw.forEach(inv => {
+        inventoryRankMap.set(inv.id, Number(inv.rank));
+      });
+      tagInventoriesRaw.forEach(inv => {
+        const currentRank = inventoryRankMap.get(inv.id) || 0;
+        inventoryRankMap.set(inv.id, Math.max(currentRank, Number(inv.rank)));
+      });
+
+      if (allInventoryIds.size > 0) {
         const inventoriesWithRelations = await prisma.inventory.findMany({
-          where: { id: { in: inventoriesRaw.map(inv => inv.id) } },
+          where: { id: { in: Array.from(allInventoryIds) } },
           include: {
             user: { select: { id: true, name: true, email: true } },
-            category: true,
-            inventoryTags: { include: { tag: true } },
+            category: {
+              select: { id: true, name: true }
+            },
+            inventoryTags: {
+              select: {
+                tag: {
+                  select: { id: true, name: true }
+                }
+              }
+            },
             _count: { select: { items: true } }
           }
         });
 
-        const inventoryMap = new Map(inventoriesWithRelations.map(inv => [inv.id, inv]));
-        results.inventories = inventoriesRaw.map(rawInv => ({
-          ...inventoryMap.get(rawInv.id),
-          searchRank: Number(rawInv.rank)
-        }));
+        results.inventories = inventoriesWithRelations
+          .map(inv => ({
+            ...inv,
+            searchRank: inventoryRankMap.get(inv.id) || 0
+          }))
+          .sort((a, b) => b.searchRank - a.searchRank)
+          .slice(0, inventoryLimit);
       }
 
-      if (type === "inventories") results.total = inventoryTotal;
+      if (type === "inventories") {
+        results.total = inventoryTotal + tagInventoryTotal;
+      }
     }
 
     if (type === "all" || type === "items") {
@@ -61,10 +91,31 @@ export const globalSearch = async (req, res) => {
         const itemsWithRelations = await prisma.inventoryItem.findMany({
           where: { id: { in: itemsRaw.map(item => item.id) } },
           include: {
-            inventory: { include: { fields: { orderBy: { order: 'asc' } } } },
+            inventory: {
+              select: {
+                id: true,
+                name: true,
+                isPublic: true,
+                fields: { orderBy: { order: 'asc' } }
+              }
+            },
             user: { select: { id: true, name: true, email: true } },
-            likes: { include: { user: { select: { id: true, name: true } } } },
-            fieldValues: { include: { field: true } }
+            likes: {
+              select: {
+                id: true,
+                userId: true,
+                user: { select: { id: true, name: true } }
+              }
+            },
+            fieldValues: {
+              select: {
+                fieldId: true,
+                value: true,
+                field: {
+                  select: { id: true, title: true, fieldType: true, order: true }
+                }
+              }
+            }
           }
         });
 
@@ -126,8 +177,16 @@ export const searchByTag = async (req, res) => {
         where: { id: { in: inventoriesRaw.map(inv => inv.id) } },
         include: {
           user: { select: { id: true, name: true, email: true } },
-          category: true,
-          inventoryTags: { include: { tag: true } },
+          category: {
+            select: { id: true, name: true }
+          },
+          inventoryTags: {
+            select: {
+              tag: {
+                select: { id: true, name: true }
+              }
+            }
+          },
           _count: { select: { items: true } }
         }
       });

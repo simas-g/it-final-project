@@ -131,15 +131,21 @@ export async function getInventoryItems(req, res) {
             select: { id: true, name: true, email: true }
           },
           likes: {
-            include: {
+            select: {
+              id: true,
+              userId: true,
               user: {
                 select: { id: true, name: true }
               }
             }
           },
           fieldValues: {
-            include: {
-              field: true
+            select: {
+              fieldId: true,
+              value: true,
+              field: {
+                select: { id: true, title: true, fieldType: true, order: true }
+              }
             }
           }
         },
@@ -174,7 +180,11 @@ export async function getItem(req, res) {
       where: { id },
       include: {
         inventory: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            userId: true,
+            isPublic: true,
             fields: {
               orderBy: { order: 'asc' }
             }
@@ -184,15 +194,20 @@ export async function getItem(req, res) {
           select: { id: true, name: true, email: true }
         },
         likes: {
-          include: {
+          select: {
+            id: true,
+            userId: true,
             user: {
               select: { id: true, name: true, email: true }
             }
           }
         },
         fieldValues: {
-          include: {
-            field: true
+          select: {
+            value: true,
+            field: {
+              select: { id: true, title: true, fieldType: true, order: true }
+            }
           }
         }
       }
@@ -217,9 +232,13 @@ export async function createItem(req, res) {
     const userId = req.user.id
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        isPublic: true,
         inventoryAccess: {
-          where: { userId }
+          where: { userId },
+          select: { accessType: true }
         },
         fields: {
           orderBy: { order: 'asc' }
@@ -280,15 +299,20 @@ export async function createItem(req, res) {
           select: { id: true, name: true, email: true }
         },
         likes: {
-          include: {
+          select: {
+            id: true,
+            userId: true,
             user: {
               select: { id: true, name: true, email: true }
             }
           }
         },
         fieldValues: {
-          include: {
-            field: true
+          select: {
+            value: true,
+            field: {
+              select: { id: true, title: true, fieldType: true, order: true }
+            }
           }
         }
       }
@@ -310,11 +334,17 @@ export async function updateItem(req, res) {
     const userId = req.user.id
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        version: true,
+        inventoryId: true,
         inventory: {
-          include: {
+          select: {
+            id: true,
+            userId: true,
             inventoryAccess: {
-              where: { userId }
+              where: { userId },
+              select: { accessType: true }
             },
             fields: {
               orderBy: { order: 'asc' }
@@ -322,8 +352,11 @@ export async function updateItem(req, res) {
           }
         },
         fieldValues: {
-          include: {
-            field: true
+          select: {
+            value: true,
+            field: {
+              select: { id: true, title: true, fieldType: true, order: true }
+            }
           }
         }
       }
@@ -366,15 +399,20 @@ export async function updateItem(req, res) {
           select: { id: true, name: true, email: true }
         },
         likes: {
-          include: {
+          select: {
+            id: true,
+            userId: true,
             user: {
               select: { id: true, name: true, email: true }
             }
           }
         },
         fieldValues: {
-          include: {
-            field: true
+          select: {
+            value: true,
+            field: {
+              select: { id: true, title: true, fieldType: true, order: true }
+            }
           }
         }
       }
@@ -395,11 +433,14 @@ export async function deleteItem(req, res) {
     const userId = req.user.id;
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
         inventory: {
-          include: {
+          select: {
+            userId: true,
             inventoryAccess: {
-              where: { userId }
+              where: { userId },
+              select: { accessType: true }
             }
           }
         }

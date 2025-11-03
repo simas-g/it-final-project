@@ -11,7 +11,7 @@ const initialState = {
   error: null
 }
 
-function authReducer(state, action) {
+const authReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN_START':
       return { ...state, loading: true, error: null }
@@ -48,7 +48,7 @@ function authReducer(state, action) {
   }
 }
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
 
   const [state, dispatch] = useReducer(authReducer, initialState)
 
@@ -79,9 +79,7 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     dispatch({ type: 'LOGIN_START' })
     try {
-      console.log('Attempting login with:', { email })
       const response = await api.post('/auth/login', { email, password })
-      console.log('Login response:', response.data)
       const { user, token } = response.data
       localStorage.setItem('token', token)
       dispatch({
@@ -107,9 +105,7 @@ export function AuthProvider({ children }) {
   const register = async (email, password, name) => {
     dispatch({ type: 'LOGIN_START' })
     try {
-      console.log('Attempting registration with:', { email, name })
       const response = await api.post('/auth/register', { email, password, name })
-      console.log('Registration response:', response.data)
       const { user, token } = response.data
       localStorage.setItem('token', token)
       dispatch({
@@ -186,7 +182,7 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useAuth() {
+export const useAuth = () => {
 
   const context = useContext(AuthContext)
   if (!context) {

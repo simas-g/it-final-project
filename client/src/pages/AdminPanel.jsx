@@ -1,97 +1,60 @@
-import { useState, useEffect } from 'react'
-
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
-
 import { useI18n } from '@/contexts/I18nContext'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
 import { Button } from '@/components/ui/button'
-
-import { Badge } from '@/components/ui/badge'
-
 import { Input } from '@/components/ui/input'
-
 import { Pagination } from '@/components/ui/pagination'
-
+import LoadingSpinner from '@/components/ui/loading-spinner'
+import DataTable from '@/components/ui/data-table'
+import CardList from '@/components/ui/card-list'
 import { usePagination } from '@/hooks/usePagination'
+import { 
+  useAdminPanel,
+  AdminStats,
+  getAdminTableColumns,
+  renderAdminCardList
+} from '@/features/admin'
+import { fetchAdminUsers, fetchAdminStats } from '@/queries/api'
+import { Search } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
-import api from '@/lib/api'
-
-import { Users, UserCheck, UserX, Shield, Trash2, Search } from 'lucide-react'
-
-export default function AdminPanel() {
-  const { user, isAdmin } = useAuth()
+const AdminPanel = () => {
+  const { isAdmin } = useAuth()
   const { getTranslation, language } = useI18n()
-  const [users, setUsers] = useState([])
-  const [pagination, setPagination] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalInventories: 0,
-    totalItems: 0,
-    totalPosts: 0
-  })
   const { page, limit, goToPage } = usePagination(1, 20)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery)
-      goToPage(1)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchTerm,
+    confirmDialogOpen,
+    setConfirmDialogOpen,
+    handleToggleBlock,
+    handleChangeRole,
+    handleDeleteUser,
+    confirmDeleteUser,
+    handleSearch,
+    handleKeyDown
+  } = useAdminPanel()
   
-  useEffect(() => {
-    if (!isAdmin()) return
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const [usersRes, statsRes] = await Promise.all([
-          api.get(`/admin/users?page=${page}&limit=${limit}&search=${debouncedSearch}`),
-          api.get('/admin/stats')
-        ])
-        setUsers(usersRes.data.users)
-        setPagination(usersRes.data.pagination)
-        setStats(statsRes.data.stats)
-      } catch (error) {
-        console.error('Error fetching admin data:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [isAdmin, page, limit, debouncedSearch])
-  const handleToggleBlock = async (userId, isBlocked) => {
-    try {
-      await api.put(`/admin/users/${userId}/block`, { isBlocked: !isBlocked })
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, isBlocked: !isBlocked } : user
-      ))
-    } catch (error) {
-      console.error('Error toggling user block:', error)
-    }
-  }
-  const handleChangeRole = async (userId, newRole) => {
-    try {
-      await api.put(`/admin/users/${userId}/role`, { role: newRole })
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ))
-    } catch (error) {
-      console.error('Error changing user role:', error)
-    }
-  }
-  const handleDeleteUser = async (userId) => {
-    if (!confirm(getTranslation('confirmDeleteUser', language))) return
-    try {
-      await api.delete(`/admin/users/${userId}`)
-      setUsers(users.filter(user => user.id !== userId))
-    } catch (error) {
-      console.error('Error deleting user:', error)
-    }
-  }
+  const { data: usersData, isLoading: usersLoading } = useQuery({
+    queryKey: ['adminUsers', page, limit, searchTerm],
+    queryFn: () => fetchAdminUsers({ page, limit, search: searchTerm }),
+    enabled: isAdmin(),
+  })
+
+  const { data: stats } = useQuery({
+    queryKey: ['adminStats'],
+    queryFn: fetchAdminStats,
+    enabled: isAdmin(),
+  })
+
+  const users = usersData?.users || []
+  const pagination = usersData?.pagination || null
+  const loading = usersLoading
+
+  const t = (key) => getTranslation(key, language)
+  const tableColumns = getAdminTableColumns(t, handleToggleBlock, handleChangeRole, handleDeleteUser)
   if (!isAdmin()) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -104,16 +67,7 @@ export default function AdminPanel() {
       </div>
     )
   }
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">{getTranslation('loading', language)}</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <LoadingSpinner message={getTranslation('loading', language)} />
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -124,131 +78,37 @@ export default function AdminPanel() {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {getTranslation('totalUsers', language)}
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {getTranslation('totalInventories', language)}
-            </CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalInventories}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {getTranslation('totalItems', language)}
-            </CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalItems}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {getTranslation('totalPosts', language)}
-            </CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPosts}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <AdminStats stats={stats} />
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <CardTitle>{getTranslation('userManagement', language)}</CardTitle>
-            <div className="flex items-center space-x-2">
-              <div className="relative">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 md:flex-none">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={getTranslation('searchUsers', language)}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
+                  onKeyDown={(e) => handleKeyDown(e, goToPage)}
+                  className="pl-10 md:w-64"
                 />
               </div>
+              <Button onClick={() => handleSearch(goToPage)} size="sm">
+                {getTranslation('search', language)}
+              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-semibold">{user.name || user.email}</h3>
-                    <Badge variant={user.role === 'ADMIN' ? 'default' : user.role === 'CREATOR' ? 'secondary' : 'outline'}>
-                      {user.role}
-                    </Badge>
-                    {user.isBlocked && (
-                      <Badge variant="destructive">{getTranslation('blocked', language)}</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <span>{user._count?.inventories || 0} {getTranslation('inventories', language)}</span>
-                    <span>{user._count?.items || 0} {getTranslation('items', language)}</span>
-                    <span>{user._count?.discussionPosts || 0} {getTranslation('posts', language)}</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleToggleBlock(user.id, user.isBlocked)}
-                  >
-                    {user.isBlocked ? (
-                      <>
-                        <UserCheck className="h-4 w-4 mr-2" />
-                        {getTranslation('unblock', language)}
-                      </>
-                    ) : (
-                      <>
-                        <UserX className="h-4 w-4 mr-2" />
-                        {getTranslation('block', language)}
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN'
-                      handleChangeRole(user.id, newRole)
-                    }}
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    {user.role === 'ADMIN' ? getTranslation('removeAdmin', language) : getTranslation('makeAdmin', language)}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteUser(user.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <DataTable 
+            columns={tableColumns}
+            data={users}
+          />
+          <CardList 
+            data={users}
+            renderCard={(user) => renderAdminCardList(user, t, handleToggleBlock, handleChangeRole, handleDeleteUser)}
+          />
           {pagination && pagination.pages > 1 && (
             <div className="mt-6">
               <Pagination pagination={pagination} onPageChange={goToPage} />
@@ -256,6 +116,18 @@ export default function AdminPanel() {
           )}
         </CardContent>
       </Card>
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        title={getTranslation('confirmDeleteUser', language)}
+        description={getTranslation('confirmDeleteUserDescription', language)}
+        confirmText={getTranslation('delete', language)}
+        cancelText={getTranslation('cancel', language)}
+        onConfirm={confirmDeleteUser}
+        variant="destructive"
+      />
     </div>
   )
 }
+
+export default AdminPanel

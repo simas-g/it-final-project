@@ -1,5 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
 import { Toaster } from '@/components/ui/toaster'
 
 import { ToastProvider } from '@/hooks/use-toast'
@@ -22,8 +24,6 @@ import Dashboard from '@/pages/Dashboard'
 
 import CreateInventory from '@/pages/CreateInventory'
 
-import RequestCreatorAccess from '@/pages/RequestCreatorAccess'
-
 import CustomIdConfig from '@/pages/CustomIdConfig'
 
 import FieldsConfig from '@/pages/FieldsConfig'
@@ -44,12 +44,23 @@ import OAuthCallback from '@/pages/OAuthCallback'
 
 import './App.css'
 
-function App() {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+})
+
+const App = () => {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <AuthProvider>
-          <ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <ToastProvider>
             <div className="min-h-screen bg-background">
               <Routes>
                 <Route path="/login" element={<Login />} />
@@ -58,7 +69,6 @@ function App() {
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="request-creator" element={<RequestCreatorAccess />} />
                   <Route path="inventory/new" element={<CreateInventory />} />
                   <Route path="inventory/:id" element={<InventoryDetail />} />
                   <Route path="inventory/:id/custom-id" element={<CustomIdConfig />} />
@@ -76,6 +86,7 @@ function App() {
         </AuthProvider>
       </I18nProvider>
     </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 

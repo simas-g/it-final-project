@@ -19,7 +19,7 @@ import {
   User  
 } from 'lucide-react'
 
-export default function Sidebar({ open, onClose }) {
+const Sidebar = ({ open, onClose }) => {
 
   const { user, isAdmin } = useAuth()
 
@@ -109,3 +109,5 @@ export default function Sidebar({ open, onClose }) {
     </>
   )
 }
+
+export default Sidebar

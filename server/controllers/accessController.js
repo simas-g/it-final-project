@@ -38,7 +38,6 @@ export async function addInventoryAccess(req, res) {
     const { inventoryId } = req.params;
     const { userId: targetUserId, accessType = 'READ' } = req.body;
     const userId = req.user.id;
-    console.log('Adding access:', { inventoryId, targetUserId, accessType, requestUserId: userId });
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       select: { userId: true, isPublic: true }
@@ -48,6 +47,12 @@ export async function addInventoryAccess(req, res) {
     }
     if (inventory.userId !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: "Only the owner or admin can manage access" });
+    }
+    if (inventory.userId === targetUserId) {
+      return res.status(400).json({ error: "Cannot grant access to the inventory owner" });
+    }
+    if (userId === targetUserId) {
+      return res.status(400).json({ error: "Cannot grant access to yourself" });
     }
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
@@ -77,7 +82,6 @@ export async function addInventoryAccess(req, res) {
         }
       }
     });
-    console.log('Access granted successfully:', access);
     res.status(201).json(access);
   } catch (error) {
     console.error("Add inventory access error:", error);
@@ -179,6 +183,8 @@ export async function togglePublicAccess(req, res) {
 export async function searchUsersForAccess(req, res) {
   try {
     const { q: query } = req.query;
+    const currentUserId = req.user.id;
+    
     if (!query || query.trim().length < 2) {
       return res.json({ users: [] });
     }
@@ -189,7 +195,8 @@ export async function searchUsersForAccess(req, res) {
           { name: { contains: searchTerm, mode: 'insensitive' } },
           { email: { contains: searchTerm, mode: 'insensitive' } }
         ],
-        isBlocked: false
+        isBlocked: false,
+        id: { not: currentUserId }
       },
       select: {
         id: true,

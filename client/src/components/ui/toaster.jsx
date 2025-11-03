@@ -9,7 +9,7 @@ import {
 
 import { useToast } from "@/hooks/use-toast"
 
-export function Toaster() {
+export const Toaster = () => {
   const { toasts, dismiss } = useToast()
   return (
     <ToastProvider>

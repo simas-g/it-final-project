@@ -55,6 +55,9 @@ export async function loginEmail(req, res) {
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+    if (user.isBlocked) {
+      return res.status(403).json({ error: "Your account has been blocked. Please contact support." });
+    }
     if (!user.password) {
       return res.status(400).json({
         error:
@@ -89,6 +92,9 @@ export async function authProvider(req, res) {
       where: { email },
     });
     if (user) {
+      if (user.isBlocked) {
+        return res.status(403).json({ error: "Your account has been blocked. Please contact support." });
+      }
       if (!user.provider || user.provider !== provider) {
         user = await prisma.user.update({
           where: { id: user.id },
@@ -131,14 +137,15 @@ export async function authProvider(req, res) {
 export const handleOAuthCallback = (req, res) => {
   try {
     if (!req.user) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=Authentication failed`);
+      const errorMessage = req.session?.messages?.[0] || "Authentication failed";
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent(errorMessage)}`);
     }
     
     const token = generateToken(req.user.id, req.user.email, req.user.role);
     res.redirect(`${process.env.CLIENT_URL}/oauth/callback?token=${token}`);
   } catch (error) {
     console.error("OAuth callback error:", error);
-    res.redirect(`${process.env.CLIENT_URL}/login?error=Authentication failed`);
+    res.redirect(`${process.env.CLIENT_URL}/login?error=${encodeURIComponent("Authentication failed")}`);
   }
 }
 
