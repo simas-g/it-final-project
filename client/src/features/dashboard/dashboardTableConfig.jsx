@@ -61,6 +61,7 @@ export const getInventoryColumns = (t) => [
     key: 'actions',
     header: 'Actions',
     headerClassName: 'text-center',
+    cellClassName: 'text-center',
     render: (inventory) => (
       <Button variant="outline" size="sm" asChild>
         <Link to={`/inventory/${inventory.id}`}>

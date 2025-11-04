@@ -77,37 +77,3 @@ export const Pagination = ({ pagination, onPageChange, className = '' }) => {
     </div>
   );
 };
-
-export const SimplePagination = ({ pagination, onPageChange, className = '' }) => {
-  if (!pagination || pagination.pages <= 1) return null;
-
-  const { page, pages, total } = pagination;
-
-  return (
-    <div className={`flex items-center justify-between ${className}`}>
-      <span className="text-sm text-gray-600 dark:text-gray-400">
-        Page {page} of {pages} ({total} total)
-      </span>
-      
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(page - 1)}
-          disabled={page === 1}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(page + 1)}
-          disabled={page === pages}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
-};
-

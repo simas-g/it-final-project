@@ -9,17 +9,20 @@ export const StatsCards = ({ stats }) => {
     {
       label: t('inventories'),
       value: stats.totalInventories,
-      icon: Package
+      icon: Package,
+      description: t('totalInventoriesDesc')
     },
     {
       label: t('items'),
       value: stats.totalItems,
-      icon: FileText
+      icon: FileText,
+      description: t('totalItemsDesc')
     },
     {
       label: t('recentActivity'),
       value: stats.recentActivity,
-      icon: Users
+      icon: Users,
+      description: t('recentActivityDesc')
     }
   ]
 
@@ -35,6 +38,11 @@ export const StatsCards = ({ stats }) => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{card.value}</div>
+            {card.description && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {card.description}
+              </p>
+            )}
           </CardContent>
         </Card>
       ))}

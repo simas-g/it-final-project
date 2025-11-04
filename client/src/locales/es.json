@@ -377,5 +377,8 @@
   "exploreInventoriesByCategory": "Explora inventarios organizados por categoría",
   "exploreByTags": "Descubre colecciones por etiquetas populares",
   "searchingByCategory": "Filtrando por categoría:",
-  "noInventoriesInCategory": "No se encontraron inventarios en esta categoría"
+  "noInventoriesInCategory": "No se encontraron inventarios en esta categoría",
+  "totalInventoriesDesc": "Total de inventarios que posees y a los que tienes acceso",
+  "totalItemsDesc": "Total de artículos en todos tus inventarios",
+  "recentActivityDesc": "Inventarios actualizados en las últimas 24 horas"
 }

@@ -82,7 +82,6 @@ const Dashboard = () => {
         inventories={ownedInventories}
         columns={inventoryColumns}
         renderCard={(inv) => renderInventoryCard(inv, t)}
-        showCreateButton={true}
       />
 
       {writeAccessInventories.length > 0 && (

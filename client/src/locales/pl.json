@@ -377,5 +377,8 @@
   "exploreInventoriesByCategory": "Przeglądaj inwentarze uporządkowane według kategorii",
   "exploreByTags": "Odkryj kolekcje według popularnych tagów",
   "searchingByCategory": "Filtrowanie według kategorii:",
-  "noInventoriesInCategory": "Nie znaleziono inwentarzy w tej kategorii"
+  "noInventoriesInCategory": "Nie znaleziono inwentarzy w tej kategorii",
+  "totalInventoriesDesc": "Wszystkie inwentarze, które posiadasz i do których masz dostęp",
+  "totalItemsDesc": "Wszystkie przedmioty we wszystkich twoich inwentarzach",
+  "recentActivityDesc": "Inwentarze zaktualizowane w ciągu ostatnich 24 godzin"
 }

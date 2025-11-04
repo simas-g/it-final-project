@@ -377,5 +377,8 @@
   "exploreInventoriesByCategory": "Explore inventories organized by category",
   "exploreByTags": "Discover collections by popular tags",
   "searchingByCategory": "Filtering by category:",
-  "noInventoriesInCategory": "No inventories found in this category"
+  "noInventoriesInCategory": "No inventories found in this category",
+  "totalInventoriesDesc": "Total inventories you own and have access to",
+  "totalItemsDesc": "Total items across all your inventories",
+  "recentActivityDesc": "Inventories updated in the last 24 hours"
 }
