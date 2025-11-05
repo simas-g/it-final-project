@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePagination } from '@/hooks/usePagination'
 import { useInventoryExport } from '@/hooks/useInventoryExport'
-import { hasWriteAccess, isOwner, isAdminOrCreator } from '@/lib/permissions'
+import { hasWriteAccess, isOwner, isAdmin } from '@/lib/permissions'
 import { fetchInventory, fetchInventoryItems, fetchInventoryStatistics } from '@/queries/api'
 
 const InventoryDetailContext = createContext()
@@ -50,7 +50,7 @@ export const InventoryDetailProvider = ({ children, inventoryId }) => {
     exporting,
     hasWriteAccess: hasWriteAccess(inventory, user),
     isOwner: isOwner(inventory, user),
-    isAdminOrCreator: isAdminOrCreator(user),
+    isAdmin: isAdmin(user),
   }
 
   return (

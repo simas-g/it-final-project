@@ -172,7 +172,7 @@ export async function updateUserRole(req, res) {
     const { id } = req.params;
     const { role } = req.body;
     const adminId = req.user.id;
-    if (!['ADMIN', 'CREATOR', 'USER'].includes(role)) {
+    if (!['ADMIN', 'USER'].includes(role)) {
       return res.status(400).json({ error: "Invalid role" });
     }
     if (id === adminId && role !== 'ADMIN') {

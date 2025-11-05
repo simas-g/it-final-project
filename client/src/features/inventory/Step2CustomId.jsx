@@ -3,10 +3,11 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Hash, Sparkles, Plus } from "lucide-react";
+import { ArrowLeft, Hash, Plus } from "lucide-react";
 import { ELEMENT_TYPES } from "@/lib/inventoryConstants";
 import { useI18n } from "@/contexts/I18nContext";
 import SortableElementItem from "./SortableElementItem";
+import { CustomIdPreview } from "@/components/ui/custom-id-preview";
 
 const Step2CustomId = ({ 
   customIdElements, 
@@ -68,20 +69,10 @@ const Step2CustomId = ({
         </CardContent>
       </Card>
 
-      <Card className="border-2 border-primary">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Sparkles className="mr-2 h-5 w-5" />
-            {t('livePreview')}
-          </CardTitle>
-          <CardDescription>{t('exampleGeneratedId')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 bg-muted rounded-lg font-mono text-lg break-all">
-            {preview || t('addElementsToSeePreview')}
-          </div>
-        </CardContent>
-      </Card>
+      <CustomIdPreview 
+        preview={preview} 
+        variant="live"
+      />
     </div>
 
     <div className="space-y-4">

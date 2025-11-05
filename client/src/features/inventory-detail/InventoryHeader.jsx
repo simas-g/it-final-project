@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Package, Users, Lock, Plus, FileSpreadsheet, FileText, Download, ChevronDown } from 'lucide-react'
+import { Package, Users, Lock, Plus, FileSpreadsheet, FileType, Download, ChevronDown } from 'lucide-react'
 import { useInventoryDetail } from './InventoryDetailContext'
 import { useI18n } from '@/contexts/I18nContext'
 
@@ -83,12 +83,12 @@ const InventoryHeader = () => {
                 {t('exportToExcel')}
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => handleExport('pdf')}
+                onClick={() => handleExport('csv')}
                 disabled={exporting}
                 className="cursor-pointer"
               >
-                <FileText className="h-4 w-4 mr-2" />
-                {t('exportToPdf')}
+                <FileType className="h-4 w-4 mr-2" />
+                {t('exportToCsv')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ImageUpload from "@/components/ui/image-upload";
 import { Tag as TagIcon, Lock, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -57,18 +58,21 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         {categories.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor="categoryId" className="text-sm font-medium">{t('category')}</Label>
-            <select
-              id="categoryId"
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={onInputChange}
-              className="w-full h-11 px-3 border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            <Select
+              value={formData.categoryId || undefined}
+              onValueChange={(value) => onInputChange({ target: { name: 'categoryId', value } })}
             >
-              <option value="">{t('noCategory')}</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
+              <SelectTrigger className="h-11 border-2">
+                <SelectValue placeholder={t('noCategory')} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
 

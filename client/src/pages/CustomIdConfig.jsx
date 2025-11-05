@@ -7,9 +7,9 @@ import {
   CustomIdConfigProvider,
   useCustomIdConfig,
   ElementsPanel,
-  LivePreview,
   AvailableElementsPanel
 } from "@/features/custom-id";
+import { CustomIdPreview } from "@/components/ui/custom-id-preview";
 
 const CustomIdConfigContent = () => {
   const {
@@ -69,7 +69,7 @@ const CustomIdConfigContent = () => {
             onToggleHelp={handleToggleHelp}
             onSave={handleSave}
           />
-          <LivePreview preview={preview} />
+          <CustomIdPreview preview={preview} variant="live" />
         </div>
 
         <div className="space-y-4">

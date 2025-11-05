@@ -8,9 +8,9 @@ import {
   CreateItemProvider, 
   useCreateItem,
   ItemFormHeader,
-  CustomIdPreview,
   ItemFormField
 } from "@/features/item";
+import { CustomIdPreview } from "@/components/ui/custom-id-preview";
 import { Save, Package, AlertCircle } from "lucide-react";
 
 const CreateItemContent = () => {
@@ -62,8 +62,9 @@ const CreateItemContent = () => {
         )}
 
         <CustomIdPreview 
-          previewId={previewId}
+          preview={previewId}
           hasCustomId={!!inventory.customIdConfig}
+          variant="default"
         />
 
         {customFields.length > 0 ? (

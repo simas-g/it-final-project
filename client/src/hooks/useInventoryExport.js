@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { useI18n } from '@/contexts/I18nContext'
 import api from '@/lib/api'
-import { exportToExcel, exportToPDF } from '@/lib/exportUtils'
+import { exportToExcel, exportToCSV } from '@/lib/exportUtils'
 
 export const useInventoryExport = (inventoryId) => {
   const { toast } = useToast()
@@ -18,7 +18,7 @@ export const useInventoryExport = (inventoryId) => {
         title: getTranslation('exportingInventory', language),
         description: format === 'excel' 
           ? getTranslation('exportToExcel', language) 
-          : getTranslation('exportToPdf', language)
+          : getTranslation('exportToCsv', language)
       })
       
       const response = await api.get(`/inventories/${inventoryId}/export`)
@@ -27,7 +27,7 @@ export const useInventoryExport = (inventoryId) => {
       if (format === 'excel') {
         exportToExcel(exportInventory, exportItems)
       } else {
-        exportToPDF(exportInventory, exportItems)
+        exportToCSV(exportInventory, exportItems)
       }
       
       toast({

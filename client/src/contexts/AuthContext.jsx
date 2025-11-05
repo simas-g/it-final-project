@@ -158,8 +158,6 @@ export const AuthProvider = ({ children }) => {
 
   const isAdmin = () => state.user?.role === 'ADMIN'
 
-  const isCreator = () => state.user?.role === 'CREATOR' || state.user?.role === 'ADMIN'
-
   const isAuthenticated = () => !!state.user
 
   const value = {
@@ -171,7 +169,6 @@ export const AuthProvider = ({ children }) => {
     setError,
     loadUser,
     isAdmin,
-    isCreator,
     isAuthenticated
   }
 

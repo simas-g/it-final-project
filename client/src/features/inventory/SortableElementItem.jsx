@@ -24,7 +24,7 @@ const SortableElementItem = ({ element, index, onUpdate, onRemove }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
   };
   const Icon = ELEMENT_TYPES.find(et => et.value === element.elementType)?.icon || Hash;
   const info = ELEMENT_TYPES.find(et => et.value === element.elementType);
@@ -32,8 +32,8 @@ const SortableElementItem = ({ element, index, onUpdate, onRemove }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all ${
-        isDragging ? 'scale-95 z-50' : 'hover:border-primary'
+      className={`flex items-center space-x-3 p-4 border-2 rounded-lg ${
+        isDragging ? 'z-50' : 'hover:border-primary'
       }`}
     >
       <div {...attributes} {...listeners} className="cursor-move">

@@ -83,6 +83,7 @@ const ItemsTab = () => {
                     key: 'actions',
                     header: 'Actions',
                     headerClassName: 'text-right',
+                    cellClassName: 'text-right',
                       render: (item) => (
                         <Button variant="outline" size="sm" asChild>
                           <Link to={`/item/${item.id}`}>

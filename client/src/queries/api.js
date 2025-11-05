@@ -96,3 +96,7 @@ export const searchUsers = async (query) => {
   return response.data.users || []
 }
 
+export const fetchCategories = async () => {
+  const response = await api.get('/categories')
+  return response.data
+}

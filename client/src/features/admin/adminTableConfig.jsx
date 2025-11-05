@@ -8,7 +8,7 @@ export const getAdminTableColumns = (t, handleToggleBlock, handleChangeRole, han
     header: 'User',
     render: (user) => (
       <div className="flex items-center gap-2">
-        <span className="font-semibold">{user.name || user.email.split('@')[0]}</span>
+        <span>{user.name || user.email.split('@')[0]}</span>
         {user.isBlocked && (
           <Badge variant="destructive" className="text-xs">{t('blocked')}</Badge>
         )}
@@ -25,7 +25,7 @@ export const getAdminTableColumns = (t, handleToggleBlock, handleChangeRole, han
     key: 'role',
     header: 'Role',
     render: (user) => (
-      <Badge variant={user.role === 'ADMIN' ? 'default' : user.role === 'CREATOR' ? 'secondary' : 'outline'}>
+      <Badge variant={user.role === 'ADMIN' ? 'default' : 'outline'}>
         {user.role}
       </Badge>
     )
@@ -102,7 +102,7 @@ export const renderAdminCardList = (user, t, handleToggleBlock, handleChangeRole
     <div className="space-y-1 min-w-0 flex-1">
       <div className="flex items-center flex-wrap gap-2">
         <h3 className="font-semibold truncate">{user.name || user.email}</h3>
-        <Badge variant={user.role === 'ADMIN' ? 'default' : user.role === 'CREATOR' ? 'secondary' : 'outline'}>
+        <Badge variant={user.role === 'ADMIN' ? 'default' : 'outline'}>
           {user.role}
         </Badge>
         {user.isBlocked && (
@@ -116,7 +116,7 @@ export const renderAdminCardList = (user, t, handleToggleBlock, handleChangeRole
         <span>{user._count?.discussionPosts || 0} {t('posts')}</span>
       </div>
     </div>
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap border-t pt-2">
       <Button
         variant="outline"
         size="sm"

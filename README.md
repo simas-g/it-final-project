@@ -1,19 +1,37 @@
-{
-    "name": "Manager",
-    "email": "manager@inventory.com",
-    "password": "123"
-}
-{
-    "user": {
-        "id": "ff2ee93b-c837-4a06-adff-d6b8269607eb",
-        "email": "manager@inventory.com",
-        "name": "Manager",
-        "provider": null,
-        "providerId": null,
-        "isBlocked": false,
-        "createdAt": "2025-11-04T10:23:09.044Z",
-        "updatedAt": "2025-11-04T10:23:09.044Z",
-        "role": "USER"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZmMmVlOTNiLWM4MzctNGEwNi1hZGZmLWQ2YjgyNjk2MDdlYiIsImVtYWlsIjoibWFuYWdlckBpbnZlbnRvcnkuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NjIyNTE3ODksImV4cCI6MTc2Mjg1NjU4OX0.9QdfOul2awMrAHoUJIbhSB0Ymk_zM5IbmYMAoUGqLm8"
-}
+# Final Project - Inventory Management System
+
+## Test User Credentials
+
+### Admin User
+**Email:** admin@inventory.com  
+**Password:** admin123  
+**Role:** ADMIN
+
+**Permissions:**
+- Full access to all inventories
+- User management capabilities
+- System-wide statistics access
+- Can block/unblock users
+- View and manage all user activity
+
+---
+
+### Regular User (Manager)
+**Email:** manager@inventory.com  
+**Password:** 123  
+**Role:** USER
+
+**Permissions:**
+- Create and manage own inventories
+- Create items within owned inventories
+- Access public inventories
+- Access inventories shared with them
+
+---
+
+## User Roles
+
+The system supports two role levels:
+
+1. **ADMIN** - Full system access, user management, and administrative capabilities
+2. **USER** - Standard user with basic inventory management

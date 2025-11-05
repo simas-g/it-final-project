@@ -19,7 +19,7 @@ export const SortableElementItem = ({ element, index, onUpdate, onRemove, showHe
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
   }
 
   const Icon = ELEMENT_TYPES.find(et => et.value === element.elementType)?.icon || Hash
@@ -29,8 +29,8 @@ export const SortableElementItem = ({ element, index, onUpdate, onRemove, showHe
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all ${
-        isDragging ? 'scale-95 z-50' : 'hover:border-primary'
+      className={`flex items-center space-x-3 p-4 border-2 rounded-lg ${
+        isDragging ? 'z-50' : ''
       }`}
     >
       <div {...attributes} {...listeners} className="cursor-move">
@@ -38,7 +38,7 @@ export const SortableElementItem = ({ element, index, onUpdate, onRemove, showHe
       </div>
       <Icon className="h-5 w-5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2 mb-2">
+        <div className="flex items-center space-x-2 mb-2 flex-wrap flex gap-1">
           <Badge variant="outline">{info?.label}</Badge>
           {showHelp[index] && (
             <p className="text-xs text-muted-foreground">{info?.helpText}</p>

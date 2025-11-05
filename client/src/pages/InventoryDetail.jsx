@@ -22,7 +22,7 @@ const InventoryDetailContent = () => {
     activeTab, 
     setActiveTab, 
     isOwner, 
-    isAdminOrCreator,
+    isAdmin,
     statistics,
     statsLoading,
     inventoryId
@@ -59,13 +59,13 @@ const InventoryDetailContent = () => {
             <MessageSquare className="h-4 w-4 mr-2" />
             {t('discussion')}
           </TabsTrigger>
-          {(isOwner || isAdminOrCreator) && (
+          {(isOwner || isAdmin) && (
             <TabsTrigger value="access" className="flex items-center">
               <Lock className="h-4 w-4 mr-2" />
               {t('access')}
             </TabsTrigger>
           )}
-          {(isOwner || isAdminOrCreator) && (
+          {(isOwner || isAdmin) && (
             <TabsTrigger value="settings" className="flex items-center">
               <Settings className="h-4 w-4 mr-2" />
               {t('settings')}
@@ -88,7 +88,7 @@ const InventoryDetailContent = () => {
         <TabsContent value="access" className="space-y-4">
           <AccessManagement 
             inventoryId={inventoryId} 
-            isOwner={isOwner || isAdminOrCreator}
+            isOwner={isOwner || isAdmin}
           />
         </TabsContent>
 

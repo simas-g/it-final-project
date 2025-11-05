@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Hash, Package, Info, Tag as TagIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -6,38 +6,34 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { api } from '@/lib/api'
-import { useToast } from '@/hooks/use-toast'
 import ImageUpload from '@/components/ui/image-upload'
 import { useInventoryDetail } from './InventoryDetailContext'
 import { useI18n } from '@/contexts/I18nContext'
+import { useQuery } from '@tanstack/react-query'
+import { fetchCategories } from '@/queries/api'
+import { useInventoryUpdate } from './useInventoryUpdate'
+import { useToast } from '@/hooks/use-toast'
+
+const getInitialFormData = (inventory) => ({
+  name: inventory.name || '',
+  description: inventory.description || '',
+  categoryId: inventory.categoryId || '',
+  imageFile: null,
+  tags: inventory.inventoryTags?.map(it => it.tag.name).join(', ') || ''
+})
 
 const InventorySettingsTab = () => {
   const { inventory } = useInventoryDetail()
   const { t } = useI18n()
   const { toast } = useToast()
-  const [categories, setCategories] = useState([])
+  const { updateInventory, saving } = useInventoryUpdate(inventory)
   const [isEditing, setIsEditing] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({
-    name: inventory.name || '',
-    description: inventory.description || '',
-    categoryId: inventory.categoryId || '',
-    imageFile: null,
-    tags: inventory.inventoryTags?.map(it => it.tag.name).join(', ') || ''
+  const [formData, setFormData] = useState(getInitialFormData(inventory))
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories
   })
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get('/categories')
-        setCategories(response.data)
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-      }
-    }
-    fetchCategories()
-  }, [])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -49,56 +45,15 @@ const InventorySettingsTab = () => {
   }
 
   const handleSave = async () => {
-    if (!formData.name.trim()) {
-      toast({ title: t('inventoryNameRequired'), variant: 'destructive' })
-      return
-    }
-
-    setSaving(true)
-    try {
-      let imageUrl = inventory.imageUrl
-
-      if (formData.imageFile) {
-        const imageFormData = new FormData()
-        imageFormData.append('image', formData.imageFile)
-        const imageResponse = await api.post('/upload/image', imageFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
-        imageUrl = imageResponse.data.url
-      }
-
-      await api.put(`/inventories/${inventory.id}`, {
-        name: formData.name,
-        description: formData.description || undefined,
-        categoryId: formData.categoryId || undefined,
-        imageUrl: imageUrl,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-        isPublic: inventory.isPublic,
-        version: inventory.version
-      })
-
-      toast({ title: t('inventoryUpdated') })
+    const success = await updateInventory(formData)
+    if (success) {
       setIsEditing(false)
       window.location.reload()
-    } catch (error) {
-      console.error('Error updating inventory:', error)
-      toast({
-        title: error.response?.data?.error || t('errorUpdatingInventory'),
-        variant: 'destructive'
-      })
-    } finally {
-      setSaving(false)
     }
   }
 
   const handleCancel = () => {
-    setFormData({
-      name: inventory.name || '',
-      description: inventory.description || '',
-      categoryId: inventory.categoryId || '',
-      imageFile: null,
-      tags: inventory.inventoryTags?.map(it => it.tag.name).join(', ') || ''
-    })
+    setFormData(getInitialFormData(inventory))
     setIsEditing(false)
   }
 
@@ -108,7 +63,6 @@ const InventorySettingsTab = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>{t('basicInformation')}</CardTitle>
               <CardDescription>{t('updateInventoryDetails')}</CardDescription>
             </div>
             {!isEditing ? (
@@ -199,9 +153,6 @@ const InventorySettingsTab = () => {
           ) : (
             <div className="space-y-4">
               <div className="flex items-start space-x-4">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Info className="h-6 w-6 text-primary" />
-                </div>
                 <div className="flex-1">
                   <h3 className="font-semibold mb-2">{inventory.name}</h3>
                   <p className="text-sm text-muted-foreground">

@@ -11,7 +11,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const InventoriesTab = () => {
   const { profileUser, isOwnProfile, inventoriesPagination } = useUserProfile()
   const { t } = useI18n()
-  
   return (
     <div className="space-y-4">
       <Card>
@@ -44,7 +43,6 @@ const InventoriesTab = () => {
                     render: (inventory) => (
                       <Link 
                         to={`/inventory/${inventory.id}`}
-                        className="font-semibold hover:text-primary transition-colors"
                       >
                         {inventory.name}
                       </Link>
@@ -58,7 +56,7 @@ const InventoriesTab = () => {
                   },
                   {
                     key: 'visibility',
-                    header: 'Visibility',
+                    header: 'Accessibility',
                     render: (inventory) => (
                       <Badge variant={inventory.isPublic ? 'secondary' : 'outline'}>
                         {inventory.isPublic ? t('public') : t('private')}
@@ -80,8 +78,8 @@ const InventoriesTab = () => {
                   {
                     key: 'created',
                     header: 'Created',
-                    cellClassName: 'text-sm text-muted-foreground whitespace-nowrap',
-                    render: (inventory) => (
+                    headerClassName: 'text-right',
+                    cellClassName: 'text-right text-sm text-muted-foreground',                    render: (inventory) => (
                       <>
                         <Calendar className="h-4 w-4 inline mr-1" />
                         {new Date(inventory.createdAt).toLocaleDateString()}

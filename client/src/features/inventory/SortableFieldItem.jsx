@@ -32,8 +32,8 @@ const SortableFieldItem = ({ field, index, onUpdate, onRemove }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-start space-x-3 p-4 border-2 rounded-lg transition-all ${
-        isDragging ? 'scale-95 z-50' : 'hover:border-primary'
+      className={`flex items-start space-x-3 p-4 border-2 rounded-lg ${
+        isDragging ? 'z-50' : 'hover:border-primary'
       }`}
     >
       <div {...attributes} {...listeners} className="cursor-move mt-2">

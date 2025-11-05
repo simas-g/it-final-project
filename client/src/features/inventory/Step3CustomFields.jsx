@@ -19,7 +19,6 @@ const Step3CustomFields = ({
   canAddFieldType,
   getFieldTypeCount,
   onBack,
-  onSubmit 
 }) => {
   const { t } = useI18n();
   

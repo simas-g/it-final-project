@@ -71,6 +71,7 @@ const LikesTab = () => {
                     key: 'actions',
                     header: 'Actions',
                     headerClassName: 'text-right',
+                    cellClassName: 'text-right',
                     render: (like) => (
                       <Button variant="outline" size="sm" asChild>
                         <Link to={`/item/${like.item.id}`}>

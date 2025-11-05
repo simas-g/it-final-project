@@ -1,6 +1,6 @@
 export const hasWriteAccess = (inventory, user) => {
   if (!user || !inventory) return false
-  if (user.role === 'ADMIN' || user.role === 'CREATOR' || user.id === inventory.userId) {
+  if (user.role === 'ADMIN' || user.id === inventory.userId) {
     return true
   }
   if (inventory.inventoryAccess && inventory.inventoryAccess.length > 0) {
@@ -18,15 +18,15 @@ export const isOwner = (inventory, user) => {
   return user.id === inventory.userId
 }
 
-export const isAdminOrCreator = (user) => {
+export const isAdmin = (user) => {
   if (!user) return false
-  return user.role === 'ADMIN' || user.role === 'CREATOR'
+  return user.role === 'ADMIN'
 }
 
 export const hasItemWriteAccess = (item, user) => {
   if (!item || !user) return false
 
-  if (user.role === 'ADMIN' || user.role === 'CREATOR') {
+  if (user.role === 'ADMIN') {
     return true
   }
 

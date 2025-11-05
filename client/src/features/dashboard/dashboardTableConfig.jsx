@@ -28,7 +28,7 @@ export const getInventoryColumns = (t) => [
   },
   {
     key: 'visibility',
-    header: 'Visibility',
+    header: 'Accessibility',
     render: (inventory) => (
       <Badge variant={inventory.isPublic ? 'secondary' : 'outline'} className="text-xs">
         {inventory.isPublic ? (

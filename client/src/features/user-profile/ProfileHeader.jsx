@@ -15,7 +15,7 @@ const ProfileHeader = () => {
       <div className="flex-1 space-y-2">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold">{profileUser.name || profileUser.email}</h1>
-          <Badge variant={profileUser.role === 'ADMIN' ? 'default' : profileUser.role === 'CREATOR' ? 'secondary' : 'outline'}>
+          <Badge variant={profileUser.role === 'ADMIN' ? 'default' : 'outline'}>
             {profileUser.role}
           </Badge>
           {profileUser.isBlocked && (
