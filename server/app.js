@@ -1,32 +1,19 @@
 import express from "express";
-
 import cors from "cors";
-
 import session from "express-session";
-
 import passport from "./lib/passport.js";
-
 import authRoutes from "./routes/authRoutes.js";
-
 import inventoryRoutes from "./routes/inventoryRoutes.js";
-
 import itemRoutes from "./routes/itemRoutes.js";
-
 import customIdRoutes from "./routes/customIdRoutes.js";
-
 import discussionRoutes from "./routes/discussionRoutes.js";
-
 import adminRoutes from "./routes/adminRoutes.js";
-
 import searchRoutes from "./routes/searchRoutes.js";
-
 import fieldRoutes from "./routes/fieldRoutes.js";
-
 import accessRoutes from "./routes/accessRoutes.js";
-
 import userRoutes from "./routes/userRoutes.js";
-
 import uploadRoutes from "./routes/uploadRoutes.js";
+import "dotenv/config";
 
 const app = express();
 

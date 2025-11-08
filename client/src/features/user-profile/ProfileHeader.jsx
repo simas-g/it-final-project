@@ -6,7 +6,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const ProfileHeader = () => {
   const { profileUser } = useUserProfile()
   const { t } = useI18n()
-  
   return (
     <div className="flex items-start gap-6 pb-6 border-b">
       <div className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center shrink-0">

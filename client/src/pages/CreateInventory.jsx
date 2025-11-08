@@ -35,18 +35,14 @@ const CreateInventoryContent = () => {
     handleSubmit,
     navigate
   } = useCreateInventory();
-
   const { getFieldTypeCount, canAddFieldType } = useFieldManagement(customFields);
-
   return (
     <div className="max-w-6xl mx-auto p-6">
       <InventoryFormHeader 
         currentStep={currentStep}
         onBack={() => navigate('/dashboard')}
       />
-
       <StepIndicator currentStep={currentStep} />
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {currentStep === 1 && (
           <Step1BasicInfo
@@ -57,7 +53,6 @@ const CreateInventoryContent = () => {
             onNext={handleNext}
           />
         )}
-
         {currentStep === 2 && (
           <Step2CustomId
             customIdElements={customIdElements}
@@ -71,7 +66,6 @@ const CreateInventoryContent = () => {
             onNext={handleNext}
           />
         )}
-
         {currentStep === 3 && (
           <Step3CustomFields
             customFields={customFields}

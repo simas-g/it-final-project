@@ -13,27 +13,22 @@ export const InventoryDetailProvider = ({ children, inventoryId }) => {
   const [activeTab, setActiveTab] = useState('items')
   const { page: itemsPage, limit: itemsLimit, goToPage: goToItemsPage } = usePagination(1, 20)
   const { handleExport, exporting } = useInventoryExport(inventoryId)
-
   const { data: inventory, isLoading: loading } = useQuery({
     queryKey: ['inventory', inventoryId],
     queryFn: () => fetchInventory(inventoryId),
   })
-
   const { data: itemsData, isLoading: itemsLoading } = useQuery({
     queryKey: ['inventoryItems', inventoryId, itemsPage, itemsLimit],
     queryFn: () => fetchInventoryItems({ inventoryId, page: itemsPage, limit: itemsLimit }),
     enabled: !!inventory && activeTab === 'items',
   })
-
   const { data: statistics, isLoading: statsLoading } = useQuery({
     queryKey: ['inventoryStatistics', inventoryId],
     queryFn: () => fetchInventoryStatistics(inventoryId),
     enabled: activeTab === 'stats',
   })
-
   const items = itemsData?.items || []
   const itemsPagination = itemsData?.pagination || null
-
   const value = {
     inventoryId,
     inventory,
@@ -52,7 +47,6 @@ export const InventoryDetailProvider = ({ children, inventoryId }) => {
     isOwner: isOwner(inventory, user),
     isAdmin: isAdmin(user),
   }
-
   return (
     <InventoryDetailContext.Provider value={value}>
       {children}

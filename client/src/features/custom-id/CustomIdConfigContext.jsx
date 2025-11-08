@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
+import api from '@/lib/api'
 import { arrayMove } from '@dnd-kit/sortable'
 
 const CustomIdConfigContext = createContext(null)
@@ -24,18 +24,15 @@ export const CustomIdConfigProvider = ({ children }) => {
   const [elements, setElements] = useState([])
   const [preview, setPreview] = useState('')
   const [showHelp, setShowHelp] = useState({})
-
   useEffect(() => {
     fetchInventory()
     fetchConfig()
   }, [id])
-
   useEffect(() => {
     if (elements.length > 0) {
       generatePreview()
     }
   }, [elements])
-
   const fetchInventory = async () => {
     try {
       const response = await api.get(`/inventories/${id}`)
@@ -45,7 +42,6 @@ export const CustomIdConfigProvider = ({ children }) => {
       setError('Failed to load inventory')
     }
   }
-
   const fetchConfig = async () => {
     try {
       setLoading(true)
@@ -59,7 +55,6 @@ export const CustomIdConfigProvider = ({ children }) => {
       setLoading(false)
     }
   }
-
   const generatePreview = async () => {
     try {
       const response = await api.post('/custom-id/preview', { elements })
@@ -69,7 +64,6 @@ export const CustomIdConfigProvider = ({ children }) => {
       setPreview('Error generating preview')
     }
   }
-
   const handleAddElement = (elementType) => {
     const newElement = {
       id: `element-${Date.now()}-${Math.random()}`,

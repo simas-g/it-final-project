@@ -4,7 +4,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const StatsCards = ({ stats }) => {
   const { t } = useI18n()
-
   const cards = [
     {
       label: t('inventories'),
@@ -25,7 +24,6 @@ export const StatsCards = ({ stats }) => {
       description: t('recentActivityDesc')
     }
   ]
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {cards.map((card, index) => (

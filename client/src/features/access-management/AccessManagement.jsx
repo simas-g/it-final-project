@@ -7,13 +7,10 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const AccessManagement = ({ inventoryId, isOwner }) => {
   if (!isOwner) return null
-
   const Content = () => {
     const { loading, confirmDialogOpen, setConfirmDialogOpen, confirmRemoveAccess } = useAccessManagement()
     const { t } = useI18n()
-
     if (loading) return <LoadingSpinner />
-
     return (
       <>
         <div className="space-y-6">

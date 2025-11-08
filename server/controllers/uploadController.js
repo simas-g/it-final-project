@@ -24,22 +24,18 @@ export const uploadImage = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided" });
     }
-
     if (!BUCKET_NAME) {
       return res.status(500).json({ error: "S3 bucket not configured" });
     }
-
     const file = req.file;
     const fileExtension = file.originalname.split('.').pop() || 'jpg';
     const fileName = `inventory-images/${generateFileName()}.${fileExtension}`;
-
     const uploadParams = {
       Bucket: BUCKET_NAME,
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
     };
-
     const useAcl = process.env.AWS_S3_USE_ACL === 'true'
     const paramsWithAcl = useAcl ? { ...uploadParams, ACL: 'public-read' } : uploadParams
     try {
@@ -51,9 +47,7 @@ export const uploadImage = async (req, res) => {
         throw err
       }
     }
-
     const imageUrl = `https://${BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${fileName}`;
-
     res.status(200).json({
       url: imageUrl,
       fileName: fileName,

@@ -4,7 +4,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const ItemFormField = ({ field, value, onChange }) => {
   const { t } = useI18n()
-
   const renderFieldInput = () => {
     switch (field.fieldType) {
       case 'SINGLE_LINE_TEXT':
@@ -18,7 +17,6 @@ export const ItemFormField = ({ field, value, onChange }) => {
             className="h-11 border-2"
           />
         )
-      
       case 'MULTI_LINE_TEXT':
         return (
           <textarea
@@ -29,7 +27,6 @@ export const ItemFormField = ({ field, value, onChange }) => {
             className="w-full min-h-[100px] px-3 py-2 border-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
           />
         )
-      
       case 'NUMERIC':
         return (
           <Input
@@ -42,7 +39,6 @@ export const ItemFormField = ({ field, value, onChange }) => {
             className="h-11 border-2"
           />
         )
-      
       case 'IMAGE_URL':
         return (
           <Input
@@ -55,7 +51,6 @@ export const ItemFormField = ({ field, value, onChange }) => {
             className="h-11 border-2"
           />
         )
-      
       case 'BOOLEAN':
         return (
           <div className="flex items-center space-x-2">
@@ -71,7 +66,6 @@ export const ItemFormField = ({ field, value, onChange }) => {
             </label>
           </div>
         )
-      
       default:
         return null
     }

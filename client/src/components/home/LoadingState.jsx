@@ -2,7 +2,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const LoadingState = () => {
   const { t } = useI18n()
-  
   return (
     <div className="flex items-center justify-center min-h-[600px]">
       <div className="text-center">

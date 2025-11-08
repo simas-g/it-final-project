@@ -8,7 +8,6 @@ import SortableFieldItem from '@/features/inventory/SortableFieldItem'
 
 const FieldsList = ({ fields, setFields, onUpdate, onRemove, onSave, saving }) => {
   const sensors = useDndSensors()
-
   const handleDragEnd = (event) => {
     const { active, over } = event
     if (active.id !== over.id) {

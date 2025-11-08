@@ -24,7 +24,6 @@ export const ToastProvider = ({ children }) => {
         removeToast(id)
       }, duration)
     }
-
     return id
   }, [removeToast])
   const dismissToast = React.useCallback((id) => {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api } from '@/lib/api'
+import api from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { useI18n } from '@/contexts/I18nContext'
 
@@ -7,17 +7,14 @@ export const useInventoryUpdate = (inventory) => {
   const { toast } = useToast()
   const { t } = useI18n()
   const [saving, setSaving] = useState(false)
-
   const updateInventory = async (formData) => {
     if (!formData.name.trim()) {
       toast({ title: t('inventoryNameRequired'), variant: 'destructive' })
       return false
     }
-
     setSaving(true)
     try {
       let imageUrl = inventory.imageUrl
-
       if (formData.imageFile) {
         const imageFormData = new FormData()
         imageFormData.append('image', formData.imageFile)
@@ -26,7 +23,6 @@ export const useInventoryUpdate = (inventory) => {
         })
         imageUrl = imageResponse.data.url
       }
-
       await api.put(`/inventories/${inventory.id}`, {
         name: formData.name,
         description: formData.description || undefined,
@@ -36,7 +32,6 @@ export const useInventoryUpdate = (inventory) => {
         isPublic: inventory.isPublic,
         version: inventory.version
       })
-
       toast({ title: t('inventoryUpdated') })
       return true
     } catch (error) {
@@ -50,7 +45,6 @@ export const useInventoryUpdate = (inventory) => {
       setSaving(false)
     }
   }
-
   return { updateInventory, saving }
 }
 

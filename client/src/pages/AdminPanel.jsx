@@ -36,23 +36,19 @@ const AdminPanel = () => {
     handleSearch,
     handleKeyDown
   } = useAdminPanel()
-  
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['adminUsers', page, limit, searchTerm],
     queryFn: () => fetchAdminUsers({ page, limit, search: searchTerm }),
     enabled: isAdmin(),
   })
-
   const { data: stats } = useQuery({
     queryKey: ['adminStats'],
     queryFn: fetchAdminStats,
     enabled: isAdmin(),
   })
-
   const users = usersData?.users || []
   const pagination = usersData?.pagination || null
   const loading = usersLoading
-
   const t = (key) => getTranslation(key, language)
   const tableColumns = getAdminTableColumns(t, handleToggleBlock, handleChangeRole, handleDeleteUser)
   if (!isAdmin()) {

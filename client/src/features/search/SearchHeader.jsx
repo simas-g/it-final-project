@@ -6,11 +6,9 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const SearchHeader = ({ tag, matchingTags }) => {
   const { getTranslation, language } = useI18n()
-
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">{getTranslation('searchResults', language)}</h1>
-      
       {tag && (
         <div className="flex items-center space-x-2 p-4 bg-muted rounded-lg border-2">
           <span className="text-sm text-muted-foreground">{getTranslation('searchingByTag', language)}</span>
@@ -27,7 +25,6 @@ export const SearchHeader = ({ tag, matchingTags }) => {
           </Button>
         </div>
       )}
-      
       {!tag && matchingTags.length > 0 && (
         <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg border-2">
           <span className="text-sm text-muted-foreground">{getTranslation('foundMatchingTags', language)}</span>
@@ -50,7 +47,6 @@ export const SearchHeader = ({ tag, matchingTags }) => {
           </div>
         </div>
       )}
-      
       <div className="flex items-center">
         <SearchAutocomplete className="flex-1 max-w-md" />
       </div>

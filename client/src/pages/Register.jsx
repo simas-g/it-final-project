@@ -1,61 +1,58 @@
 import { useState, useEffect } from "react";
-
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-
+import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-
 import { useI18n } from "@/contexts/I18nContext";
-
 import { Button } from "@/components/ui/button";
-
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
-
 import { Label } from "@/components/ui/label";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowRight, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
+import { registerUser } from "@/queries/api";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
-  const { register, error, clearError, setError } = useAuth();
+  const auth = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
-  
   useEffect(() => {
     const urlError = searchParams.get("error");
     if (urlError) {
-      setError(decodeURIComponent(urlError));
+      auth.setError(decodeURIComponent(urlError));
       navigate("/register", { replace: true });
     }
-  }, [searchParams, setError, navigate]);
-  const handleSubmit = async (e) => {
+  }, [searchParams, auth, navigate]);
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+      const { user, token } = data;
+      localStorage.setItem('token', token);
+      auth.dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { user, token }
+      });
+      navigate("/dashboard");
+    },
+    onError: (error) => {
+      const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+      auth.setError(errorMessage);
+    }
+  });
+  const handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (password !== confirmPassword) {
       return;
     }
-    if (loading) return;
-    try {
-      setLoading(true);
-      clearError();
-      const result = await register(email, password, name);
-      if (result.success) {
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-    } finally {
-      setLoading(false);
-    }
+    auth.clearError();
+    registerMutation.mutate({ email, password, name });
   };
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -72,9 +69,9 @@ const Register = () => {
           <Card className="border-2 shadow-lg">
             <CardContent className="pt-8 pb-8 px-8">
               <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
+                {auth.error && (
                   <Alert variant="destructive" className="animate-in">
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>{auth.error}</AlertDescription>
                   </Alert>
                 )}
                 <div className="space-y-2">
@@ -153,9 +150,9 @@ const Register = () => {
                 <Button 
                   type="submit" 
                   className="w-full h-11 font-medium group mt-6" 
-                  disabled={loading || (password !== confirmPassword && confirmPassword)}
+                  disabled={registerMutation.isPending || (password !== confirmPassword && confirmPassword)}
                 >
-                  {loading ? (
+                  {registerMutation.isPending ? (
                     <span className="flex items-center">
                       <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2"></div>
                       {t('creating')}
@@ -168,7 +165,6 @@ const Register = () => {
                   )}
                 </Button>
               </form>
-              
               <div className="mt-6 mb-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -181,7 +177,6 @@ const Register = () => {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   type="button"
@@ -195,7 +190,6 @@ const Register = () => {
                   <FcGoogle className="mr-2 h-5 w-5" />
                   Google
                 </Button>
-                
                 <Button
                   type="button"
                   variant="outline"
@@ -209,7 +203,6 @@ const Register = () => {
                   Facebook
                 </Button>
               </div>
-
               <div className="mt-6 pt-6 border-t text-center">
                 <p className="text-sm text-muted-foreground">
                   {t('haveAccount')}{" "}
@@ -228,5 +221,4 @@ const Register = () => {
     </div>
   )
 }
-
 export default Register

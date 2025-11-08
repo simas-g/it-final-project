@@ -17,9 +17,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner'
 const UserProfileContent = () => {
   const { profileUser, loading, activeTab, setActiveTab } = useUserProfile()
   const { t } = useI18n()
-
   if (loading) return <LoadingSpinner message={t('loading')} />
-
   if (!profileUser) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -32,11 +30,9 @@ const UserProfileContent = () => {
       </div>
     )
   }
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <ProfileHeader />
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="inventories" className="flex items-center">
@@ -56,19 +52,15 @@ const UserProfileContent = () => {
             {t('likes')} ({profileUser._count?.itemLikes || 0})
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="inventories">
           <InventoriesTab />
         </TabsContent>
-
         <TabsContent value="items">
           <ItemsTab />
         </TabsContent>
-
         <TabsContent value="posts">
           <PostsTab />
         </TabsContent>
-
         <TabsContent value="likes">
           <LikesTab />
         </TabsContent>
@@ -79,7 +71,6 @@ const UserProfileContent = () => {
 
 const UserProfile = () => {
   const { id } = useParams()
-
   return (
     <UserProfileProvider userId={id}>
       <UserProfileContent />

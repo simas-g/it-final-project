@@ -11,7 +11,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const ItemsTab = () => {
   const { profileUser, isOwnProfile, itemsPagination } = useUserProfile()
   const { t } = useI18n()
-  
   return (
     <div className="space-y-4">
       <Card>

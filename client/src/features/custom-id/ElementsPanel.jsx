@@ -8,7 +8,6 @@ import { SortableElementItem } from './SortableElementItem'
 
 export const ElementsPanel = ({ elements, saving, showHelp, onDragEnd, onUpdate, onRemove, onToggleHelp, onSave }) => {
   const sensors = useDndSensors()
-
   return (
     <Card className="border-2">
       <CardHeader>

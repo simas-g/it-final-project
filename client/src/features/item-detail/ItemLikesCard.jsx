@@ -8,7 +8,6 @@ const ItemLikesCard = () => {
   const { item } = useItemDetail()
   const { t } = useI18n()
   const likes = item.likes
-
   return (
     <Card>
       <CardHeader>

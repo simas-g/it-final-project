@@ -21,7 +21,6 @@ const SearchAutocomplete = ({ className = '' }) => {
   const [isTyping, setIsTyping] = useState(false)
   const navigate = useNavigate()
   const { t } = useI18n()
-
   useEffect(() => {
     const urlQuery = searchParams.get('q')
     if (urlQuery && urlQuery !== query) {
@@ -29,21 +28,17 @@ const SearchAutocomplete = ({ className = '' }) => {
       setIsTyping(false)
     }
   }, [searchParams])
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query)
     }, 600)
-
     return () => clearTimeout(timer)
   }, [query])
-
   const { data: suggestions = [], isLoading: loading } = useQuery({
     queryKey: ['searchSuggestions', debouncedQuery],
     queryFn: () => fetchSearchSuggestions(debouncedQuery),
     enabled: debouncedQuery.length >= 2 && isTyping,
   })
-
   const handleSearch = (searchQuery = query) => {
     if (searchQuery.trim()) {
       setQuery(searchQuery.trim())

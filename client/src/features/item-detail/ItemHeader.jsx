@@ -18,9 +18,7 @@ const ItemHeader = () => {
     cancelEditing,
     handleDelete
   } = useItemDetail()
-  
   const { t } = useI18n()
-
   return (
     <div className="flex items-start justify-between">
       <div className="space-y-2">

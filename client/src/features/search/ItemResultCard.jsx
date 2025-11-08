@@ -6,7 +6,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const ItemResultCard = ({ item }) => {
   const { getTranslation, language } = useI18n()
-
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">

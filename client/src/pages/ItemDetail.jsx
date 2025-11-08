@@ -18,18 +18,15 @@ import { fetchItem } from '@/queries/api'
 const ItemDetailContent = () => {
   const { t } = useI18n()
   const { confirmDialogOpen, setConfirmDialogOpen, confirmDelete } = useItemDetail()
-
   return (
     <>
       <div className="space-y-6">
         <ItemHeader />
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <ItemFieldsCard />
             <ItemLikesCard />
           </div>
-
           <div className="space-y-6">
             <ItemInfoCard />
             <ItemActionsCard />
@@ -53,14 +50,11 @@ const ItemDetailContent = () => {
 const ItemDetail = () => {
   const { id } = useParams()
   const { t } = useI18n()
-
   const { data: item, isLoading: loading } = useQuery({
     queryKey: ['item', id],
     queryFn: () => fetchItem(id),
   })
-
   if (loading) return <LoadingSpinner message={t('loading')} />
-
   if (!item) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -73,7 +67,6 @@ const ItemDetail = () => {
       </div>
     )
   }
-
   return (
     <ItemDetailProvider item={item}>
       <ItemDetailContent />

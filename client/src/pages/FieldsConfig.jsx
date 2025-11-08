@@ -1,46 +1,33 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { api } from "@/lib/api"
+import api from "@/lib/api"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { ArrowLeft, AlertCircle, Info } from "lucide-react"
 import FieldsList from "@/components/fields-config/FieldsList"
 import FieldTypeButtons from "@/components/fields-config/FieldTypeButtons"
 import FixedFieldsInfo from "@/components/fields-config/FixedFieldsInfo"
 import { FIELD_TYPES } from "@/lib/inventoryConstants"
+import { fetchInventoryFields } from "@/queries/api"
 
 const FieldsConfig = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [inventory, setInventory] = useState(null)
   const [fields, setFields] = useState([])
-
-  useEffect(() => {
-    fetchInventoryAndFields()
-  }, [id])
-
-  const fetchInventoryAndFields = async () => {
-    try {
-      setLoading(true)
-      const [invResponse, fieldsResponse] = await Promise.all([
-        api.get(`/inventories/${id}`),
-        api.get(`/inventories/${id}/fields`)
-      ])
-      setInventory(invResponse.data)
-      setFields(fieldsResponse.data)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setError('Failed to load data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  const { isLoading, refetch } = useQuery({
+    queryKey: ['inventoryFields', id],
+    queryFn: async () => {
+      const data = await fetchInventoryFields(id)
+      setFields(data)
+      return data
+    },
+    enabled: !!id
+  })
   const canAddFieldType = (fieldType) => {
     const typeInfo = FIELD_TYPES.find(t => t.value === fieldType)
     const count = fields.filter(f => f.fieldType === fieldType).length
@@ -124,7 +111,7 @@ const FieldsConfig = () => {
       setSuccess('Fields configuration saved successfully!')
       setTimeout(() => {
         setSuccess("")
-        fetchInventoryAndFields()
+        refetch()
       }, 1500)
     } catch (error) {
       console.error('Error saving fields:', error)
@@ -134,7 +121,7 @@ const FieldsConfig = () => {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner message="Loading fields..." />
   }
 
@@ -162,8 +149,8 @@ const FieldsConfig = () => {
         </Alert>
       )}
 
-      <Alert>
-        <Info className="h-4 w-4" />
+      <Alert className="flex items-center gap-2 ">
+        <Info className="h-4 w-4 flex-shrink-0" />
         <AlertDescription>
           <strong>Field Limits:</strong> You can add up to 3 fields of each type. Fixed fields (Created By, Created At, Custom ID) are automatically included in all items.
         </AlertDescription>

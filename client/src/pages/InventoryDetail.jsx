@@ -27,11 +27,8 @@ const InventoryDetailContent = () => {
     statsLoading,
     inventoryId
   } = useInventoryDetail()
-  
   const { t } = useI18n()
-
   if (loading) return <LoadingSpinner message={t('loading')} />
-
   if (!inventory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -44,11 +41,9 @@ const InventoryDetailContent = () => {
       </div>
     )
   }
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <InventoryHeader />
-      
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="items" className="flex items-center">
@@ -76,26 +71,21 @@ const InventoryDetailContent = () => {
             {t('statistics')}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="items">
           <InventoryItemsTab />
         </TabsContent>
-
         <TabsContent value="discussion" className="space-y-4">
           <Discussion inventoryId={inventoryId} />
         </TabsContent>
-
         <TabsContent value="access" className="space-y-4">
           <AccessManagement 
             inventoryId={inventoryId} 
             isOwner={isOwner || isAdmin}
           />
         </TabsContent>
-
         <TabsContent value="settings">
           <InventorySettingsTab />
         </TabsContent>
-
         <TabsContent value="stats" className="space-y-4">
           <Statistics statistics={statistics} statsLoading={statsLoading} />
         </TabsContent>
@@ -106,7 +96,6 @@ const InventoryDetailContent = () => {
 
 const InventoryDetail = () => {
   const { id } = useParams()
-
   return (
     <InventoryDetailProvider inventoryId={id}>
       <InventoryDetailContent />

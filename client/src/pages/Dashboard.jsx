@@ -19,31 +19,24 @@ import { Plus, Package } from "lucide-react";
 const Dashboard = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useI18n();
-
   const { data: ownedInventories = [], isLoading: ownedLoading } = useQuery({
     queryKey: ['userInventories', 'owned', user?.id],
     queryFn: () => fetchUserInventories('owned', 100),
     enabled: !!user && !authLoading,
   });
-
   const { data: accessInventories = [], isLoading: accessLoading } = useQuery({
     queryKey: ['userInventories', 'access', user?.id],
     queryFn: () => fetchUserInventories('access', 100),
     enabled: !!user && !authLoading,
   });
-
   const writeAccessInventories = accessInventories.filter(inv => 
     inv.inventoryAccess?.[0]?.accessType === 'WRITE'
   )
-
   const stats = calculateStats(ownedInventories, writeAccessInventories)
   const loading = ownedLoading || accessLoading
-
   const inventoryColumns = getInventoryColumns(t)
   const accessInventoryColumns = getAccessInventoryColumns(t)
-  
   if (authLoading || loading) return <LoadingSpinner message={t('loading')} />
-
   if (!isAuthenticated()) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -58,7 +51,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center justify-between pb-6 border-b">
@@ -76,14 +68,12 @@ const Dashboard = () => {
         </Button>
       </div>
       <StatsCards stats={stats} />
-
       <InventorySection
         title={t('yourInventories')}
         inventories={ownedInventories}
         columns={inventoryColumns}
         renderCard={(inv) => renderInventoryCard(inv, t)}
       />
-
       {writeAccessInventories.length > 0 && (
         <InventorySection
           title={t('inventoriesWithWriteAccess')}
@@ -95,5 +85,4 @@ const Dashboard = () => {
     </div>
   )
 }
-
 export default Dashboard

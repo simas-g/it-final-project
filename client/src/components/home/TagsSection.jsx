@@ -5,9 +5,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const TagsSection = ({ tags }) => {
   const { t } = useI18n()
-  
   if (tags.length === 0) return null
-  
   return (
     <section>
       <div className="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">

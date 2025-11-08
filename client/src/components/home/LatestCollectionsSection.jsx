@@ -6,7 +6,6 @@ import InventoryCard from './InventoryCard'
 
 const LatestCollectionsSection = ({ inventories }) => {
   const { t } = useI18n()
-  
   return (
     <section>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b">

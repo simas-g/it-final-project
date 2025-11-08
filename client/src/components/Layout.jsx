@@ -8,9 +8,7 @@ import LoadingSpinner from './ui/loading-spinner'
 const Layout = () => {
   const { isAuthenticated, loading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   if (loading) return <LoadingSpinner />
-
   if (!isAuthenticated()) {
     return (
       <div className="min-h-screen bg-background">

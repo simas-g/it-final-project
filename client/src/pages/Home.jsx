@@ -17,7 +17,6 @@ const Home = () => {
   if (loading) {
     return <LoadingState />
   }
-
   return (
     <div className="max-w-6xl mx-auto space-y-6 sm:space-y-12">
       <LatestCollectionsSection inventories={latestInventories} />
@@ -27,5 +26,4 @@ const Home = () => {
     </div>
   )
 }
-
 export default Home

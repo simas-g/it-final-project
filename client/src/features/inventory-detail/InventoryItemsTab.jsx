@@ -13,9 +13,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner'
 const InventoryItemsTab = () => {
   const { items, inventory, itemsLoading, hasWriteAccess, itemsPagination, goToItemsPage } = useInventoryDetail()
   const { t } = useI18n()
-  
   const visibleFields = inventory.fields?.filter(f => f.showInTable) || []
-
   const renderFieldValue = (field, item) => {
     if (field.fieldType === 'BOOLEAN') {
       return (
@@ -24,11 +22,9 @@ const InventoryItemsTab = () => {
         </Badge>
       )
     }
-    
     if (field.fieldType === 'MULTI_LINE_TEXT') {
       return <span className="text-sm line-clamp-2">{item.fields?.[field.id] || '-'}</span>
     }
-    
     if (field.fieldType === 'IMAGE_URL' && item.fields?.[field.id]) {
       return (
         <div className="flex items-center space-x-2">
@@ -43,7 +39,6 @@ const InventoryItemsTab = () => {
         </div>
       )
     }
-    
     return <span className="text-sm">{item.fields?.[field.id] || '-'}</span>
   }
 

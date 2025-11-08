@@ -21,18 +21,15 @@ export const DiscussionProvider = ({ inventoryId, children }) => {
   const { t } = useI18n()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-
   const [newPostContent, setNewPostContent] = useState('')
   const [editingPostId, setEditingPostId] = useState(null)
   const [editContent, setEditContent] = useState('')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [postToDelete, setPostToDelete] = useState(null)
-
   const { data: posts = [], isLoading: loading } = useQuery({
     queryKey: ['discussionPosts', inventoryId],
     queryFn: () => fetchDiscussionPosts(inventoryId),
   })
-
   const createPostMutation = useMutation({
     mutationFn: (content) => api.post(`/inventories/${inventoryId}/discussion`, { content }),
     onSuccess: () => {
@@ -51,7 +48,6 @@ export const DiscussionProvider = ({ inventoryId, children }) => {
       })
     }
   })
-
   const updatePostMutation = useMutation({
     mutationFn: ({ postId, content }) => api.put(`/discussion/${postId}`, { content }),
     onSuccess: () => {
@@ -71,7 +67,6 @@ export const DiscussionProvider = ({ inventoryId, children }) => {
       })
     }
   })
-
   const deletePostMutation = useMutation({
     mutationFn: (postId) => api.delete(`/discussion/${postId}`),
     onSuccess: () => {
@@ -89,7 +84,6 @@ export const DiscussionProvider = ({ inventoryId, children }) => {
       })
     }
   })
-
   const handleCreatePost = (e) => {
     e.preventDefault()
     if (!newPostContent.trim()) return

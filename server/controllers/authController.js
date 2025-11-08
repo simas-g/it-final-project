@@ -137,12 +137,10 @@ export async function authProvider(req, res) {
 export const handleOAuthCallback = (req, res) => {
   try {
     const clientUrl = process.env.FRONTEND_URL
-    
     if (!req.user) {
       const errorMessage = req.session?.messages?.[0] || "Authentication failed";
       return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(errorMessage)}`);
     }
-    
     const token = generateToken(req.user.id, req.user.email, req.user.role);
     res.redirect(`${clientUrl}/oauth/callback?token=${token}`);
   } catch (error) {

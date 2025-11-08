@@ -5,7 +5,6 @@ import { Package, Users } from 'lucide-react'
 import { useI18n } from '@/contexts/I18nContext'
 const TrendingItem = ({ inventory, rank }) => {
   const { t } = useI18n()
-  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-3 sm:p-4">
@@ -16,7 +15,6 @@ const TrendingItem = ({ inventory, rank }) => {
           {inventory.imageUrl && (
             <img src={inventory.imageUrl} alt={inventory.name} className="w-24 h-24 object-cover" />
           )}
-
           <div className="flex-1 min-w-0 space-y-1">
             <Link 
               to={`/inventory/${inventory.id}`}

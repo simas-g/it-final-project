@@ -24,19 +24,15 @@ const themeReducer = (state, action) => {
 }
 
 export const ThemeProvider = ({ children }) => {
-
   const [state, dispatch] = useReducer(themeReducer, initialState)
-
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark')
     document.documentElement.classList.add(state.theme)
     localStorage.setItem('theme', state.theme)
   }, [state.theme])
-
   useEffect(() => {
     localStorage.setItem('language', state.language)
   }, [state.language])
-
   const setTheme = (theme) => {
     dispatch({ type: 'SET_THEME', payload: theme })
   }
@@ -64,7 +60,6 @@ export const ThemeProvider = ({ children }) => {
 }
 
 export const useTheme = () => {
-
   const context = useContext(ThemeContext)
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider')

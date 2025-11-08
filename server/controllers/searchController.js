@@ -8,7 +8,6 @@ export const globalSearch = async (req, res) => {
     if (!query || query.trim().length === 0) {
       return res.status(400).json({ error: "Search query is required" });
     }
-    
     const sanitizedQuery = sanitizeSearchQuery(query.trim());
     if (!sanitizedQuery) {
       return res.json({
@@ -16,7 +15,6 @@ export const globalSearch = async (req, res) => {
         pagination: { page: 1, limit: parseInt(limit), total: 0, pages: 0 }
       });
     }
-    
     const skip = (parseInt(page) - 1) * parseInt(limit);
     let results = { inventories: [], items: [], total: 0 };
 
@@ -220,12 +218,10 @@ export const getSearchSuggestions = async (req, res) => {
     if (!query || query.trim().length < 2) {
       return res.json({ suggestions: [] });
     }
-    
     const sanitizedQuery = sanitizeSearchQuery(query.trim());
     if (!sanitizedQuery) {
       return res.json({ suggestions: [] });
     }
-
     const suggestions = await searchSuggestions(prisma, sanitizedQuery);
     res.json({ suggestions });
   } catch (error) {

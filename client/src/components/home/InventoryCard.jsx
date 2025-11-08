@@ -6,7 +6,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const InventoryCard = ({ inventory }) => {
   const { t } = useI18n()
-  
   return (
     <Card className="hover:shadow-md transition-shadow flex flex-col">
       <CardHeader className="pb-2 flex-shrink-0">

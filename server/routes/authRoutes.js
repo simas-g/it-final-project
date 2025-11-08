@@ -11,6 +11,7 @@ import { authenticateToken } from "../middleware/auth.js";
 import passport from "../lib/passport.js";
 
 const router = express.Router();
+const clientUrl = process.env.FRONTEND_URL;
 
 router.post("/auth/register", registerEmail);
 router.post("/auth/login", loginEmail);
@@ -25,7 +26,6 @@ router.get(
 router.get(
   "/auth/google/callback",
   (req, res, next) => {
-    const clientUrl = process.env.FRONTEND_URL;
     passport.authenticate("google", { session: true }, (err, user, info) => {
       if (err) {
         return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);
@@ -52,7 +52,6 @@ router.get(
 router.get(
   "/auth/facebook/callback",
   (req, res, next) => {
-    const clientUrl = process.env.FRONTEND_URL;
     passport.authenticate("facebook", { session: true }, (err, user, info) => {
       if (err) {
         return res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Authentication failed")}`);

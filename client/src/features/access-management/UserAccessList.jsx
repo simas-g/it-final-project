@@ -6,7 +6,6 @@ import { UserAccessItem } from './UserAccessItem'
 export const UserAccessList = () => {
   const { t } = useI18n()
   const { accessList } = useAccessManagement()
-
   if (accessList.length === 0) {
     return (
       <div className="text-center py-8">
@@ -20,7 +19,6 @@ export const UserAccessList = () => {
       </div>
     )
   }
-
   return (
     <div className="space-y-2">
       {accessList.map((access) => (

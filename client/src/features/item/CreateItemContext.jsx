@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
+import api from '@/lib/api'
 import { prepareFieldValues, initializeFieldValues, validateFields } from '@/lib/fieldUtils'
 import { useI18n } from '@/contexts/I18nContext'
 
@@ -25,17 +25,14 @@ export const CreateItemProvider = ({ children }) => {
   const [customFields, setCustomFields] = useState([])
   const [fieldValues, setFieldValues] = useState({})
   const [previewId, setPreviewId] = useState('')
-
   useEffect(() => {
     fetchInventory()
   }, [inventoryId])
-
   useEffect(() => {
     if (inventory?.customIdConfig) {
       generatePreviewId()
     }
   }, [inventory])
-
   const fetchInventory = async () => {
     try {
       setFetchingInventory(true)
@@ -50,7 +47,6 @@ export const CreateItemProvider = ({ children }) => {
       setFetchingInventory(false)
     }
   }
-
   const generatePreviewId = async () => {
     if (!inventory?.customIdConfig?.elementsList) return
     try {
@@ -62,7 +58,6 @@ export const CreateItemProvider = ({ children }) => {
       console.error('Error generating preview:', error)
     }
   }
-
   const handleFieldChange = (fieldId, value) => {
     setFieldValues(prev => ({
       ...prev,

@@ -1,13 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
-
 import { useAuth } from '@/contexts/AuthContext'
-
 import { useI18n } from '@/contexts/I18nContext'
-
 import { useTheme } from '@/contexts/ThemeContext'
-
 import { Button } from '@/components/ui/button'
-
 import { cn } from '@/lib/utils'
 import {
   Home,
@@ -20,15 +15,10 @@ import {
 } from 'lucide-react'
 
 const Sidebar = ({ open, onClose }) => {
-
   const { user, isAdmin } = useAuth()
-
   const { t } = useI18n()
-
   const { theme } = useTheme()
-
   const location = useLocation()
-
   const navigation = [
     {
       name: t('profile'),
@@ -55,7 +45,6 @@ const Sidebar = ({ open, onClose }) => {
       current: location.pathname === '/search'
     }
   ]
-
   if (isAdmin()) {
     navigation.push({
       name: t('admin'),
@@ -64,7 +53,6 @@ const Sidebar = ({ open, onClose }) => {
       current: location.pathname === '/admin'
     })
   }
-
   return (
     <>
       {open && (
@@ -76,7 +64,6 @@ const Sidebar = ({ open, onClose }) => {
           onClick={onClose}
         />
       )}
-
       <div className={cn(
         "fixed inset-y-0 left-0 w-64 h-screen pt-20 z-50 transform bg-background border-r-2 transition-transform duration-200 ease-in-out lg:translate-x-0",
         open ? "translate-x-0" : "-translate-x-full"
@@ -103,7 +90,6 @@ const Sidebar = ({ open, onClose }) => {
               )
             })}
           </nav>
-
         </div>
       </div>
     </>

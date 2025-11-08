@@ -2,13 +2,11 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const StepIndicator = ({ currentStep }) => {
   const { t } = useI18n()
-
   const steps = [
     { number: 1, label: t('basicInfo') },
     { number: 2, label: t('customId') },
     { number: 3, label: t('fieldsShort') }
   ]
-
   return (
     <div className="mb-8">
       <div className="flex items-center space-x-4">

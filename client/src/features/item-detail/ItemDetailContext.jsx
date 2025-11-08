@@ -16,14 +16,11 @@ export const ItemDetailProvider = ({ children, item }) => {
   const { getTranslation, language } = useI18n()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  
   const [isEditing, setIsEditing] = useState(false)
   const [editValues, setEditValues] = useState({})
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
-
   const liked = item?.likes?.some(like => like.userId === user?.id) || false
   const hasWriteAccess = hasItemWriteAccess(item, user)
-
   const updateItemMutation = useMutation({
     mutationFn: (data) => api.put(`/items/${item.id}`, data),
     onSuccess: () => {
@@ -43,7 +40,6 @@ export const ItemDetailProvider = ({ children, item }) => {
       })
     }
   })
-
   const toggleLikeMutation = useMutation({
     mutationFn: () => api.post(`/items/${item.id}/like`),
     onSuccess: () => {
@@ -57,7 +53,6 @@ export const ItemDetailProvider = ({ children, item }) => {
       })
     }
   })
-
   const deleteItemMutation = useMutation({
     mutationFn: () => api.delete(`/items/${item.id}`),
     onSuccess: () => {
@@ -75,7 +70,6 @@ export const ItemDetailProvider = ({ children, item }) => {
       })
     }
   })
-
   const startEditing = () => {
     const initialValues = {}
     if (item?.inventory?.fields) {

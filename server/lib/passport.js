@@ -39,9 +39,7 @@ async (accessToken, refreshToken, profile, done) => {
     if (!email) {
         return done(new Error("No email found in Google profile"), null);
     }
-
     let user = await prisma.user.findUnique({ where: { email } });
-
     if (user) {
         if (user.isBlocked) {
         return done(null, false, { message: "Your account has been blocked. Please contact support." });
@@ -68,7 +66,6 @@ async (accessToken, refreshToken, profile, done) => {
         },
         });
     }
-
     return done(null, user);
     } catch (error) {
     return done(error, null);
@@ -101,9 +98,7 @@ async (accessToken, refreshToken, profile, done) => {
     if (!email) {
         return done(new Error("No email found in Facebook profile"), null);
     }
-
     let user = await prisma.user.findUnique({ where: { email } });
-
     if (user) {
         if (user.isBlocked) {
         return done(null, false, { message: "Your account has been blocked. Please contact support." });
@@ -130,7 +125,6 @@ async (accessToken, refreshToken, profile, done) => {
         },
         });
     }
-
     return done(null, user);
     } catch (error) {
     return done(error, null);
@@ -140,4 +134,3 @@ async (accessToken, refreshToken, profile, done) => {
 );
 
 export default passport;
-

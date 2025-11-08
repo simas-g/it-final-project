@@ -13,7 +13,6 @@ export const UserProfileProvider = ({ children, userId }) => {
   const itemsPagination = usePagination(1, 10)
   const postsPagination = usePagination(1, 10)
   const likesPagination = usePagination(1, 10)
-
   const { data: profileUser, isLoading: loading } = useQuery({
     queryKey: [
       'userProfile', 
@@ -39,9 +38,7 @@ export const UserProfileProvider = ({ children, userId }) => {
       likesLimit: likesPagination.limit
     }),
   })
-
   const isOwnProfile = currentUser?.id === profileUser?.id
-
   const value = {
     profileUser,
     loading,
@@ -53,7 +50,6 @@ export const UserProfileProvider = ({ children, userId }) => {
     postsPagination,
     likesPagination,
   }
-
   return (
     <UserProfileContext.Provider value={value}>
       {children}

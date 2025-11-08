@@ -1,5 +1,4 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
-
 import api from '@/lib/api'
 
 const AuthContext = createContext()
@@ -49,9 +48,7 @@ const authReducer = (state, action) => {
 }
 
 export const AuthProvider = ({ children }) => {
-
   const [state, dispatch] = useReducer(authReducer, initialState)
-
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('token')
@@ -75,7 +72,6 @@ export const AuthProvider = ({ children }) => {
     }
     initAuth()
   }, [])
-
   const login = async (email, password) => {
     dispatch({ type: 'LOGIN_START' })
     try {
@@ -101,7 +97,6 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: errorMessage }
     }
   }
-
   const register = async (email, password, name) => {
     dispatch({ type: 'LOGIN_START' })
     try {
@@ -127,7 +122,6 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: errorMessage }
     }
   }
-
   const logout = () => {
     localStorage.removeItem('token')
     dispatch({ type: 'LOGOUT' })
@@ -162,6 +156,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     ...state,
+    dispatch,
     login,
     register,
     logout,
@@ -180,7 +175,6 @@ export const AuthProvider = ({ children }) => {
 }
 
 export const useAuth = () => {
-
   const context = useContext(AuthContext)
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')

@@ -19,40 +19,33 @@ export const AccessManagementProvider = ({ inventoryId, isOwner, children }) => 
   const { t } = useI18n()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  
   const [showAddUser, setShowAddUser] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
   const [sortBy, setSortBy] = useState('name')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [accessToRemove, setAccessToRemove] = useState(null)
-
   const { data: accessData, isLoading: loading } = useQuery({
     queryKey: ['inventoryAccess', inventoryId],
     queryFn: () => fetchInventoryAccessList(inventoryId),
   })
-
   const { data: rawSearchResults = [], isLoading: searching } = useQuery({
     queryKey: ['searchUsers', searchQuery],
     queryFn: () => searchUsersApi(searchQuery),
     enabled: searchQuery.trim().length >= 2,
   })
-
   const accessList = accessData?.accessList || []
   const isPublic = accessData?.isPublic || false
-
   const searchResults = useMemo(() => {
     if (!rawSearchResults || rawSearchResults.length === 0) return []
     const existingUserIds = new Set(accessList.map(access => access.user.id))
     return rawSearchResults.filter(user => !existingUserIds.has(user.id))
   }, [rawSearchResults, accessList])
-
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       queryClient.setQueryData(['searchUsers', searchQuery], [])
     }
   }, [searchQuery, queryClient])
-
   const addAccessMutation = useMutation({
     mutationFn: (userId) => api.post(`/inventories/${inventoryId}/access`, {
       userId,
@@ -76,7 +69,6 @@ export const AccessManagementProvider = ({ inventoryId, isOwner, children }) => 
       })
     }
   })
-
   const removeAccessMutation = useMutation({
     mutationFn: (accessId) => api.delete(`/access/${accessId}`),
     onSuccess: () => {
@@ -94,7 +86,6 @@ export const AccessManagementProvider = ({ inventoryId, isOwner, children }) => 
       })
     }
   })
-
   const togglePublicMutation = useMutation({
     mutationFn: () => api.put(`/inventories/${inventoryId}/public`, {
       isPublic: !isPublic
@@ -114,7 +105,6 @@ export const AccessManagementProvider = ({ inventoryId, isOwner, children }) => 
       })
     }
   })
-
   const handleAddAccess = () => {
     if (!selectedUser) return
     addAccessMutation.mutate(selectedUser.id)

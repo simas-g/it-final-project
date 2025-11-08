@@ -12,7 +12,6 @@ const DiscussionPost = ({ post }) => {
   const { language } = useI18n()
   const isOwner = currentUserId === post.userId
   const isEditing = editingPostId === post.id
-
   return (
     <Card>
       <CardContent>
@@ -56,7 +55,6 @@ const DiscussionPost = ({ post }) => {
             </div>
           )}
         </div>
-
         {isEditing ? (
           <div className="space-y-3">
             <textarea

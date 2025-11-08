@@ -8,28 +8,24 @@ export const useAdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState(null)
-
   const toggleBlockMutation = useMutation({
     mutationFn: ({ userId, isBlocked }) => api.put(`/admin/users/${userId}/block`, { isBlocked: !isBlocked }),
     onSuccess: () => {
       queryClient.invalidateQueries(['adminUsers'])
     }
   })
-
   const changeRoleMutation = useMutation({
     mutationFn: ({ userId, role }) => api.put(`/admin/users/${userId}/role`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries(['adminUsers'])
     }
   })
-
   const deleteUserMutation = useMutation({
     mutationFn: (userId) => api.delete(`/admin/users/${userId}`),
     onSuccess: () => {
       queryClient.invalidateQueries(['adminUsers'])
     }
   })
-
   const handleToggleBlock = (userId, isBlocked) => {
     toggleBlockMutation.mutate({ userId, isBlocked })
   }

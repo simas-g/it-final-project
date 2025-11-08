@@ -5,7 +5,6 @@ export const calculateStats = (owned, writeAccess) => {
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
     return new Date(inv.updatedAt) > dayAgo
   }).length
-  
   return {
     totalInventories: allInventories.length,
     totalItems,

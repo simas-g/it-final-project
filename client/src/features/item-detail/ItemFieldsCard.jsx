@@ -7,12 +7,9 @@ import { useI18n } from '@/contexts/I18nContext'
 const ItemFieldsCard = () => {
   const { item, isEditing, editValues, handleFieldChange } = useItemDetail()
   const { t } = useI18n()
-  
   const fields = item.inventory.fields
   const itemFields = item.fields
-
   if (!fields || fields.length === 0) return null
-
   const renderField = (field) => {
     if (isEditing) {
       return (
@@ -74,7 +71,6 @@ const ItemFieldsCard = () => {
         </div>
       )
     }
-
     return (
       <div key={field.id}>
         <Label className="text-sm font-medium text-muted-foreground">

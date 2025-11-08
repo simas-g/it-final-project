@@ -28,11 +28,9 @@ const CreateItemContent = () => {
     handleSubmit,
     navigate
   } = useCreateItem();
-
   if (fetchingInventory) {
     return <LoadingSpinner message={t('loadingInventory')} />;
   }
-
   if (!inventory) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -45,14 +43,12 @@ const CreateItemContent = () => {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <ItemFormHeader 
         inventoryName={inventory.name}
         onBack={() => navigate(`/inventory/${inventoryId}`)}
       />
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <Alert variant="destructive">
@@ -60,13 +56,11 @@ const CreateItemContent = () => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
         <CustomIdPreview 
           preview={previewId}
           hasCustomId={!!inventory.customIdConfig}
           variant="default"
         />
-
         {customFields.length > 0 ? (
           <Card className="border-2">
             <CardHeader>
@@ -107,7 +101,6 @@ const CreateItemContent = () => {
             </CardContent>
           </Card>
         )}
-
         <div className="flex items-center justify-between pt-6 border-t-2">
           <Button
             type="button"

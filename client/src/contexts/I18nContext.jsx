@@ -1,11 +1,7 @@
 import { createContext, useContext, useMemo } from 'react'
-
 import { useTheme } from './ThemeContext'
-
 import enTranslations from '../locales/en.json'
-
 import esTranslations from '../locales/es.json'
-
 import plTranslations from '../locales/pl.json'
 
 const I18nContext = createContext()
@@ -17,9 +13,7 @@ const translations = {
 }
 
 export const I18nProvider = ({ children }) => {
-
   const { language } = useTheme()
-
   const value = useMemo(() => {
     const getTranslation = (key, lang, params = {}) => {
       const targetLanguage = lang || language || 'en'
@@ -50,7 +44,6 @@ export const I18nProvider = ({ children }) => {
 }
 
 export const useI18n = () => {
-
   const context = useContext(I18nContext)
   if (!context) {
     throw new Error('useI18n must be used within an I18nProvider')

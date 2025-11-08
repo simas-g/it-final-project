@@ -11,7 +11,6 @@ import { useI18n } from "@/contexts/I18nContext";
 const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange, onNext }) => {
   const { toast } = useToast();
   const { t } = useI18n();
-  
   return (
   <>
     <Card className="border-2">
@@ -34,7 +33,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
             required
           />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="description" className="text-sm font-medium">{t('description')}</Label>
           <textarea
@@ -48,7 +46,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         </div>
       </CardContent>
     </Card>
-
     <Card className="border-2">
       <CardHeader>
         <CardTitle>{t('categorization')}</CardTitle>
@@ -75,7 +72,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
             </Select>
           </div>
         )}
-
         <div className="space-y-2">
           <Label htmlFor="tags" className="text-sm font-medium flex items-center">
             <TagIcon className="h-4 w-4 mr-2" />
@@ -93,7 +89,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         </div>
       </CardContent>
     </Card>
-
     <Card className="border-2">
       <CardHeader>
         <CardTitle>{t('mediaAccessibility')}</CardTitle>
@@ -107,7 +102,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
             toast({ title: error, variant: 'destructive' });
           }}
         />
-
         <div className="space-y-4">
           <Label className="text-sm font-medium">{t('accessibility')}</Label>
           <div className="flex items-center space-x-4 p-4 border-2 rounded-lg">
@@ -144,7 +138,6 @@ const Step1BasicInfo = ({ formData, categories, onInputChange, onImageFileChange
         </div>
       </CardContent>
     </Card>
-
     <div className="flex justify-end">
       <Button type="button" onClick={onNext} size="lg">
         {t('nextCustomId')}

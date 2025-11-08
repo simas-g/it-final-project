@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
+import api from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { useI18n } from '@/contexts/I18nContext'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -33,11 +33,9 @@ export const CreateInventoryProvider = ({ children }) => {
   const [customIdElements, setCustomIdElements] = useState([])
   const [preview, setPreview] = useState('')
   const [customFields, setCustomFields] = useState([])
-
   useEffect(() => {
     fetchCategories()
   }, [])
-
   useEffect(() => {
     if (customIdElements.length > 0) {
       generatePreview()
@@ -45,7 +43,6 @@ export const CreateInventoryProvider = ({ children }) => {
       setPreview('')
     }
   }, [customIdElements])
-
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories')
@@ -54,7 +51,6 @@ export const CreateInventoryProvider = ({ children }) => {
       console.error('Error fetching categories:', error)
     }
   }
-
   const generatePreview = async () => {
     try {
       const response = await api.post('/custom-id/preview', { elements: customIdElements })
@@ -64,7 +60,6 @@ export const CreateInventoryProvider = ({ children }) => {
       setPreview(t('errorGeneratingPreview'))
     }
   }
-
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target
     setFormData(prev => ({

@@ -4,7 +4,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const InventoryFormHeader = ({ currentStep, onBack }) => {
   const { t } = useI18n()
-
   const getStepName = (step) => {
     switch(step) {
       case 1: return t('basicInformation')

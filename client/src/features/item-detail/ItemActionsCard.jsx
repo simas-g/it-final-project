@@ -8,7 +8,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const ItemActionsCard = () => {
   const { item, isAuthenticated, hasWriteAccess, isEditing, startEditing } = useItemDetail()
   const { t } = useI18n()
-
   return (
     <Card>
       <CardHeader>

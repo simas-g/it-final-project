@@ -18,7 +18,6 @@ export const AddUserForm = () => {
     cancelAddUser,
     submitting
   } = useAccessManagement()
-
   return (
     <div className="border-2 border-dashed rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">

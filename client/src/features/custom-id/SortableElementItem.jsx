@@ -15,16 +15,13 @@ export const SortableElementItem = ({ element, index, onUpdate, onRemove, showHe
     transition,
     isDragging,
   } = useSortable({ id: element.id || `element-${index}` })
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
   }
-
   const Icon = ELEMENT_TYPES.find(et => et.value === element.elementType)?.icon || Hash
   const info = ELEMENT_TYPES.find(et => et.value === element.elementType)
-
   return (
     <div
       ref={setNodeRef}

@@ -17,9 +17,7 @@ const SearchResults = () => {
   const {
     hasSearched,
     loading,
-    query,
     tag,
-    searchType,
     activeTab,
     setActiveTab,
     results,
@@ -27,9 +25,7 @@ const SearchResults = () => {
     matchingTags,
     goToPage
   } = useSearchResults()
-  
   if (loading) return <LoadingSpinner message={getTranslation('searching', language)} />
-
   if (!hasSearched) {
     return (
       <div className="max-w-6xl mx-auto space-y-6 mt-8 px-10">
@@ -138,5 +134,4 @@ const SearchResults = () => {
     </div>
   )
 }
-
 export default SearchResults

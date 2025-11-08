@@ -8,7 +8,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const InventorySection = ({ title, inventories, columns, renderCard }) => {
   const { t } = useI18n()
-
   return (
     <div>
       <div className="mb-4">

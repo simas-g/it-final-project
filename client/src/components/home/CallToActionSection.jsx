@@ -7,9 +7,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const CallToActionSection = () => {
   const { isAuthenticated } = useAuth()
   const { t } = useI18n()
-  
   if (isAuthenticated()) return null
-  
   return (
     <section className="text-center space-y-6 py-12 sm:py-16 border-t">
       <div className="space-y-3">

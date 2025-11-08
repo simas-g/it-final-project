@@ -9,7 +9,6 @@ export const hasWriteAccess = (inventory, user) => {
       return true
     }
   }
-
   return false
 }
 
@@ -25,26 +24,21 @@ export const isAdmin = (user) => {
 
 export const hasItemWriteAccess = (item, user) => {
   if (!item || !user) return false
-
   if (user.role === 'ADMIN') {
     return true
   }
-
   if (user.id === item.userId) {
     return true
   }
-
   if (item.inventory && user.id === item.inventory.userId) {
     return true
   }
-
   if (item.inventory && item.inventory.inventoryAccess && item.inventory.inventoryAccess.length > 0) {
     const userAccess = item.inventory.inventoryAccess.find(access => access.userId === user.id)
     if (userAccess && userAccess.accessType === 'WRITE') {
       return true
     }
   }
-
   return false
 }
 

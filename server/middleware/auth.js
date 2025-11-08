@@ -11,20 +11,16 @@ export const authenticateToken = async (req, res, next) => {
         .json({ error: "Access denied. No token provided." });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: { id: true, isBlocked: true }
     });
-    
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
-    
     if (user.isBlocked) {
       return res.status(403).json({ error: "Your account has been blocked. Please contact support." });
     }
-    
     req.user = decoded;
     next();
   } catch (error) {

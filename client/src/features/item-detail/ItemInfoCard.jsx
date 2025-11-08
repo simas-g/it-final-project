@@ -6,7 +6,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const ItemInfoCard = () => {
   const { item } = useItemDetail()
   const { t } = useI18n()
-
   return (
     <Card>
       <CardHeader>

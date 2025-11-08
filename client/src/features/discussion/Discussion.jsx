@@ -21,9 +21,7 @@ const DiscussionContent = () => {
     setConfirmDialogOpen,
     confirmDeletePost,
   } = useDiscussion()
-
   if (loading) return <LoadingSpinner />
-
   return (
     <>
       <div className="space-y-6">
@@ -40,7 +38,6 @@ const DiscussionContent = () => {
         {!isAuthenticated && (
           <DiscussionLoginPrompt t={t} />
         )}
-
         <div className="space-y-4">
           {posts.length === 0 && (
             <DiscussionEmptyState />

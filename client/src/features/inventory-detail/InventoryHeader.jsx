@@ -14,7 +14,6 @@ import { useI18n } from '@/contexts/I18nContext'
 const InventoryHeader = () => {
   const { inventory, hasWriteAccess, handleExport, exporting } = useInventoryDetail()
   const { t } = useI18n()
-
   return (
     <div className="pb-6 border-b">
       <div className="flex flex-row items-start justify-between gap-4 flex-wrap">
@@ -58,7 +57,6 @@ const InventoryHeader = () => {
             </div>
           </div>
         </div>
-        
         <div className="flex items-center gap-2 flex-wrap">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

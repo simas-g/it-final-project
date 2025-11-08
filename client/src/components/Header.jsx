@@ -1,11 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-
 import { useAuth } from '@/contexts/AuthContext'
-
 import { useTheme } from '@/contexts/ThemeContext'
-
 import { useI18n } from '@/contexts/I18nContext'
-
 import { Button } from '@/components/ui/button'
 import { 
   DropdownMenu,
@@ -26,15 +22,10 @@ import {
 } from 'lucide-react'
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
-
   const { user, logout, isAuthenticated } = useAuth()
-
   const { theme, toggleTheme, setLanguage, language } = useTheme()
-
   const { t } = useI18n()
-
   const navigate = useNavigate()
-
   const handleLogout = () => {
     logout()
     navigate('/login')

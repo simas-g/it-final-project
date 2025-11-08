@@ -8,10 +8,8 @@ export const useInventoryExport = (inventoryId) => {
   const { toast } = useToast()
   const { getTranslation, language } = useI18n()
   const [exporting, setExporting] = useState(false)
-
   const handleExport = async (format) => {
     if (exporting) return
-    
     setExporting(true)
     try {
       toast({
@@ -20,16 +18,13 @@ export const useInventoryExport = (inventoryId) => {
           ? getTranslation('exportToExcel', language) 
           : getTranslation('exportToCsv', language)
       })
-      
       const response = await api.get(`/inventories/${inventoryId}/export`)
       const { inventory: exportInventory, items: exportItems } = response.data
-      
       if (format === 'excel') {
         exportToExcel(exportInventory, exportItems)
       } else {
         exportToCSV(exportInventory, exportItems)
       }
-      
       toast({
         title: getTranslation('exportSuccess', language),
         variant: 'default'
@@ -45,7 +40,6 @@ export const useInventoryExport = (inventoryId) => {
       setExporting(false)
     }
   }
-
   return { handleExport, exporting }
 }
 

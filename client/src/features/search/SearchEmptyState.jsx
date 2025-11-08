@@ -3,7 +3,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const SearchEmptyState = ({ type = 'general' }) => {
   const { getTranslation, language } = useI18n()
-
   const configs = {
     general: {
       icon: Search,
@@ -26,10 +25,8 @@ export const SearchEmptyState = ({ type = 'general' }) => {
       description: getTranslation('noInventoriesWithTag', language)
     }
   }
-
   const config = configs[type] || configs.general
   const Icon = config.icon
-
   return (
     <div className="text-center py-12">
       <Icon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

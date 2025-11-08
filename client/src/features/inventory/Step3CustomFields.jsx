@@ -21,7 +21,6 @@ const Step3CustomFields = ({
   onBack,
 }) => {
   const { t } = useI18n();
-  
   return (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div className="lg:col-span-2 space-y-6">
@@ -68,7 +67,6 @@ const Step3CustomFields = ({
         </CardContent>
       </Card>
     </div>
-
     <div className="space-y-4">
       <Card className="border-2">
         <CardHeader>
@@ -107,7 +105,6 @@ const Step3CustomFields = ({
           })}
         </CardContent>
       </Card>
-
       <Card className="border-2">
         <CardHeader>
           <CardTitle className="text-sm">{t('fixedFields')}</CardTitle>
@@ -132,7 +129,6 @@ const Step3CustomFields = ({
         </CardContent>
       </Card>
     </div>
-
     <div className="col-span-full flex items-center justify-between pt-6 border-t-2">
       <Button type="button" variant="outline" onClick={onBack} disabled={loading}>
         <ArrowLeft className="mr-2 h-4 w-4" />

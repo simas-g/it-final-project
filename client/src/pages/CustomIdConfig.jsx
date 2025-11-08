@@ -29,11 +29,9 @@ const CustomIdConfigContent = () => {
     handleSave,
     navigate
   } = useCustomIdConfig()
-
   if (loading) {
     return <LoadingSpinner message="Loading configuration..." />
   }
-
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex items-center flex-wrap justify-between">
@@ -44,19 +42,16 @@ const CustomIdConfigContent = () => {
         <h1 className="text-3xl font-bold">Custom ID Configuration</h1>
         <div className="w-32"></div>
       </div>
-
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
       {success && (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <AlertDescription className="text-green-700 dark:text-green-300">{success}</AlertDescription>
         </Alert>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ElementsPanel
@@ -71,7 +66,6 @@ const CustomIdConfigContent = () => {
           />
           <CustomIdPreview preview={preview} variant="live" />
         </div>
-
         <div className="space-y-4">
           <AvailableElementsPanel
             elements={elements}

@@ -1,5 +1,15 @@
 import api from '@/lib/api'
 
+export const loginUser = async ({ email, password }) => {
+  const response = await api.post('/auth/login', { email, password })
+  return response.data
+}
+
+export const registerUser = async ({ email, password, name }) => {
+  const response = await api.post('/auth/register', { email, password, name })
+  return response.data
+}
+
 export const fetchInventory = async (id) => {
   const response = await api.get(`/inventories/${id}?includeItems=false`)
   return response.data
@@ -98,5 +108,10 @@ export const searchUsers = async (query) => {
 
 export const fetchCategories = async () => {
   const response = await api.get('/categories')
+  return response.data
+}
+
+export const fetchInventoryFields = async (inventoryId) => {
+  const response = await api.get(`/inventories/${inventoryId}/fields`)
   return response.data
 }

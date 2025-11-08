@@ -1,18 +1,13 @@
 export const sanitizeSearchQuery = (query) => {
   if (!query || typeof query !== 'string') return '';
-  
   const cleaned = query
     .trim()
     .replace(/[^\w\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  
   if (!cleaned) return '';
-  
   const words = cleaned.split(' ').filter(word => word.length > 0);
-  
   if (words.length === 0) return '';
-  
   return words.join(' & ');
 };
 
@@ -27,14 +22,12 @@ export const searchInventories = async (prisma, sanitizedQuery, limit, skip) => 
     ORDER BY rank DESC, i."createdAt" DESC
     LIMIT ${limit} OFFSET ${skip}
   `;
-
   const count = await prisma.$queryRaw`
     SELECT COUNT(*)::int as count
     FROM "Inventory" i
     WHERE to_tsvector('english', COALESCE(i.name, '') || ' ' || COALESCE(i.description, ''))
       @@ to_tsquery('english', ${sanitizedQuery})
   `;
-
   return { results, total: Number(count[0].count) };
 };
 
@@ -57,7 +50,6 @@ export const searchItems = async (prisma, sanitizedQuery, limit, skip) => {
     ORDER BY rank DESC, item."createdAt" DESC
     LIMIT ${limit} OFFSET ${skip}
   `;
-
   const count = await prisma.$queryRaw`
     SELECT COUNT(DISTINCT item.id)::int as count
     FROM "InventoryItem" item
@@ -69,7 +61,6 @@ export const searchItems = async (prisma, sanitizedQuery, limit, skip) => {
         AND to_tsvector('english', COALESCE(fv2.value, '')) @@ to_tsquery('english', ${sanitizedQuery})
       )
   `;
-
   return { results, total: Number(count[0].count) };
 };
 
@@ -85,7 +76,6 @@ export const searchTags = async (prisma, sanitizedQuery, limit, skip) => {
     ORDER BY rank DESC
     LIMIT ${limit} OFFSET ${skip}
   `;
-
   const count = await prisma.$queryRaw`
     SELECT COUNT(DISTINCT i.id)::int as count
     FROM "Inventory" i
@@ -93,7 +83,6 @@ export const searchTags = async (prisma, sanitizedQuery, limit, skip) => {
     INNER JOIN "Tag" t ON t.id = it."tagId"
     WHERE to_tsvector('english', t.name) @@ to_tsquery('english', ${sanitizedQuery})
   `;
-
   return { results, total: Number(count[0].count) };
 };
 
@@ -121,7 +110,6 @@ export const searchSuggestions = async (prisma, sanitizedQuery) => {
       ORDER BY rank DESC LIMIT 5
     `
   ]);
-
   return [
     ...inventoryNames.map(inv => ({ type: 'inventory', text: inv.name })),
     ...tagNames.map(tag => ({ type: 'tag', text: tag.name })),

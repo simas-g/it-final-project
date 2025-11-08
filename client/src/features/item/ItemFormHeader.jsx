@@ -4,7 +4,6 @@ import { useI18n } from '@/contexts/I18nContext'
 
 export const ItemFormHeader = ({ inventoryName, onBack }) => {
   const { t } = useI18n()
-
   return (
     <div className="mb-8">
       <Button 
