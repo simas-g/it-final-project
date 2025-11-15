@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <record id="inventory_viewer_inventory_tree" model="ir.ui.view">
+    <field name="name">inventory.viewer.inventory.tree</field>
+    <field name="model">inventory.viewer.inventory</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="total_items"/>
+        <field name="field_count"/>
+        <field name="synced_at" widget="datetime"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="inventory_viewer_inventory_action_window" model="ir.actions.act_window">
+    <field name="name">Imported Inventories</field>
+    <field name="res_model">inventory.viewer.inventory</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+  </record>
+
+  <record id="inventory_viewer_inventory_form" model="ir.ui.view">
+    <field name="name">inventory.viewer.inventory.form</field>
+    <field name="model">inventory.viewer.inventory</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_open_import_wizard" type="object" string="Import Inventory" class="oe_highlight"/>
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="name" readonly="1"/>
+              <field name="token" readonly="1"/>
+              <field name="external_inventory_id" readonly="1"/>
+              <field name="description" readonly="1"/>
+            </group>
+            <group>
+              <field name="synced_at" readonly="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Metrics">
+              <group>
+                <group>
+                  <field name="metrics_summary" readonly="1"/>
+                </group>
+              </group>
+            </page>
+            <page string="Fields">
+              <field name="field_ids">
+                <tree editable="false" create="false" delete="false">
+                  <field name="name"/>
+                  <field name="field_type"/>
+                  <field name="stat_summary"/>
+                </tree>
+                <form>
+                  <group>
+                    <field name="name" readonly="1"/>
+                    <field name="field_type" readonly="1"/>
+                    <field name="stat_summary" readonly="1"/>
+                  </group>
+                </form>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+</odoo>
+

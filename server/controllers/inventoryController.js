@@ -1,8 +1,13 @@
+import crypto from "crypto";
 import prisma from "../lib/prisma.js";
 import { isOwnerOrAdmin } from "../lib/permissions.js";
 import { handleError } from "../lib/errors.js";
 import { getFieldValues } from "../lib/fieldMapping.js";
 import { getUserIdFromToken } from "../lib/user.js";
+import { buildInventoryAggregations } from "../lib/inventoryAggregations.js";
+
+const createRawToken = () => crypto.randomBytes(32).toString("hex");
+const toTokenHash = (token) => crypto.createHash("sha256").update(token).digest("hex");
 export async function getInventories(req, res) {
   try {
     const { page = 1, limit = 10, search = "", category = "", tag = "" } = req.query;
@@ -590,3 +595,93 @@ export async function getInventoryItemsForExport(req, res) {
     handleError(error, "Failed to fetch inventory items for export", res);
   }
 }
+
+export const generateInventoryApiToken = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inventory = await prisma.inventory.findUnique({
+      where: { id },
+      select: { id: true, userId: true }
+    });
+    if (!inventory) {
+      return res.status(404).json({ error: "Inventory not found" });
+    }
+    const requesterId = req.user.id;
+    const requesterRole = req.user.role;
+    if (!isOwnerOrAdmin(inventory.userId, requesterId, requesterRole)) {
+      return res.status(403).json({ error: "Only the owner or admin can manage API tokens" });
+    }
+    const token = createRawToken();
+    const tokenHash = toTokenHash(token);
+    await prisma.inventory.update({
+      where: { id },
+      data: {
+        apiTokenHash: tokenHash,
+        apiTokenGeneratedAt: new Date(),
+        apiTokenLastUsedAt: null
+      }
+    });
+    res.json({ token });
+  } catch (error) {
+    handleError(error, "Failed to generate inventory API token", res);
+  }
+};
+
+export const getInventoryAggregationsByToken = async (req, res) => {
+  try {
+    const token = req.query.token || req.params.token;
+    if (!token) {
+      return res.status(400).json({ error: "Token is required. Provide it as a query parameter: ?token=YOUR_TOKEN" });
+    }
+    const inventory = await prisma.inventory.findFirst({
+      where: { apiTokenHash: toTokenHash(token) },
+      include: {
+        fields: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+    if (!inventory) {
+      return res.status(404).json({ error: "Invalid or expired token" });
+    }
+    const [fieldValues, totalItems] = await Promise.all([
+      prisma.itemFieldValue.findMany({
+        where: {
+          field: {
+            inventoryId: inventory.id
+          }
+        },
+        select: {
+          fieldId: true,
+          value: true
+        }
+      }),
+      prisma.inventoryItem.count({
+        where: { inventoryId: inventory.id }
+      })
+    ]);
+    const accessedAt = new Date();
+    await prisma.inventory.update({
+      where: { id: inventory.id },
+      data: { apiTokenLastUsedAt: accessedAt }
+    });
+    const aggregations = buildInventoryAggregations(inventory.fields, fieldValues, totalItems);
+    res.json({
+      inventory: {
+        id: inventory.id,
+        name: inventory.name,
+        description: inventory.description,
+        totalItems,
+        fieldsCount: inventory.fields.length,
+        createdAt: inventory.createdAt,
+        updatedAt: inventory.updatedAt,
+        apiTokenGeneratedAt: inventory.apiTokenGeneratedAt,
+        apiTokenLastUsedAt: accessedAt
+      },
+      metrics: aggregations.summary,
+      fields: aggregations.fields
+    });
+  } catch (error) {
+    handleError(error, "Failed to fetch inventory aggregations", res);
+  }
+};

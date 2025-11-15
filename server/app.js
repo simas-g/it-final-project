@@ -13,6 +13,7 @@ import fieldRoutes from "./routes/fieldRoutes.js";
 import accessRoutes from "./routes/accessRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import salesforceRoutes from "./routes/salesforceRoutes.js";
 import "dotenv/config";
 
 const app = express();
@@ -31,7 +32,8 @@ app.use(
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    secret:
+      process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -55,9 +57,10 @@ app.use("/api", fieldRoutes);
 app.use("/api", accessRoutes);
 app.use("/api", userRoutes);
 app.use("/api", uploadRoutes);
-
+app.use("/api", salesforceRoutes);
 
 app.get("/health", (req, res) => {
+  console.log("hello people");
   res.status(200).json({ status: "ok" });
 });
 

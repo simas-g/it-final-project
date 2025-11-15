@@ -115,3 +115,13 @@ export const fetchInventoryFields = async (inventoryId) => {
   const response = await api.get(`/inventories/${inventoryId}/fields`)
   return response.data
 }
+
+export const createSalesforceAccount = async (formData) => {
+  const response = await api.post('/salesforce/create-account', formData)
+  return response
+}
+
+export const generateInventoryApiToken = async (inventoryId) => {
+  const response = await api.post(`/inventories/${inventoryId}/api-token`)
+  return response.data
+}

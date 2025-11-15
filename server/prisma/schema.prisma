@@ -166,6 +166,9 @@ model Inventory {
   imageUrl    String?
   isPublic    Boolean   @default(false)
   version     Int       @default(1)
+  apiTokenHash        String?
+  apiTokenGeneratedAt DateTime?
+  apiTokenLastUsedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String

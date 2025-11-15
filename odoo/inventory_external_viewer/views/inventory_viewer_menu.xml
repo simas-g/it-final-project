@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <record id="inventory_viewer_import_action" model="ir.actions.act_window">
+    <field name="name">Import Inventory</field>
+    <field name="res_model">inventory.viewer.import.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <record id="inventory_viewer_inventory_action" model="ir.actions.act_window">
+    <field name="name">Imported Inventories</field>
+    <field name="res_model">inventory.viewer.inventory</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="inventory_viewer_root_menu" name="Inventory Viewer"/>
+  <menuitem id="inventory_viewer_import_menu" name="Import Inventory" parent="inventory_viewer_root_menu" action="inventory_viewer_import_action"/>
+  <menuitem id="inventory_viewer_inventory_menu" name="Imported Inventories" parent="inventory_viewer_root_menu" action="inventory_viewer_inventory_action"/>
+</odoo>
+

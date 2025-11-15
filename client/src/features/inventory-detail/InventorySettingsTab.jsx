@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Hash, Package, Info, Tag as TagIcon } from 'lucide-react'
+import { Hash, Package, Tag as TagIcon, KeyRound, RefreshCw, Copy } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,7 @@ import ImageUpload from '@/components/ui/image-upload'
 import { useInventoryDetail } from './InventoryDetailContext'
 import { useI18n } from '@/contexts/I18nContext'
 import { useQuery } from '@tanstack/react-query'
-import { fetchCategories } from '@/queries/api'
+import { fetchCategories, generateInventoryApiToken } from '@/queries/api'
 import { useInventoryUpdate } from './useInventoryUpdate'
 import { useToast } from '@/hooks/use-toast'
 
@@ -29,10 +29,13 @@ const InventorySettingsTab = () => {
   const { updateInventory, saving } = useInventoryUpdate(inventory)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState(getInitialFormData(inventory))
+  const [apiToken, setApiToken] = useState('')
+  const [tokenLoading, setTokenLoading] = useState(false)
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories
   })
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
 
 
   const handleInputChange = (e) => {
@@ -56,6 +59,41 @@ const InventorySettingsTab = () => {
     setFormData(getInitialFormData(inventory))
     setIsEditing(false)
   }
+
+  const handleGenerateToken = async () => {
+    if (tokenLoading) return
+    try {
+      setTokenLoading(true)
+      const { token } = await generateInventoryApiToken(inventory.id)
+      setApiToken(token)
+      toast({ title: t('apiTokenCreatedTitle'), description: t('apiTokenCreatedDescription') })
+    } catch (error) {
+      const message = error.response?.data?.error || t('apiTokenError')
+      toast({ title: t('apiTokenError'), description: message, variant: 'destructive' })
+    } finally {
+      setTokenLoading(false)
+    }
+  }
+
+  const copyToClipboard = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      toast({ title: t('copiedToClipboard') })
+    } catch (_error) {
+      toast({ title: t('clipboardUnavailable'), variant: 'destructive' })
+    }
+  }
+
+  const formatDate = (value) => {
+    if (!value) return t('notAvailable')
+    return new Date(value).toLocaleString()
+  }
+
+  const baseEndpoint = `${backendUrl}/api/external/inventories/aggregations`
+  const fullEndpoint = apiToken
+    ? `${baseEndpoint}?token=${apiToken}`
+    : ''
+  const odooUrl = import.meta.env.VITE_ODOO_URL || 'http://localhost:8069'
 
   return (
     <div className="space-y-4">
@@ -226,6 +264,89 @@ const InventorySettingsTab = () => {
               </Link>
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-primary" />
+                {t('apiTokenTitle')}
+              </CardTitle>
+              <CardDescription>{t('apiTokenDescription')}</CardDescription>
+            </div>
+            <Button onClick={handleGenerateToken} disabled={tokenLoading}>
+              {tokenLoading ? t('generating') : inventory.apiTokenGeneratedAt ? t('regenerateToken') : t('generateToken')}
+              <RefreshCw className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            {t('apiTokenWarning')}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1">
+              <p className="text-xs uppercase text-muted-foreground">{t('lastGeneratedAt')}</p>
+              <p className="font-medium">{formatDate(inventory.apiTokenGeneratedAt)}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs uppercase text-muted-foreground">{t('lastUsedAt')}</p>
+              <p className="font-medium">{formatDate(inventory.apiTokenLastUsedAt)}</p>
+            </div>
+          </div>
+          {apiToken ? (
+            <div className="space-y-4">
+              <div>
+                <Label>{t('apiTokenLabel')}</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input readOnly value={apiToken} />
+                  <Button variant="outline" onClick={() => copyToClipboard(apiToken)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('apiTokenUsageInstructions')}
+                </p>
+              </div>
+              <div>
+                <Label>{t('endpointLabel')}</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input readOnly value={baseEndpoint} />
+                  <Button variant="outline" onClick={() => copyToClipboard(baseEndpoint)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('endpointHelp')}
+                </p>
+              </div>
+              <div className="rounded-md border p-3 bg-muted/50">
+                <p className="text-sm font-medium mb-2">{t('howToUseTitle')}</p>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>{t('howToUseStep1')}</li>
+                  <li>
+                    {t('howToUseStep2')}{' '}
+                    <a 
+                      href={odooUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      {odooUrl}
+                    </a>
+                  </li>
+                  <li>{t('howToUseStep3')}</li>
+                </ol>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-md border p-4 text-sm text-muted-foreground">
+              {t('noTokenYet')}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

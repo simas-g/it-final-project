@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <record id="inventory_viewer_import_wizard_view" model="ir.ui.view">
+    <field name="name">inventory.viewer.import.wizard.form</field>
+    <field name="model">inventory.viewer.import.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Import inventory">
+        <group>
+          <field name="api_token" required="1"/>
+          <field name="base_url" required="1"/>
+        </group>
+        <footer>
+          <button name="action_import" type="object" string="Import" class="btn-primary"/>
+          <button string="Cancel" special="cancel" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>
+

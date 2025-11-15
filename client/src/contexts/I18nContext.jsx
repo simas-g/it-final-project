@@ -17,7 +17,30 @@ export const I18nProvider = ({ children }) => {
   const value = useMemo(() => {
     const getTranslation = (key, lang, params = {}) => {
       const targetLanguage = lang || language || 'en'
-      let text = translations[targetLanguage]?.[key] || translations['en']?.[key] || key
+      const translationObj = translations[targetLanguage] || translations['en'] || {}
+      const keys = key.split('.')
+      let text = translationObj
+      for (const k of keys) {
+        if (text && typeof text === 'object') {
+          text = text[k]
+        } else {
+          text = undefined
+          break
+        }
+      }
+      if (typeof text !== 'string') {
+        const fallbackObj = translations['en'] || {}
+        let fallbackText = fallbackObj
+        for (const k of keys) {
+          if (fallbackText && typeof fallbackText === 'object') {
+            fallbackText = fallbackText[k]
+          } else {
+            fallbackText = undefined
+            break
+          }
+        }
+        text = typeof fallbackText === 'string' ? fallbackText : key
+      }
       Object.keys(params).forEach(param => {
         text = text.replace(`{${param}}`, params[param])
       })
