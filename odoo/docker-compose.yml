@@ -14,7 +14,8 @@ services:
       - "5433:5432"
 
   odoo:
-    image: odoo:17
+    build: .
+    image: odoo_custom:17
     container_name: odoo_app
     depends_on:
       - odoo_db
@@ -29,9 +30,7 @@ services:
     volumes:
       - ./inventory_external_viewer:/mnt/extra-addons/inventory_external_viewer
       - odoo_data:/var/lib/odoo
-    command: >
-      odoo --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons 
-      --dev=reload,qweb,werkzeug,xml
+    command: odoo --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 
 volumes:
   odoo_db_data:
