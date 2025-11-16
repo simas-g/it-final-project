@@ -9,5 +9,6 @@ COPY inventory_external_viewer /mnt/extra-addons/inventory_external_viewer
 
 USER odoo
 
-CMD odoo --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons --db_host=${DB_HOST} --db_port=${DB_PORT} --db_user=${DB_USER} --db_password=${DB_PASSWORD} --database=${DB_NAME} --db_maxconn=64 --admin-passwd=${ADMIN_PASSWD}
+CMD odoo --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons --db_host=${DB_HOST} --db_port=${DB_PORT} --db_user=${DB_USER} --db_password=${DB_PASSWORD} --database=${DB_NAME} --db_maxconn=64
+
 
