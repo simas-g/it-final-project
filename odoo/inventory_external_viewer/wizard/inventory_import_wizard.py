@@ -1,5 +1,5 @@
 import requests
-
+import os
 from odoo import fields, models, _
 from odoo.exceptions import UserError
 
@@ -13,8 +13,8 @@ class InventoryViewerImportWizard(models.TransientModel):
   inventory_id = fields.Many2one("inventory.viewer.inventory", string="Inventory")
 
   def _default_base_url(self):
-    param = self.env["ir.config_parameter"].sudo().get_param("inventory.viewer.base_url")
-    return param or "http://host.docker.internal:8080"
+    env_url = os.getenv("INVENTORY_API_BASE_URL")
+    return env_url or "http://host.docker.internal:8080"
 
   def action_import(self):
     self.ensure_one()
