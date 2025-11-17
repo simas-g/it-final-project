@@ -433,5 +433,33 @@
     "creating": "Creando...",
     "createAccount": "Crear Cuenta",
     "createAccountButton": "Crear Cuenta de Salesforce"
+  },
+  "supportTicket": {
+    "help": "Ayuda",
+    "createSupportTicket": "Crear Ticket de Soporte",
+    "createSupportTicketLink": "Crear ticket de soporte",
+    "createSupportTicketDescription": "Complete el formulario a continuación para crear un ticket de soporte. El ticket se cargará en Dropbox para su procesamiento.",
+    "summary": "Resumen",
+    "summaryRequired": "El resumen es obligatorio",
+    "summaryPlaceholder": "Describa su problema o solicitud...",
+    "priority": "Prioridad",
+    "priorityRequired": "La prioridad es obligatoria",
+    "selectPriority": "Seleccionar prioridad",
+    "high": "Alta",
+    "average": "Media",
+    "low": "Baja",
+    "adminEmails": "Correos de Administradores",
+    "adminEmailsRequired": "Los correos de administradores son obligatorios",
+    "adminEmailsPlaceholder": "email1@ejemplo.com, email2@ejemplo.com",
+    "adminEmailsHint": "Separe múltiples correos con comas",
+    "validEmailsRequired": "Por favor proporcione al menos un correo válido",
+    "ticketInformation": "Información del Ticket",
+    "reportedBy": "Reportado por",
+    "link": "Enlace",
+    "submitting": "Enviando...",
+    "submitTicket": "Enviar Ticket",
+    "ticketCreated": "Ticket Creado",
+    "ticketUploadedSuccessfully": "El ticket de soporte se ha cargado exitosamente",
+    "ticketUploadFailed": "Error al cargar el ticket de soporte"
   }
 }

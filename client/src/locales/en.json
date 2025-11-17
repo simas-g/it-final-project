@@ -433,5 +433,33 @@
     "creating": "Creating...",
     "createAccount": "Create Account",
     "createAccountButton": "Create Salesforce Account"
+  },
+  "supportTicket": {
+    "help": "Help",
+    "createSupportTicket": "Create Support Ticket",
+    "createSupportTicketLink": "Create support ticket",
+    "createSupportTicketDescription": "Fill out the form below to create a support ticket. The ticket will be uploaded to Dropbox for processing.",
+    "summary": "Summary",
+    "summaryRequired": "Summary is required",
+    "summaryPlaceholder": "Describe your issue or request...",
+    "priority": "Priority",
+    "priorityRequired": "Priority is required",
+    "selectPriority": "Select priority",
+    "high": "High",
+    "average": "Average",
+    "low": "Low",
+    "adminEmails": "Admin Emails",
+    "adminEmailsRequired": "Admin emails are required",
+    "adminEmailsPlaceholder": "email1@example.com, email2@example.com",
+    "adminEmailsHint": "Separate multiple emails with commas",
+    "validEmailsRequired": "Please provide at least one valid email",
+    "ticketInformation": "Ticket Information",
+    "reportedBy": "Reported by",
+    "link": "Link",
+    "submitting": "Submitting...",
+    "submitTicket": "Submit Ticket",
+    "ticketCreated": "Ticket Created",
+    "ticketUploadedSuccessfully": "Support ticket has been uploaded successfully",
+    "ticketUploadFailed": "Failed to upload support ticket"
   }
 }

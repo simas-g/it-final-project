@@ -433,5 +433,33 @@
     "creating": "Tworzenie...",
     "createAccount": "Utwórz Konto",
     "createAccountButton": "Utwórz Konto Salesforce"
+  },
+  "supportTicket": {
+    "help": "Pomoc",
+    "createSupportTicket": "Utwórz Zgłoszenie Wsparcia",
+    "createSupportTicketLink": "Utwórz zgłoszenie wsparcia",
+    "createSupportTicketDescription": "Wypełnij poniższy formularz, aby utworzyć zgłoszenie wsparcia. Zgłoszenie zostanie przesłane do Dropbox do przetworzenia.",
+    "summary": "Podsumowanie",
+    "summaryRequired": "Podsumowanie jest wymagane",
+    "summaryPlaceholder": "Opisz swój problem lub prośbę...",
+    "priority": "Priorytet",
+    "priorityRequired": "Priorytet jest wymagany",
+    "selectPriority": "Wybierz priorytet",
+    "high": "Wysoki",
+    "average": "Średni",
+    "low": "Niski",
+    "adminEmails": "E-maile Administratorów",
+    "adminEmailsRequired": "E-maile administratorów są wymagane",
+    "adminEmailsPlaceholder": "email1@przykład.com, email2@przykład.com",
+    "adminEmailsHint": "Oddziel wiele e-maili przecinkami",
+    "validEmailsRequired": "Proszę podać co najmniej jeden prawidłowy e-mail",
+    "ticketInformation": "Informacje o Zgłoszeniu",
+    "reportedBy": "Zgłoszone przez",
+    "link": "Link",
+    "submitting": "Przesyłanie...",
+    "submitTicket": "Wyślij Zgłoszenie",
+    "ticketCreated": "Zgłoszenie Utworzone",
+    "ticketUploadedSuccessfully": "Zgłoszenie wsparcia zostało pomyślnie przesłane",
+    "ticketUploadFailed": "Nie udało się przesłać zgłoszenia wsparcia"
   }
 }

@@ -20,6 +20,7 @@ import {
   Globe,
   Package
 } from 'lucide-react'
+import SupportTicketButton from './SupportTicketButton'
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
   const { user, logout, isAuthenticated } = useAuth()
@@ -111,6 +112,8 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         <div className="flex items-center space-x-2">
+          <SupportTicketButton />
+          
           <DropdownMenu >
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">

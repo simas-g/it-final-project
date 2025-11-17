@@ -14,6 +14,7 @@ import accessRoutes from "./routes/accessRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import salesforceRoutes from "./routes/salesforceRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
 import "dotenv/config";
 
 const app = express();
@@ -66,6 +67,7 @@ app.use("/api", accessRoutes);
 app.use("/api", userRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", salesforceRoutes);
+app.use("/api", supportRoutes);
 
 app.get("/health", (req, res) => {
   console.log("hello people");

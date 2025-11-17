@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchCategories, generateInventoryApiToken } from '@/queries/api'
 import { useInventoryUpdate } from './useInventoryUpdate'
 import { useToast } from '@/hooks/use-toast'
+import { useQueryClient } from '@tanstack/react-query'
 
 const getInitialFormData = (inventory) => ({
   name: inventory.name || '',
@@ -36,7 +37,7 @@ const InventorySettingsTab = () => {
     queryFn: fetchCategories
   })
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
-
+  const queryClient = useQueryClient()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -66,6 +67,7 @@ const InventorySettingsTab = () => {
       setTokenLoading(true)
       const { token } = await generateInventoryApiToken(inventory.id)
       setApiToken(token)
+      queryClient.invalidateQueries({ queryKey: ['inventory-detail', inventory.id] })
       toast({ title: t('apiTokenCreatedTitle'), description: t('apiTokenCreatedDescription') })
     } catch (error) {
       const message = error.response?.data?.error || t('apiTokenError')
@@ -90,9 +92,6 @@ const InventorySettingsTab = () => {
   }
 
   const baseEndpoint = `${backendUrl}/api/external/inventories/aggregations`
-  const fullEndpoint = apiToken
-    ? `${baseEndpoint}?token=${apiToken}`
-    : ''
   const odooUrl = import.meta.env.VITE_ODOO_URL || 'http://localhost:8069'
 
   return (
@@ -270,7 +269,7 @@ const InventorySettingsTab = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex flex-col gap-2">
               <CardTitle className="flex items-center gap-2">
                 <KeyRound className="h-5 w-5 text-primary" />
                 {t('apiTokenTitle')}

@@ -35,3 +35,5 @@ The system supports two role levels:
 
 1. **ADMIN** - Full system access, user management, and administrative capabilities
 2. **USER** - Standard user with basic inventory management
+
+---
