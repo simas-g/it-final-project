@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { User, Calendar, Building2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -6,6 +7,7 @@ import { useUserProfile } from './UserProfileContext'
 import { useI18n } from '@/contexts/I18nContext'
 import { useAuth } from '@/contexts/AuthContext'
 import SalesforceIntegrationForm from './SalesforceIntegrationForm'
+import { getSalesforceData } from '@/queries/api'
 
 const ProfileHeader = () => {
   const { profileUser, isOwnProfile } = useUserProfile()
@@ -13,6 +15,13 @@ const ProfileHeader = () => {
   const { t } = useI18n()
   const [salesforceFormOpen, setSalesforceFormOpen] = useState(false)
   const showSalesforceButton = isOwnProfile || isAdmin()
+  const shouldPassUserId = isAdmin() || isOwnProfile
+  const canFetchSalesforce = (isOwnProfile || isAdmin()) && profileUser?.id
+  const { isSuccess: hasSalesforceConnection, isLoading: isLoadingSalesforceData } = useQuery({
+    queryKey: ['salesforceData', profileUser?.id],
+    queryFn: () => getSalesforceData(shouldPassUserId ? profileUser?.id : null),
+    enabled: !!canFetchSalesforce,
+  })
 
   return (
     <>
@@ -53,18 +62,30 @@ const ProfileHeader = () => {
           {showSalesforceButton && (
             <div className="pt-2">
               <Button
-                variant="outline"
+                variant="link"
+                size="xs"
                 onClick={() => setSalesforceFormOpen(true)}
                 className="flex items-center gap-2"
+                disabled={isLoadingSalesforceData}
               >
                 <Building2 className="h-4 w-4" />
-                {t('salesforce.createAccountButton') || 'Create Salesforce Account'}
+                {isLoadingSalesforceData 
+                  ? (t('salesforce.loading') || 'Loading...')
+                  : hasSalesforceConnection 
+                    ? (t('salesforce.editAccountButton') || 'Edit Salesforce Account')
+                    : (t('salesforce.createAccountButton') || 'Create Salesforce Account')
+                }
               </Button>
             </div>
           )}
         </div>
       </div>
-      <SalesforceIntegrationForm open={salesforceFormOpen} onOpenChange={setSalesforceFormOpen} />
+      <SalesforceIntegrationForm 
+        open={salesforceFormOpen} 
+        onOpenChange={setSalesforceFormOpen}
+        isEditMode={hasSalesforceConnection}
+        targetUserId={shouldPassUserId ? profileUser?.id : null}
+      />
     </>
   )
 }

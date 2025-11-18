@@ -86,6 +86,45 @@ export const searchTags = async (prisma, sanitizedQuery, limit, skip) => {
   return { results, total: Number(count[0].count) };
 };
 
+export const searchAdminUsers = async (prisma, query, limit = 10) => {
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+  
+  const searchQuery = query.trim();
+  const isEmailQuery = /@/.test(searchQuery);
+  
+  const users = await prisma.user.findMany({
+    where: {
+      role: 'ADMIN',
+      isBlocked: false,
+      OR: [
+        { email: { contains: searchQuery, mode: 'insensitive' } },
+        { name: { contains: searchQuery, mode: 'insensitive' } }
+      ]
+    },
+    select: {
+      name: true,
+      email: true
+    },
+    take: limit,
+    orderBy: isEmailQuery
+      ? [
+          { email: 'asc' }
+        ]
+      : [
+          { name: 'asc' }
+        ]
+  });
+  
+  return users.map(user => ({
+    type: 'user',
+    text: user.name || user.email,
+    email: user.email,
+    name: user.name
+  }));
+};
+
 export const searchSuggestions = async (prisma, sanitizedQuery) => {
   const [inventoryNames, tagNames, userNames] = await Promise.all([
     prisma.$queryRaw`

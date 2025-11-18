@@ -1,6 +1,6 @@
 import prisma from "../lib/prisma.js"
 import { getFieldValues } from "../lib/fieldMapping.js"
-import { sanitizeSearchQuery, searchInventories, searchItems, searchTags, searchSuggestions } from "../lib/fullTextSearch.js"
+import { sanitizeSearchQuery, searchInventories, searchItems, searchTags, searchSuggestions, searchAdminUsers } from "../lib/fullTextSearch.js"
 
 export const globalSearch = async (req, res) => {
   try {
@@ -218,14 +218,31 @@ export const getSearchSuggestions = async (req, res) => {
     if (!query || query.trim().length < 2) {
       return res.json({ suggestions: [] });
     }
-    const sanitizedQuery = sanitizeSearchQuery(query.trim());
-    if (!sanitizedQuery) {
+    const originalQuery = query.trim();
+    const isEmailQuery = /@/.test(originalQuery);
+    const sanitizedQuery = sanitizeSearchQuery(originalQuery);
+    
+    if (!isEmailQuery && !sanitizedQuery) {
       return res.json({ suggestions: [] });
     }
-    const suggestions = await searchSuggestions(prisma, sanitizedQuery);
+    const suggestions = await searchSuggestions(prisma, sanitizedQuery || '', originalQuery);
     res.json({ suggestions });
   } catch (error) {
     console.error("Get search suggestions error:", error);
     res.status(500).json({ error: "Failed to get search suggestions" });
+  }
+}
+
+export const getAdminUserSuggestions = async (req, res) => {
+  try {
+    const { q: query, limit = 10 } = req.query;
+    if (!query || query.trim().length < 2) {
+      return res.json({ suggestions: [] });
+    }
+    const suggestions = await searchAdminUsers(prisma, query.trim(), parseInt(limit));
+    res.json({ suggestions });
+  } catch (error) {
+    console.error("Get admin user suggestions error:", error);
+    res.status(500).json({ error: "Failed to get admin user suggestions" });
   }
 }

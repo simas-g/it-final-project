@@ -55,6 +55,11 @@ export const fetchSearchSuggestions = async (query) => {
   return response.data.suggestions || []
 }
 
+export const fetchAdminUserSuggestions = async (query, limit = 10) => {
+  const response = await api.get(`/search/admin-users?q=${encodeURIComponent(query)}&limit=${limit}`)
+  return response.data.suggestions || []
+}
+
 export const fetchHomeData = async () => {
   const [inventoriesRes, popularRes, tagsRes] = await Promise.all([
     api.get('/inventories?limit=5'),
@@ -116,9 +121,22 @@ export const fetchInventoryFields = async (inventoryId) => {
   return response.data
 }
 
-export const createSalesforceAccount = async (formData) => {
-  const response = await api.post('/salesforce/create-account', formData)
+export const getSalesforceData = async (userId = null) => {
+  const url = userId ? `/salesforce/data?userId=${userId}` : '/salesforce/data'
+  const response = await api.get(url)
+  return response.data
+}
+
+export const createSalesforceAccount = async (formData, userId = null) => {
+  const payload = userId ? { ...formData, userId } : formData
+  const response = await api.post('/salesforce/create-account', payload)
   return response
+}
+
+export const updateSalesforceAccount = async (formData, userId = null) => {
+  const payload = userId ? { ...formData, userId } : formData
+  const response = await api.put('/salesforce/update-account', payload)
+  return response.data
 }
 
 export const generateInventoryApiToken = async (inventoryId) => {

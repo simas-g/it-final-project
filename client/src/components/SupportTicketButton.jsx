@@ -22,7 +22,6 @@ const SupportTicketButton = () => {
       inventoryTitle = null
     }
   }
-
   return (
     <>
       <Button

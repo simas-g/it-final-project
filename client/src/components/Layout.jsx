@@ -19,9 +19,6 @@ const Layout = () => {
         />
         <main className="p-8 md:p-10">
           <Outlet />
-          <div className="mt-8 pt-4 border-t text-center">
-            <SupportTicketLink />
-          </div>
         </main>
       </div>
     )

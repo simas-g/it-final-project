@@ -138,16 +138,18 @@ model ItemLike {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  name       String?
-  password   String?
-  provider   String?
-  providerId String?
-  isBlocked  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  role       UserRole @default(USER)
+  id                String   @id @default(uuid())
+  email             String   @unique
+  name              String?
+  password          String?
+  provider          String?
+  providerId        String?
+  isBlocked         Boolean  @default(false)
+  salesforceAccountId String?
+  salesforceContactId String? @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  role              UserRole @default(USER)
 
   preferences     UserPreferences?
   inventories     Inventory[]

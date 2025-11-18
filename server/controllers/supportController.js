@@ -29,6 +29,13 @@ const uploadToDropbox = async (fileName, fileContent) => {
 
   if (!response.ok) {
     const errorText = await response.text()
+    let errorData
+    try {
+      errorData = JSON.parse(errorText)
+    } catch {
+      errorData = {}
+    }
+    
     throw new Error(`Dropbox upload failed: ${errorText}`)
   }
 
@@ -38,7 +45,7 @@ const uploadToDropbox = async (fileName, fileContent) => {
 export const uploadSupportTicket = async (req, res) => {
   try {
     const { reportedBy, inventory, link, priority, adminEmails, summary } = req.body
-
+    console.log(adminEmails, 'our emails')
     if (!summary || !priority || !adminEmails || !Array.isArray(adminEmails) || adminEmails.length === 0) {
       return res.status(400).json({
         error: 'Missing required fields'
@@ -63,6 +70,7 @@ export const uploadSupportTicket = async (req, res) => {
       fileName,
     })
   } catch (error) {
+    console.error('Error uploading support ticket:', error)
     res.status(500).json({
       error: error.message || 'Failed to upload support ticket',
     })

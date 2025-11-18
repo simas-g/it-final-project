@@ -1,32 +1,66 @@
-import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useI18n } from '@/contexts/I18nContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react'
-import { createSalesforceAccount } from '@/queries/api'
-import LoadingSpinner from '@/components/ui/loading-spinner'
+import { createSalesforceAccount, updateSalesforceAccount, getSalesforceData } from '@/queries/api'
 
-const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
-  const { user } = useAuth()
+const SalesforceIntegrationForm = ({ open, onOpenChange, isEditMode = false, targetUserId = null }) => {
   const { t } = useI18n()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     companyName: '',
     phone: '',
     industry: '',
-    billingStreet: '',
-    billingCity: '',
-    billingState: '',
-    billingPostalCode: '',
-    billingCountry: '',
+    description: '',
+    website: '',
+    numberOfEmployees: '',
     jobTitle: '',
     department: ''
   })
+
+  const { data: salesforceData, isLoading: loadingData } = useQuery({
+    queryKey: ['salesforceData', targetUserId],
+    queryFn: () => getSalesforceData(targetUserId),
+    enabled: open && isEditMode && !!targetUserId,
+    retry: (failureCount, error) => {
+      if (error?.response?.status === 404) {
+        return false
+      }
+      return failureCount < 2
+    },
+  })
+
+  useEffect(() => {
+    if (salesforceData && isEditMode) {
+      setFormData({
+        companyName: salesforceData.companyName || '',
+        phone: salesforceData.phone || '',
+        industry: salesforceData.industry || '',
+        description: salesforceData.description || '',
+        website: salesforceData.website || '',
+        numberOfEmployees: salesforceData.numberOfEmployees?.toString() || '',
+        jobTitle: salesforceData.jobTitle || '',
+        department: salesforceData.department || ''
+      })
+    } else if (open && !isEditMode) {
+      setFormData({
+        companyName: '',
+        phone: '',
+        industry: '',
+        description: '',
+        website: '',
+        numberOfEmployees: '',
+        jobTitle: '',
+        department: ''
+      })
+    }
+  }, [salesforceData, isEditMode, open])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -37,28 +71,37 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
     setLoading(true)
 
     try {
-      const response = await createSalesforceAccount(formData)
-      toast({
-        title: t('salesforce.successTitle') || 'Success',
-        description: t('salesforce.successMessage') || `Account and Contact created successfully in Salesforce. Account ID: ${response.data.accountId}`,
-      })
+      if (isEditMode) {
+        const response = await updateSalesforceAccount(formData, targetUserId)
+        queryClient.invalidateQueries({ queryKey: ['salesforceData'] })
+        toast({
+          title: t('salesforce.updateSuccessTitle') || 'Success',
+          description: t('salesforce.updateSuccessMessage') || response.message || 'Salesforce account and contact updated successfully',
+        })
+      } else {
+        const response = await createSalesforceAccount(formData, targetUserId)
+        queryClient.invalidateQueries({ queryKey: ['salesforceData'] })
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+        toast({
+          title: t('salesforce.successTitle') || 'Success',
+          description: t('salesforce.successMessage') || `Account and Contact created successfully in Salesforce. Account ID: ${response.data?.accountId}`,
+        })
+        setFormData({
+          companyName: '',
+          phone: '',
+          industry: '',
+          description: '',
+          website: '',
+          numberOfEmployees: '',
+          jobTitle: '',
+          department: ''
+        })
+      }
       onOpenChange(false)
-      setFormData({
-        companyName: '',
-        phone: '',
-        industry: '',
-        billingStreet: '',
-        billingCity: '',
-        billingState: '',
-        billingPostalCode: '',
-        billingCountry: '',
-        jobTitle: '',
-        department: ''
-      })
     } catch (error) {
       toast({
         title: t('salesforce.errorTitle') || 'Error',
-        description: error.response?.data?.error || error.message || t('salesforce.errorMessage') || 'Failed to create Salesforce account',
+        description: error.response?.data?.error || error.message || (isEditMode ? t('salesforce.updateErrorMessage') : t('salesforce.errorMessage')) || (isEditMode ? 'Failed to update Salesforce account' : 'Failed to create Salesforce account'),
         variant: 'destructive'
       })
     } finally {
@@ -68,20 +111,24 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] max-w-[90vw] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            {t('salesforce.formTitle') || 'Create Salesforce Account'}
+          <DialogTitle>
+            {isEditMode 
+              ? (t('salesforce.editFormTitle') || 'Edit Salesforce Account')
+              : (t('salesforce.formTitle') || 'Create Salesforce Account')
+            }
           </DialogTitle>
           <DialogDescription>
-            {t('salesforce.formDescription') || 'Fill in the additional information to create an Account with a linked Contact in Salesforce.'}
+            {isEditMode
+              ? (t('salesforce.editFormDescription') || 'Update your Salesforce Account and Contact information.')
+              : (t('salesforce.formDescription') || 'Fill in the additional information to create an Account with a linked Contact in Salesforce.')
+            }
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="companyName" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
+            <Label htmlFor="companyName">
               {t('salesforce.companyName') || 'Company Name'} *
             </Label>
             <Input
@@ -93,10 +140,9 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
+              <Label htmlFor="phone">
                 {t('salesforce.phone') || 'Phone'}
               </Label>
               <Input
@@ -109,8 +155,7 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="industry" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
+              <Label htmlFor="industry">
                 {t('salesforce.industry') || 'Industry'}
               </Label>
               <Input
@@ -122,10 +167,56 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="jobTitle" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
+              <Label htmlFor="website">
+                {t('salesforce.website') || 'Website'}
+              </Label>
+              <Input
+                id="website"
+                type="url"
+                value={formData.website}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                placeholder={t('salesforce.websitePlaceholder') || 'Enter website URL'}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="numberOfEmployees">
+                {t('salesforce.numberOfEmployees') || 'Number of Employees'}
+              </Label>
+              <Input
+                id="numberOfEmployees"
+                type="number"
+                min="1"
+                max="2147483647"
+                value={formData.numberOfEmployees}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 2147483647)) {
+                    handleInputChange('numberOfEmployees', value)
+                  }
+                }}
+                placeholder={t('salesforce.numberOfEmployeesPlaceholder') || 'Enter number of employees'}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">
+              {t('salesforce.description') || 'Description'}
+            </Label>
+            <Input
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder={t('salesforce.descriptionPlaceholder') || 'Enter company description'}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="jobTitle">
                 {t('salesforce.jobTitle') || 'Job Title'}
               </Label>
               <Input
@@ -137,8 +228,7 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
+              <Label htmlFor="department">
                 {t('salesforce.department') || 'Department'}
               </Label>
               <Input
@@ -150,60 +240,28 @@ const SalesforceIntegrationForm = ({ open, onOpenChange }) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {t('salesforce.billingAddress') || 'Billing Address'}
-            </Label>
-            <div className="space-y-2">
-              <Input
-                value={formData.billingStreet}
-                onChange={(e) => handleInputChange('billingStreet', e.target.value)}
-                placeholder={t('salesforce.streetPlaceholder') || 'Street'}
-              />
-              <div className="grid grid-cols-3 gap-2">
-                <Input
-                  value={formData.billingCity}
-                  onChange={(e) => handleInputChange('billingCity', e.target.value)}
-                  placeholder={t('salesforce.cityPlaceholder') || 'City'}
-                />
-                <Input
-                  value={formData.billingState}
-                  onChange={(e) => handleInputChange('billingState', e.target.value)}
-                  placeholder={t('salesforce.statePlaceholder') || 'State'}
-                />
-                <Input
-                  value={formData.billingPostalCode}
-                  onChange={(e) => handleInputChange('billingPostalCode', e.target.value)}
-                  placeholder={t('salesforce.postalCodePlaceholder') || 'Postal Code'}
-                />
-              </div>
-              <Input
-                value={formData.billingCountry}
-                onChange={(e) => handleInputChange('billingCountry', e.target.value)}
-                placeholder={t('salesforce.countryPlaceholder') || 'Country'}
-              />
-            </div>
-          </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               {t('cancel') || 'Cancel'}
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <LoadingSpinner className="mr-2 h-4 w-4" />
-                  {t('salesforce.creating') || 'Creating...'}
-                </>
-              ) : (
-                t('salesforce.createAccount') || 'Create Account'
-              )}
+            <Button type="submit" disabled={loading || loadingData} className="w-full sm:w-auto">
+              {loading
+                ? (isEditMode 
+                    ? (t('salesforce.updating') || 'Updating...')
+                    : (t('salesforce.creating') || 'Creating...')
+                  )
+                : (isEditMode
+                    ? (t('salesforce.updateAccount') || 'Update Account')
+                    : (t('salesforce.createAccount') || 'Create Account')
+                  )
+              }
             </Button>
           </div>
         </form>
